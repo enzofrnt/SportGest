@@ -15,7 +15,11 @@ RUN apt-get update && apt-get install -y \
 # Installation de Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+COPY SportGest/ /var/www/html/
+
 WORKDIR /var/www/html
+
+RUN composer install
 
 # Configuration PHP pour le développement
 FROM base AS dev
@@ -29,4 +33,6 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | b
     && apt-get update \
     && apt-get install -y symfony-cli
 
-CMD composer install && symfony server:start --port=8000 --allow-all-ip
+RUN symfony server:ca:install
+
+CMD symfony server:start --port=8000 --allow-all-ip

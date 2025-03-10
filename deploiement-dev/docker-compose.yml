@@ -19,12 +19,12 @@ services:
     env_file: .env
     volumes:
       - ../symfony/SportGest:/var/www/html
+      - /var/www/html/var
+      - /var/www/html/vendor
     ports:
       - "${PHP_PORT}:8000"
     depends_on:
       - db
-    working_dir: /var/www/html
-
   # Node.js pour Angular
   angular:
     build:
