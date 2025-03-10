@@ -29,4 +29,4 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | b
     && apt-get update \
     && apt-get install -y symfony-cli
 
-CMD symfony server:start --port=8000 --allow-all-ip
+CMD composer install && symfony server:start --port=8000 --allow-all-ip
