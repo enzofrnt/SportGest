@@ -20,6 +20,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityPersistedEvent;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use Symfony\Component\Validator\Constraints\Choice;
+
 class UtilisateurCrudController extends AbstractCrudController
 {
 
@@ -53,6 +56,13 @@ class UtilisateurCrudController extends AbstractCrudController
                 ])
                 ->setRequired($pageName === Crud::PAGE_NEW)
                 ->onlyOnForms(),
+            ChoiceField::new('roles')
+                ->setLabel('Rôles')
+                ->allowMultipleChoices(true)
+                ->setChoices([
+                    'Utilisateur' => 'ROLE_USER',
+                    'Administrateur' => 'ROLE_ADMIN',
+                ]),
         ];
     }
     public function createNewFormBuilder(EntityDto $entityDto, KeyValueStore $formOptions, AdminContext $context): FormBuilderInterface

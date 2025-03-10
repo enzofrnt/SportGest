@@ -2,13 +2,16 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\CategorieRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CategorieRepository::class)]
+// #[ApiResource(stateless: false)]
 class Categorie
 {
     #[ORM\Id]
@@ -17,18 +20,22 @@ class Categorie
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['monGroupe', 'categorie:read', 'article:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['monGroupe'])]
     private ?string $description = null;
 
     #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 100])]
+    #[Groups(['monGroupe'])]
     private int $numero_ordre = 100;
 
     /**
      * @var Collection<int, Article>
      */
     #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'categorie', fetch: 'LAZY')]
+    #[Groups(['monGroupe'])]
     private Collection $articles;
 
     public function __construct()
