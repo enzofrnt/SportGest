@@ -35,4 +35,8 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | b
 
 RUN symfony server:ca:install
 
-CMD symfony server:start --port=8000 --allow-all-ip
+# Copie et configuration du script de démarrage
+COPY start-symfony.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/start-symfony.sh
+
+CMD ["/usr/local/bin/start-symfony.sh"]
