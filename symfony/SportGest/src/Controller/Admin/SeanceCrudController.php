@@ -43,7 +43,7 @@ class SeanceCrudController extends AbstractCrudController
             ChoiceField::new('statut', 'Statut')
                 ->setChoices(array_combine(StatutSeance::values(), StatutSeance::values())),
             AssociationField::new('coach', 'Coach'),
-            AssociationField::new('sportifs', 'Sportifs')
+            AssociationField::new('sportifs', 'Nb Sportifs')
                 ->setFormTypeOption('by_reference', false),
             AssociationField::new('exercices', 'Exercices')
                 ->setFormTypeOption('by_reference', false)
