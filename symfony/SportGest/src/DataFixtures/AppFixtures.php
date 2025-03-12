@@ -146,6 +146,18 @@ class AppFixtures extends Fixture
             $manager->persist($coach);
             $coachs[] = $coach;
         }
+
+        // Coach de test
+        $coach = new Coach();
+        $coach->setNom('Dupont');
+        $coach->setPrenom('Jean');
+        $coach->setEmail('coach@sportgest.fr');
+        $coach->setPassword($this->passwordHasher->hashPassword($coach, 'password'));
+        $coach->setSpecialites(['Fitness', 'Musculation']);
+        $coach->setTarifHoraire(50.0);
+        $manager->persist($coach);
+
+        $coachs[] = $coach;
         
         return $coachs;
     }
@@ -169,7 +181,19 @@ class AppFixtures extends Fixture
             $manager->persist($sportif);
             $sportifs[] = $sportif;
         }
-        
+
+        // Sportif de test
+        $sportif = new Sportif();
+        $sportif->setNom('Dubois');
+        $sportif->setPrenom('Pierre');
+        $sportif->setEmail('sportif@sportgest.fr');
+        $sportif->setPassword($this->passwordHasher->hashPassword($sportif, 'password'));
+        $sportif->setDateInscription(new \DateTimeImmutable('1990-01-01'));
+        $sportif->setNiveauSportif(NiveauSportif::INTERMEDIAIRE);
+        $manager->persist($sportif);
+
+        $sportifs[] = $sportif;
+
         return $sportifs;
     }
     
@@ -280,6 +304,17 @@ class AppFixtures extends Fixture
             $manager->persist($responsable);
             $responsables[] = $responsable;
         }
+
+        // Admin (Responsable) de test
+        $admin = new Responsable();
+        $admin->setNom('Martin');
+        $admin->setPrenom('Sophie');
+        $admin->setEmail('admin@sportgest.fr');
+        $admin->setPassword($this->passwordHasher->hashPassword($admin, 'password'));
+        $manager->persist($admin);
+
+        $responsables[] = $admin;
+
         return $responsables;
     }
 }

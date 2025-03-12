@@ -5,7 +5,7 @@
         <div class="row mb-4">
             <div class="col-12">
                 <h1 class="display-4">
-                    <i class="fas fa-tachometer-alt me-3"></i>Tableau de bord administrateur
+                    <i class="fas fa-tachometer-alt me-3"></i>Bienvenue {{ app.user.prenom }} {{ app.user.nom }}
                 </h1>
                 <hr class="my-4">
             </div>
@@ -14,26 +14,6 @@
         <div class="row g-4">
             <div class="col-xl-3 col-md-6">
                 <div class="card bg-gradient-primary h-100 shadow">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-white-50 text-uppercase mb-2">Utilisateurs</h6>
-                                <h2 class="text-white display-4 mb-0">{{ stats.total_utilisateurs }}</h2>
-                            </div>
-                            <div class="rounded-circle bg-white bg-opacity-25 p-3">
-                                <i class="fas fa-users fa-2x text-white"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 d-flex justify-content-between text-white-50 small">
-                            <span><i class="fas fa-user-tie me-1"></i>Coachs: {{ stats.total_coachs }}</span>
-                            <span><i class="fas fa-running me-1"></i>Sportifs: {{ stats.total_sportifs }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-3 col-md-6">
-                <div class="card bg-gradient-success h-100 shadow">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
@@ -46,6 +26,25 @@
                         </div>
                         <div class="mt-3 text-white-50">
                             <span><i class="fas fa-calendar-alt me-1"></i>Total: {{ stats.total_seances }} séances</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-gradient-success h-100 shadow">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 text-uppercase mb-2">Sportifs</h6>
+                                <h2 class="text-white display-4 mb-0">{{ stats.total_sportifs }}</h2>
+                            </div>
+                            <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                                <i class="fas fa-users fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-white-50">
+                            <span><i class="fas fa-user-check me-1"></i>Sportifs actifs</span>
                         </div>
                     </div>
                 </div>
@@ -75,15 +74,15 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="text-white-50 text-uppercase mb-2">Fiches de paie</h6>
-                                <h2 class="text-white display-4 mb-0">{{ stats.total_fiches_paie }}</h2>
+                                <h6 class="text-white-50 text-uppercase mb-2">Revenus du mois</h6>
+                                <h2 class="text-white display-4 mb-0">{{ stats.revenus_mois }}€</h2>
                             </div>
                             <div class="rounded-circle bg-white bg-opacity-25 p-3">
-                                <i class="fas fa-file-invoice-dollar fa-2x text-white"></i>
+                                <i class="fas fa-euro-sign fa-2x text-white"></i>
                             </div>
                         </div>
                         <div class="mt-3 text-white-50">
-                            <span><i class="fas fa-calendar-check me-1"></i>Ce mois-ci</span>
+                            <span><i class="fas fa-chart-line me-1"></i>Ce mois-ci</span>
                         </div>
                     </div>
                 </div>
@@ -91,11 +90,11 @@
         </div>
 
         <div class="row g-4 mt-2">
-            <div class="col-xl-6">
+            <div class="col-xl-8">
                 <div class="card shadow h-100">
                     <div class="card-header py-3">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-pie me-2"></i>Séances par type
+                            <i class="fas fa-chart-bar me-2"></i>Statistiques des séances
                         </h5>
                     </div>
                     <div class="card-body">
@@ -104,26 +103,11 @@
                 </div>
             </div>
 
-            <div class="col-xl-6">
+            <div class="col-xl-4">
                 <div class="card shadow h-100">
                     <div class="card-header py-3">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-doughnut me-2"></i>Statut des séances
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="statutChart" height="300"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card shadow">
-                    <div class="card-header py-3">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-list me-2"></i>Dernières séances
+                            <i class="fas fa-calendar-check me-2"></i>Prochaines séances
                         </h5>
                     </div>
                     <div class="card-body">
@@ -133,13 +117,11 @@
                                     <tr>
                                         <th>Date</th>
                                         <th>Type</th>
-                                        <th>Coach</th>
-                                        <th>Sportifs</th>
                                         <th>Statut</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for seance in derniere_seances %}
+                                    {% for seance in prochaines_seances %}
                                     <tr>
                                         <td>
                                             <i class="far fa-calendar me-2"></i>
@@ -151,19 +133,54 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <i class="fas fa-user-tie me-2"></i>
-                                            {{ seance.coach }}
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info">
-                                                <i class="fas fa-users me-1"></i>
-                                                {{ seance.sportifs|length }}
-                                            </span>
-                                        </td>
-                                        <td>
                                             <span class="badge bg-{{ seance.statut.value == 'prévue' ? 'warning' : (seance.statut.value == 'validée' ? 'success' : 'danger') }}">
                                                 <i class="fas fa-circle me-1"></i>
                                                 {{ seance.statut.value }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-invoice-dollar me-2"></i>Dernières fiches de paie
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Période</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for fiche in derniere_fiches %}
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-calendar-alt me-2"></i>
+                                            {{ fiche.periode.value }}
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-euro-sign me-2"></i>
+                                            {{ fiche.montantTotal }}€
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Payée
                                             </span>
                                         </td>
                                     </tr>
@@ -225,8 +242,8 @@
         Chart.defaults.color = textColor;
         Chart.defaults.font.family = fontFamily;
 
-        // Options communes pour les graphiques
-        const commonOptions = {
+        // Options du graphique
+        const options = {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -251,44 +268,37 @@
                     padding: 15,
                     cornerRadius: 8,
                     displayColors: true,
-                    usePointStyle: true,
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            return ` ${label}: ${value}`;
-                        }
+                    usePointStyle: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
                     }
                 }
             }
         };
 
-        // Graphique des séances par type
+        // Graphique des séances par mois
         new Chart(document.getElementById('seancesChart'), {
-            type: 'pie',
+            type: 'bar',
             data: {
-                labels: {{ stats.seances_par_type.labels|json_encode|raw }},
+                labels: {{ stats.seances_par_mois.labels|json_encode|raw }},
                 datasets: [{
-                    data: {{ stats.seances_par_type.data|json_encode|raw }},
-                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
-                    borderWidth: 0
+                    label: 'Nombre de séances',
+                    data: {{ stats.seances_par_mois.data|json_encode|raw }},
+                    backgroundColor: '#4e73df',
+                    borderRadius: 6
                 }]
             },
-            options: commonOptions
-        });
-
-        // Graphique des statuts
-        new Chart(document.getElementById('statutChart'), {
-            type: 'doughnut',
-            data: {
-                labels: {{ stats.statuts.labels|json_encode|raw }},
-                datasets: [{
-                    data: {{ stats.statuts.data|json_encode|raw }},
-                    backgroundColor: ['#f6c23e', '#1cc88a', '#e74a3b'],
-                    borderWidth: 0
-                }]
-            },
-            options: commonOptions
+            options: options
         });
     </script>
     {% endblock %}

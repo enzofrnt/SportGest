@@ -87,7 +87,17 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return [$this->roles];
+        // Rôle de base pour tous les utilisateurs
+        $roles = ['ROLE_USER'];
+
+        // Attribution des rôles selon le type d'utilisateur
+        if ($this instanceof Coach) {
+            $roles[] = 'ROLE_COACH';
+        } elseif ($this instanceof Responsable) {
+            $roles[] = 'ROLE_ADMIN';
+        }
+
+        return array_unique($roles);
     }
 
     public function eraseCredentials(): void
