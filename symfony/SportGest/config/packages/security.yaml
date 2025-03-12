@@ -24,7 +24,7 @@ security:
 #   access_control:
 #     - { path: ^/admin, roles: ROLE_ADMIN }
 #     - { path: ^/profile, roles: ROLE_USER }
-#     - { path: ^/responsable, roles: ROLE_RESPONSABLE }
+#     - { path: ^/coach, roles: ROLE_COACH }
 
 when@test:
   security:
