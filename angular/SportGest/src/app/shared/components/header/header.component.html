@@ -1,0 +1,82 @@
+<header class="header">
+    <div class="container">
+        <div class="logo">
+            <a routerLink="/">
+                <img src="assets/images/logo.png" alt="SportGest" class="logo-img">
+                <span class="logo-text">SportGest</span>
+            </a>
+        </div>
+
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <!-- Menu public -->
+                <li class="nav-item"><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Accueil</a></li>
+                <li class="nav-item"><a routerLink="/coachs" routerLinkActive="active">Nos coachs</a></li>
+                <li class="nav-item"><a routerLink="/seances" routerLinkActive="active">Nos séances</a></li>
+                <li class="nav-item"><a routerLink="/planning" routerLinkActive="active">Planning</a></li>
+
+                <!-- Menu membre connecté -->
+                @if (isAuthenticated) {
+                <li class="nav-item"><a routerLink="/membre" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Tableau de bord</a></li>
+                <li class="nav-item"><a routerLink="/membre/planning" routerLinkActive="active">Mon planning</a></li>
+                <li class="nav-item"><a routerLink="/membre/reservation" routerLinkActive="active">Réserver</a></li>
+                <li class="nav-item"><a routerLink="/membre/reservations" routerLinkActive="active">Mes réservations</a></li>
+                }
+            </ul>
+        </nav>
+
+        <div class="user-actions">
+            @if (!isAuthenticated) {
+            <a routerLink="/connexion" class="btn btn-login">Connexion</a>
+            <a routerLink="/inscription" class="btn btn-register">Inscription</a> } @else {
+            <div class="user-menu">
+                <button class="user-menu-btn" (click)="toggleUserMenu()">
+            <span class="user-name">{{ currentUser?.firstname }}</span>
+            <i class="icon-chevron-down"></i>
+          </button> @if (isUserMenuOpen) {
+                <div class="user-dropdown">
+                    <ul>
+                        <li><a routerLink="/membre/profil">Mon profil</a></li>
+                        <li><a routerLink="/membre/historique">Historique</a></li>
+                        <li><a routerLink="/membre/statistiques">Statistiques</a></li>
+                        <li><a (click)="logout()" class="logout">Déconnexion</a></li>
+                    </ul>
+                </div>
+                }
+            </div>
+            }
+        </div>
+
+        <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+    </div>
+</header>
+
+<!-- Menu mobile -->
+@if (isMobileMenuOpen) {
+<div class="mobile-menu">
+    <ul class="mobile-nav-list">
+        <li class="mobile-nav-item"><a routerLink="/" (click)="closeMobileMenu()">Accueil</a></li>
+        <li class="mobile-nav-item"><a routerLink="/coachs" (click)="closeMobileMenu()">Nos coachs</a></li>
+        <li class="mobile-nav-item"><a routerLink="/seances" (click)="closeMobileMenu()">Nos séances</a></li>
+        <li class="mobile-nav-item"><a routerLink="/planning" (click)="closeMobileMenu()">Planning</a></li>
+
+        @if (isAuthenticated) {
+        <li class="mobile-nav-item"><a routerLink="/membre" (click)="closeMobileMenu()">Tableau de bord</a></li>
+        <li class="mobile-nav-item"><a routerLink="/membre/planning" (click)="closeMobileMenu()">Mon planning</a></li>
+        <li class="mobile-nav-item"><a routerLink="/membre/reservation" (click)="closeMobileMenu()">Réserver</a></li>
+        <li class="mobile-nav-item"><a routerLink="/membre/reservations" (click)="closeMobileMenu()">Mes réservations</a></li>
+        <li class="mobile-nav-item"><a routerLink="/membre/profil" (click)="closeMobileMenu()">Mon profil</a></li>
+        <li class="mobile-nav-item"><a routerLink="/membre/historique" (click)="closeMobileMenu()">Historique</a></li>
+        <li class="mobile-nav-item"><a routerLink="/membre/statistiques" (click)="closeMobileMenu()">Statistiques</a></li>
+        <li class="mobile-nav-item"><a (click)="logout(); closeMobileMenu()">Déconnexion</a></li>
+        } @else {
+        <li class="mobile-nav-item"><a routerLink="/connexion" (click)="closeMobileMenu()">Connexion</a></li>
+        <li class="mobile-nav-item"><a routerLink="/inscription" (click)="closeMobileMenu()">Inscription</a></li>
+        }
+    </ul>
+</div>
+}

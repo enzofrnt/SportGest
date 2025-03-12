@@ -1,0 +1,392 @@
+// Variables
+$primary-color: #0066cc;
+$secondary-color: #f8f9fa;
+$accent-color: #ff6b6b;
+$text-color: #333;
+$light-text: #666;
+$border-radius: 8px;
+// Styles généraux des sections
+.section-header {
+    text-align: center;
+    margin-bottom: 50px;
+    h2 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        color: $text-color;
+        position: relative;
+        display: inline-block;
+        &:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: $primary-color;
+        }
+    }
+    p {
+        font-size: 1.2rem;
+        color: $light-text;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+section {
+    padding: 80px 0;
+}
+
+// Bannière principale
+.hero-banner {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/assets/images/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 150px 0;
+    text-align: center;
+    .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            .btn {
+                padding: 15px 30px;
+                border-radius: $border-radius;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s;
+                font-size: 1.1rem;
+            }
+            .btn-primary {
+                background-color: $primary-color;
+                color: white;
+                &:hover {
+                    background-color: darken($primary-color, 10%);
+                    transform: translateY(-3px);
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                }
+            }
+            .btn-outline {
+                border: 2px solid white;
+                color: white;
+                &:hover {
+                    background-color: white;
+                    color: $text-color;
+                    transform: translateY(-3px);
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                }
+            }
+        }
+    }
+}
+
+// Section concept
+.concept-section {
+    background-color: white;
+    .concept-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        .concept-card {
+            background-color: $secondary-color;
+            padding: 30px;
+            border-radius: $border-radius;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            &:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+            .concept-icon {
+                font-size: 3rem;
+                color: $primary-color;
+                margin-bottom: 20px;
+            }
+            h3 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+                color: $text-color;
+            }
+            p {
+                color: $light-text;
+                line-height: 1.6;
+            }
+        }
+    }
+}
+
+// Section avantages
+.benefits-section {
+    background-color: $secondary-color;
+    .benefits-container {
+        display: flex;
+        align-items: center;
+        gap: 50px;
+        .benefits-image {
+            flex: 1;
+            img {
+                width: 100%;
+                border-radius: $border-radius;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+        }
+        .benefits-content {
+            flex: 1;
+            .benefit-item {
+                display: flex;
+                align-items: flex-start;
+                margin-bottom: 30px;
+                .benefit-icon {
+                    font-size: 1.5rem;
+                    color: $primary-color;
+                    margin-right: 15px;
+                    flex-shrink: 0;
+                }
+                .benefit-text {
+                    h3 {
+                        font-size: 1.3rem;
+                        margin-bottom: 10px;
+                        color: $text-color;
+                    }
+                    p {
+                        color: $light-text;
+                        line-height: 1.6;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Section témoignages
+.testimonials-section {
+    background-color: white;
+    .testimonials-slider {
+        display: flex;
+        gap: 30px;
+        overflow-x: auto;
+        padding: 20px 0;
+        &::-webkit-scrollbar {
+            height: 8px;
+        }
+        &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+        &::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+        .testimonial-card {
+            min-width: 350px;
+            background-color: $secondary-color;
+            border-radius: $border-radius;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            .testimonial-content {
+                margin-bottom: 20px;
+                p {
+                    font-style: italic;
+                    color: $text-color;
+                    line-height: 1.6;
+                }
+            }
+            .testimonial-author {
+                display: flex;
+                align-items: center;
+                .author-image {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    margin-right: 15px;
+                }
+                .author-info {
+                    h4 {
+                        font-size: 1.1rem;
+                        margin-bottom: 5px;
+                        color: $text-color;
+                    }
+                    p {
+                        font-size: 0.9rem;
+                        color: $light-text;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Section types de séances
+.sessions-section {
+    background-color: $secondary-color;
+    .sessions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        .session-card {
+            background-color: white;
+            border-radius: $border-radius;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            &:hover {
+                transform: translateY(-10px);
+            }
+            .session-image {
+                position: relative;
+                height: 200px;
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                .session-badge {
+                    position: absolute;
+                    top: 15px;
+                    right: 15px;
+                    background-color: $accent-color;
+                    color: white;
+                    padding: 5px 15px;
+                    border-radius: 20px;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                }
+            }
+            .session-content {
+                padding: 25px;
+                h3 {
+                    font-size: 1.5rem;
+                    margin-bottom: 15px;
+                    color: $text-color;
+                }
+                p {
+                    color: $light-text;
+                    margin-bottom: 20px;
+                    line-height: 1.6;
+                }
+                .btn-link {
+                    color: $primary-color;
+                    text-decoration: none;
+                    font-weight: 600;
+                    display: inline-flex;
+                    align-items: center;
+                    &:after {
+                        content: '→';
+                        margin-left: 5px;
+                        transition: transform 0.3s;
+                    }
+                    &:hover:after {
+                        transform: translateX(5px);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Section call-to-action
+.cta-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/assets/images/cta-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    .cta-content {
+        max-width: 700px;
+        margin: 0 auto;
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .btn-lg {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: $border-radius;
+            background-color: $primary-color;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+            &:hover {
+                background-color: darken($primary-color, 10%);
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+        }
+    }
+}
+
+// Responsive
+@media (max-width: 992px) {
+    .hero-banner {
+        padding: 100px 0;
+        .hero-content {
+            h1 {
+                font-size: 2.8rem;
+            }
+        }
+    }
+    .benefits-container {
+        flex-direction: column;
+    }
+    .section-header {
+        h2 {
+            font-size: 2rem;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-banner {
+        .hero-content {
+            h1 {
+                font-size: 2.2rem;
+            }
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    }
+    section {
+        padding: 60px 0;
+    }
+    .testimonials-slider {
+        .testimonial-card {
+            min-width: 280px;
+        }
+    }
+}
