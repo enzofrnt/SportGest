@@ -8,12 +8,13 @@ use App\Entity\Coach;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use \EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 
 class UtilisateurCrudController extends AbstractCrudController
 {
@@ -29,7 +30,7 @@ class UtilisateurCrudController extends AbstractCrudController
         return Utilisateur::class;
     }
 
-    public function configureActions(\EasyCorp\Bundle\EasyAdminBundle\Config\Actions $actions): \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
+    public function configureActions(Actions $actions): Actions
     {
         return $actions
             ->disable(Action::NEW, Action::EDIT, Action::DELETE)
@@ -44,7 +45,13 @@ class UtilisateurCrudController extends AbstractCrudController
             TextField::new('prenom'),
             EmailField::new('email'),
             TextField::new('password')
-                ->setFormType(PasswordType::class)
+                ->setFormType(RepeatedType::class)
+                ->setFormTypeOptions([
+                    'type' => PasswordType::class,
+                    'first_options' => ['label' => 'Mot de passe'],
+                    'second_options' => ['label' => 'Confirmer le mot de passe'],
+                    'invalid_message' => 'Les mots de passe doivent correspondre',
+                ])
                 ->setRequired(true)
                 ->onlyOnForms(),
             TextField::new('role', 'Role')
