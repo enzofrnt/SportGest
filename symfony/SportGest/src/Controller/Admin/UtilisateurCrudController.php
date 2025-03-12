@@ -47,16 +47,6 @@ class UtilisateurCrudController extends AbstractCrudController
                 ->setFormType(PasswordType::class)
                 ->setRequired(true)
                 ->onlyOnForms(),
-            ChoiceField::new('role')
-                ->setChoices([
-                    'Sportif' => 'sportif',
-                    'Coach' => 'coach',
-                ])
-                ->setFormTypeOption('mapped', false)
-                ->setRequired(true)
-                ->setFormTypeOption('placeholder', 'Choisir un type d\'utilisateur')
-                ->setHelp('Sélectionnez si vous souhaitez créer un Sportif ou un Coach')
-                ->hideOnIndex(),
             TextField::new('role', 'Role')
                 ->setVirtual(true)
                 ->hideOnForm(),
