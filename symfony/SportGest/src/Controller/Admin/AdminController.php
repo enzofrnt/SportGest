@@ -12,6 +12,9 @@ use App\Entity\Utilisateur;
 use App\Entity\Coach;
 use App\Entity\Sportif;
 use App\Entity\Responsable;
+use App\Entity\Exercice;
+use App\Entity\Seance;
+
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 class AdminController extends AbstractDashboardController
 {
@@ -35,5 +38,8 @@ class AdminController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Coach', 'fas fa-user', Coach::class);
         yield MenuItem::linkToCrud('Sportif', 'fas fa-user', Sportif::class);
         yield MenuItem::linkToCrud('Responsable', 'fas fa-user', Responsable::class);
+        yield MenuItem::section('Exercices et Séances');
+        yield MenuItem::linkToCrud('Exercices', 'fas fa-dumbbell', Exercice::class);
+        yield MenuItem::linkToCrud('Séances', 'fas fa-calendar-alt', Seance::class);
     }
 }
