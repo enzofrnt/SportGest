@@ -10,6 +10,7 @@ use App\Entity\Seance;
 use App\Entity\Exercice;
 use App\Entity\FicheDePaie;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Entity\Responsable;
 
 class AppFixtures extends Fixture
 {
@@ -69,6 +70,8 @@ class AppFixtures extends Fixture
         
         // Création des fiches de paie
         $this->createFichesDePaie($manager, $coachs);
+
+        $this->createResponsables($manager, 3);
         
         $manager->flush();
     }
@@ -175,6 +178,23 @@ class AppFixtures extends Fixture
         }
         
         return $sportifs;
+    }
+
+    private function createResponsables(ObjectManager $manager, int $count): array
+    {
+        $responsables = [];
+        for ($i = 0; $i < $count; $i++) {
+            $responsable = new Responsable();
+            $nom = $this->getRandomLastName();
+            $prenom = $this->getRandomFirstName();
+            $responsable->setNom($nom);
+            $responsable->setPrenom($prenom);
+            $responsable->setEmail($this->getRandomEmail($prenom, $nom));
+            $responsable->setPassword($this->passwordHasher->hashPassword($responsable, 'password'));
+            $manager->persist($responsable);
+            $responsables[] = $responsable;
+        }
+        return $responsables;
     }
     
     private function createSeances(ObjectManager $manager, array $coachs, array $sportifs, array $exercices, int $count): void

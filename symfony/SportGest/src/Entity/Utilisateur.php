@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'role', type: 'string')]
-#[ORM\DiscriminatorMap(['utilisateur' => Utilisateur::class, 'coach' => Coach::class, 'sportif' => Sportif::class])]
+#[ORM\DiscriminatorMap(['utilisateur' => Utilisateur::class, 'coach' => Coach::class, 'sportif' => Sportif::class, 'responsable' => Responsable::class])]
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -98,5 +98,17 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserIdentifier(): string
     {
         return $this->email;
+    }
+
+
+    public function getRole(): string
+    {
+        $class = get_class($this); 
+        return match ($class) {
+            Sportif::class => 'Sportif',
+            Coach::class => 'Coach',
+            Responsable::class => 'Responsable',
+            default => 'Utilisateur',
+        };
     }
 }
