@@ -7,6 +7,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enum\TypeSeance;
+use App\Enum\StatutSeance;
+use App\Enum\NiveauSportif;
 
 #[ORM\Entity(repositoryClass: SeanceRepository::class)]
 class Seance
@@ -19,8 +22,8 @@ class Seance
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateHeure = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $typeSeance = null;
+    #[ORM\Column(type: 'string', enumType: TypeSeance::class)]
+    private ?TypeSeance $typeSeance = null;
 
     #[ORM\Column(length: 255)]
     private ?string $themeSeance = null;
@@ -35,11 +38,11 @@ class Seance
     #[ORM\ManyToMany(targetEntity: Sportif::class)]
     private Collection $sportifs;
 
-    #[ORM\Column(length: 255)]
-    private ?string $statut = null;
+    #[ORM\Column(type: 'string', enumType: StatutSeance::class)]
+    private ?StatutSeance $statut = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $niveauSeance = null;
+    #[ORM\Column(type: 'string', enumType: NiveauSportif::class)]
+    private ?NiveauSportif $niveauSeance = null;
 
     /**
      * @var Collection<int, Exercice>
@@ -70,12 +73,12 @@ class Seance
         return $this;
     }
 
-    public function getTypeSeance(): ?string
+    public function getTypeSeance(): ?TypeSeance
     {
         return $this->typeSeance;
     }
 
-    public function setTypeSeance(string $typeSeance): static
+    public function setTypeSeance(TypeSeance $typeSeance): static
     {
         $this->typeSeance = $typeSeance;
 
@@ -130,24 +133,24 @@ class Seance
         return $this;
     }
 
-    public function getStatut(): ?string
+    public function getStatut(): ?StatutSeance
     {
         return $this->statut;
     }
 
-    public function setStatut(string $statut): static
+    public function setStatut(StatutSeance $statut): static
     {
         $this->statut = $statut;
 
         return $this;
     }
 
-    public function getNiveauSeance(): ?string
+    public function getNiveauSeance(): ?NiveauSportif
     {
         return $this->niveauSeance;
     }
 
-    public function setNiveauSeance(string $niveauSeance): static
+    public function setNiveauSeance(NiveauSportif $niveauSeance): static
     {
         $this->niveauSeance = $niveauSeance;
 

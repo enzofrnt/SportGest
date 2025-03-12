@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\SportifRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enum\NiveauSportif;
 
 #[ORM\Entity(repositoryClass: SportifRepository::class)]
 class Sportif extends Utilisateur
@@ -11,8 +12,8 @@ class Sportif extends Utilisateur
     #[ORM\Column]
     private ?\DateTimeImmutable $dateInscription = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $niveauSportif = null;
+    #[ORM\Column(type: 'string', enumType: NiveauSportif::class)]
+    private ?NiveauSportif $niveauSportif = null;
 
     public function getDateInscription(): ?\DateTimeImmutable
     {
@@ -26,12 +27,12 @@ class Sportif extends Utilisateur
         return $this;
     }
 
-    public function getNiveauSportif(): ?string
+    public function getNiveauSportif(): ?NiveauSportif
     {
         return $this->niveauSportif;
     }
 
-    public function setNiveauSportif(string $niveauSportif): static
+    public function setNiveauSportif(NiveauSportif $niveauSportif): static
     {
         $this->niveauSportif = $niveauSportif;
 

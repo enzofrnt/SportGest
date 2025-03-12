@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ExerciceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enum\DifficulteExercice;
 
 #[ORM\Entity(repositoryClass: ExerciceRepository::class)]
 class Exercice
@@ -22,8 +23,8 @@ class Exercice
     #[ORM\Column]
     private ?int $dureeEstimee = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $difficulte = null;
+    #[ORM\Column(type: 'string', enumType: DifficulteExercice::class)]
+    private ?DifficulteExercice $difficulte = null;
 
     public function getId(): ?int
     {
@@ -66,12 +67,12 @@ class Exercice
         return $this;
     }
 
-    public function getDifficulte(): ?string
+    public function getDifficulte(): ?DifficulteExercice
     {
         return $this->difficulte;
     }
 
-    public function setDifficulte(string $difficulte): static
+    public function setDifficulte(DifficulteExercice $difficulte): static
     {
         $this->difficulte = $difficulte;
 

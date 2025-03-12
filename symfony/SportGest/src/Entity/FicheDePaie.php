@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\FicheDePaieRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enum\PeriodePaie;
 
 #[ORM\Entity(repositoryClass: FicheDePaieRepository::class)]
 class FicheDePaie
@@ -17,8 +18,8 @@ class FicheDePaie
     #[ORM\JoinColumn(nullable: false)]
     private ?Coach $coach = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $periode = null;
+    #[ORM\Column(type: 'string', enumType: PeriodePaie::class)]
+    private ?PeriodePaie $periode = null;
 
     #[ORM\Column]
     private ?float $montantTotal = null;
@@ -40,12 +41,12 @@ class FicheDePaie
         return $this;
     }
 
-    public function getPeriode(): ?string
+    public function getPeriode(): ?PeriodePaie
     {
         return $this->periode;
     }
 
-    public function setPeriode(string $periode): static
+    public function setPeriode(PeriodePaie $periode): static
     {
         $this->periode = $periode;
 

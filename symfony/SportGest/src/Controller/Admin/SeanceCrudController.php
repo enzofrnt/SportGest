@@ -9,9 +9,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use App\Enum\TypeSeance;
+use App\Enum\StatutSeance;
+use App\Enum\NiveauSportif;
 
 class SeanceCrudController extends AbstractCrudController
 {
@@ -31,10 +35,13 @@ class SeanceCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             DateTimeField::new('dateHeure', 'Date et heure'),
-            TextField::new('typeSeance', 'Type de séance'),
+            ChoiceField::new('typeSeance', 'Type de séance')
+                ->setChoices(array_combine(TypeSeance::values(), TypeSeance::values())),
             TextField::new('themeSeance', 'Thème de la séance'),
-            TextField::new('niveauSeance', 'Niveau de la séance'),
-            TextField::new('statut', 'Statut'),
+            ChoiceField::new('niveauSeance', 'Niveau de la séance')
+                ->setChoices(array_combine(NiveauSportif::values(), NiveauSportif::values())),
+            ChoiceField::new('statut', 'Statut')
+                ->setChoices(array_combine(StatutSeance::values(), StatutSeance::values())),
             AssociationField::new('coach', 'Coach'),
             AssociationField::new('sportifs', 'Sportifs')
                 ->setFormTypeOption('by_reference', false),
