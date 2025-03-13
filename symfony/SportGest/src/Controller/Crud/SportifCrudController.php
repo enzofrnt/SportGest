@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace App\Controller\Crud;
 
 use App\Entity\Sportif;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
