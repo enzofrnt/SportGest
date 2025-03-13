@@ -37,13 +37,5 @@ services:
     ports:
       - "${ANGULAR_PORT}:4200"
 
-  # Adminer pour la gestion de base de données
-  adminer:
-    image: adminer
-    ports:
-      - "${ADMINER_PORT}:8080"
-    depends_on:
-      - db
-
 volumes:
-  mariadb_data: 
+  mariadb_data:
