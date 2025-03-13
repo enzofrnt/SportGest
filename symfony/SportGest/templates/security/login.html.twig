@@ -2,58 +2,184 @@
 
 {% block title %}Connexion - SportGest{% endblock %}
 
+{% block stylesheets %}
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            background-color: #fff;
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, var(--ea-color-primary) 0%, var(--ea-color-primary-dark) 100%);
+            border-top-left-radius: 0.75rem !important;
+            border-top-right-radius: 0.75rem !important;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .card-header h2 {
+            color: #fff;
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-control {
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--ea-color-border);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            border-color: var(--ea-color-primary);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+            outline: 0;
+        }
+
+        .input-group-text {
+            background-color: var(--ea-color-background);
+            border: 1px solid var(--ea-color-border);
+            border-radius: 0.5rem 0 0 0.5rem;
+            color: var(--ea-color-primary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--ea-color-primary) 0%, var(--ea-color-primary-dark) 100%);
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(78, 115, 223, 0.3);
+            background: linear-gradient(45deg, var(--ea-color-primary-dark) 0%, var(--ea-color-primary) 100%);
+        }
+
+        .card-footer {
+            background-color: var(--ea-color-background);
+            border-top: 1px solid var(--ea-color-border);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .test-accounts {
+            font-size: 0.875rem;
+            color: var(--ea-color-text-light);
+        }
+
+        .test-accounts ul {
+            margin-top: 1rem;
+            padding-left: 0;
+        }
+
+        .test-accounts li {
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .test-accounts strong {
+            color: var(--ea-color-primary);
+            font-weight: 600;
+        }
+
+        .alert {
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+        }
+
+        .alert-danger {
+            background-color: rgba(231, 74, 59, 0.1);
+            color: var(--ea-color-danger);
+        }
+
+        .alert i {
+            margin-right: 0.5rem;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white text-center py-3">
-                    <h2 class="mb-0">Connexion</h2>
-                </div>
-                <div class="card-body p-4">
-                    <form method="post">
-                        {% if error %}
-                            <div class="alert alert-danger">
-                                {{ error.messageKey|trans(error.messageData, 'security') }}
-                            </div>
-                        {% endif %}
-
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                <input type="email" value="{{ last_username }}" name="email" id="email" class="form-control" required autofocus>
-                            </div>
+<div class="container">
+    <div class="login-container">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-lock me-2"></i>Connexion</h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
                         </div>
+                    {% endif %}
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mot de passe</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                <input type="password" name="password" id="password" class="form-control" required>
-                            </div>
+                    <div class="mb-4">
+                        <label for="email" class="form-label">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" value="{{ last_username }}" name="email" id="email" class="form-control" required autofocus>
                         </div>
-
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <div class="card-footer text-center py-3">
-                    <div class="small text-muted">
-                        Comptes de test :
-                        <ul class="list-unstyled mt-2">
-                            <li><strong>Coach :</strong> coach@sportgest.fr / password</li>
-                            <li><strong>Admin :</strong> admin@sportgest.fr / password</li>
-                            <li><strong>Sportif :</strong> sportif@sportgest.fr / password</li>
-                        </ul>
                     </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Mot de passe</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" name="password" id="password" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <div class="d-grid">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% if app.environment == 'dev' %}
+            <div class="card-footer">
+                <div class="test-accounts">
+                    <p class="mb-2">Comptes de test :</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-user-tie me-2"></i><strong>Coach :</strong> coach@sportgest.fr / password</li>
+                        <li><i class="fas fa-user-shield me-2"></i><strong>Admin :</strong> admin@sportgest.fr / password</li>
+                        <li><i class="fas fa-running me-2"></i><strong>Sportif :</strong> sportif@sportgest.fr / password</li>
+                    </ul>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

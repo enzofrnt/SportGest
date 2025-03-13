@@ -17,7 +17,7 @@ use App\Entity\FicheDePaie;
 use App\Enum\PeriodePaie;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-#[AdminDashboard(routePath: '/coach', routeName: 'coach_dashboard')]
+#[AdminDashboard(routePath: '/dashboard/coach', routeName: 'coach_dashboard')]
 #[IsGranted('ROLE_COACH')]
 class CoachDashboardController extends AbstractDashboardController
 {
@@ -25,7 +25,7 @@ class CoachDashboardController extends AbstractDashboardController
     {
     }
 
-    #[Route('/coach', name: 'coach_dashboard')]
+    #[Route('/dashboard/coach', name: 'coach_dashboard')]
     public function index(): Response
     {
         $user = $this->getUser();

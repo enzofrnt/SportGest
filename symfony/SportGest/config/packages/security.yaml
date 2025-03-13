@@ -19,19 +19,23 @@ security:
         login_path: app_login
         check_path: app_login
         enable_csrf: true
-        default_target_path: /
+        default_target_path: app_login_success
         username_parameter: email
         password_parameter: password
       logout:
         path: app_logout
         target: app_login
+      access_denied_handler: App\Security\AccessDeniedHandler
+      access_denied_url: /access-denied
 
   # Easy way to control access for large sections of your site
   # Note: Only the *first* access control that matches will be used
   access_control:
     - { path: ^/login, roles: PUBLIC_ACCESS }
-    - { path: ^/admin, roles: ROLE_ADMIN }
-    - { path: ^/coach, roles: ROLE_COACH }
+    - { path: ^/dashboard/admin, roles: ROLE_ADMIN }
+    - { path: ^/dashboard/coach, roles: ROLE_COACH }
+    - { path: ^/dashboard/sportif, roles: ROLE_SPORTIF }
+    - { path: ^/access-denied, roles: PUBLIC_ACCESS }
     - { path: ^/, roles: ROLE_USER }
 
 when@test:

@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accès refusé - SportGest{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-container {
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 5rem;
+            color: var(--ea-color-danger);
+            margin-bottom: 1.5rem;
+        }
+
+        .error-title {
+            font-size: 2rem;
+            color: var(--ea-color-danger);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .error-message {
+            color: var(--ea-color-text);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--ea-color-primary) 0%, var(--ea-color-primary-dark) 100%);
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(78, 115, 223, 0.3);
+            background: linear-gradient(45deg, var(--ea-color-primary-dark) 0%, var(--ea-color-primary) 100%);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-ban"></i>
+        </div>
+        <h1 class="error-title">Accès refusé</h1>
+        <p class="error-message">
+            Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+            Veuillez vous connecter avec un compte approprié.
+        </p>
+        <a href="{{ path('app_login') }}" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt me-2"></i>Retour à la connexion
+        </a>
+    </div>
+</div>
+{% endblock %} 

@@ -6,12 +6,19 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class SecurityController extends AbstractController
 {
     #[Route('/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(AuthenticationUtils $authenticationUtils, Security $security): Response
     {
+        // Si l'utilisateur est déjà connecté, le rediriger vers son dashboard
+        if ($security->isGranted('ROLE_USER')) {
+            return $this->redirectToRoute('app_dashboard');
+        }
+
         // Récupérer l'erreur de login s'il y en a une
         $error = $authenticationUtils->getLastAuthenticationError();
         
@@ -28,5 +35,17 @@ class SecurityController extends AbstractController
     public function logout(): void
     {
         // Le logout est géré automatiquement par Symfony
+    }
+
+    #[Route('/login/success', name: 'app_login_success')]
+    public function loginSuccess(): Response
+    {
+        return $this->redirectToRoute('app_dashboard');
+    }
+
+    #[Route('/access-denied', name: 'app_access_denied')]
+    public function accessDenied(): Response
+    {
+        return $this->render('security/access_denied.html.twig');
     }
 } 
