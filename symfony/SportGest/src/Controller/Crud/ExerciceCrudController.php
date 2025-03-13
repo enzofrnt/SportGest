@@ -13,6 +13,7 @@ use App\Enum\DifficulteExercice;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_COACH')]
+#[IsGranted('ROLE_RESPONSABLE')]
 class ExerciceCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string

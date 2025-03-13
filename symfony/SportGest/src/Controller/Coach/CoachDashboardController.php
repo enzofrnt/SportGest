@@ -16,12 +16,13 @@ use App\Controller\Crud\ExerciceCrudController;
 use App\Controller\Crud\SeanceCrudController;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\FicheDePaie;
+use App\Entity\Utilisateur;
 use App\Enum\PeriodePaie;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
-use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
-use Symfony\Component\Security\Core\User\UserInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[IsGranted('ROLE_COACH')]
 #[Route('/dashboard/coach')]
@@ -42,6 +43,10 @@ class CoachDashboardController extends AbstractDashboardController
 
     public function configureUserMenu(UserInterface $user): UserMenu
     {
+        if (!$user instanceof Utilisateur) {
+            throw new \RuntimeException('L\'utilisateur doit être une instance de Utilisateur');
+        }
+
         return parent::configureUserMenu($user)
             ->setName($user->getPrenom() . ' ' . $user->getNom())
             ->setGravatarEmail($user->getEmail())

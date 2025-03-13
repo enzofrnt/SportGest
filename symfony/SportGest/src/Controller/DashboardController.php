@@ -22,12 +22,10 @@ class DashboardController extends AbstractController
 
         $roles = $user->getRoles();
         
-        if (in_array('ROLE_ADMIN', $roles)) {
-            return $this->redirectToRoute('admin');
+        if (in_array('ROLE_RESPONSABLE', $roles)) {
+            return $this->redirectToRoute('responsable_dashboard');
         } elseif (in_array('ROLE_COACH', $roles)) {
             return $this->redirectToRoute('coach_dashboard');
-        } elseif (in_array('ROLE_SPORTIF', $roles)) {
-            return $this->redirectToRoute('sportif_dashboard');
         }
 
         return $this->redirectToRoute('app_login');

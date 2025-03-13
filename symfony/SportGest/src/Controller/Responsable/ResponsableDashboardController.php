@@ -7,6 +7,7 @@ use App\Entity\Seance;
 use App\Entity\Utilisateur;
 use App\Entity\Coach;
 use App\Entity\Responsable;
+use App\Entity\FicheDePaie;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -17,6 +18,7 @@ use App\Controller\Crud\SeanceCrudController;
 use App\Controller\Crud\UtilisateurCrudController;
 use App\Controller\Crud\CoachCrudController;
 use App\Controller\Crud\ResponsableCrudController;
+use App\Entity\Sportif;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
@@ -40,6 +42,10 @@ class ResponsableDashboardController extends AbstractDashboardController
 
     public function configureUserMenu(UserInterface $user): UserMenu
     {
+        if (!$user instanceof Utilisateur) {
+            throw new \RuntimeException('L\'utilisateur doit être une instance de Utilisateur');
+        }
+
         return parent::configureUserMenu($user)
             ->setName($user->getPrenom() . ' ' . $user->getNom())
             ->setGravatarEmail($user->getEmail())
@@ -92,19 +98,56 @@ class ResponsableDashboardController extends AbstractDashboardController
 
         // Statistiques générales
         $stats = [
+            'total_utilisateurs' => $this->entityManager->getRepository(Utilisateur::class)->count([]),
             'total_seances' => $this->entityManager->getRepository(Seance::class)->count([]),
-            'total_sportifs' => $this->entityManager->getRepository(Utilisateur::class)->count([]),
+            'total_sportifs' => $this->entityManager->getRepository(Sportif::class)->count([]),
             'total_coachs' => $this->entityManager->getRepository(Coach::class)->count([]),
             'total_exercices' => $this->entityManager->getRepository(Exercice::class)->count([]),
+            'seances_du_jour' => $this->entityManager->getRepository(Seance::class)
+                ->createQueryBuilder('s')
+                ->select('COUNT(s)')
+                ->where('s.dateHeure >= :debut')
+                ->andWhere('s.dateHeure < :fin')
+                ->setParameter('debut', new \DateTime('today'))
+                ->setParameter('fin', new \DateTime('tomorrow'))
+                ->getQuery()
+                ->getSingleScalarResult(),
+            'total_fiches_paie' => $this->entityManager->getRepository(FicheDePaie::class)->count([]),
+        ];
+
+        // Statistiques des séances par type
+        $seancesParType = $this->entityManager->getRepository(Seance::class)
+            ->createQueryBuilder('s')
+            ->select('s.typeSeance as type, COUNT(s) as count')
+            ->groupBy('s.typeSeance')
+            ->getQuery()
+            ->getResult();
+
+        $stats['seances_par_type'] = [
+            'labels' => array_map(fn($item) => $item['type']->value, $seancesParType),
+            'data' => array_map(fn($item) => $item['count'], $seancesParType),
+        ];
+
+        // Statistiques des statuts
+        $statuts = $this->entityManager->getRepository(Seance::class)
+            ->createQueryBuilder('s')
+            ->select('s.statut as status, COUNT(s) as count')
+            ->groupBy('s.statut')
+            ->getQuery()
+            ->getResult();
+
+        $stats['statuts'] = [
+            'labels' => array_map(fn($item) => $item['status']->value, $statuts),
+            'data' => array_map(fn($item) => $item['count'], $statuts),
         ];
 
         // Dernières séances
-        $dernieres_seances = $this->entityManager->getRepository(Seance::class)
+        $derniere_seances = $this->entityManager->getRepository(Seance::class)
             ->findBy([], ['dateHeure' => 'DESC'], 5);
 
         return $this->render('responsable/dashboard.html.twig', [
             'stats' => $stats,
-            'dernieres_seances' => $dernieres_seances,
+            'derniere_seances' => $derniere_seances,
         ]);
     }
 } 

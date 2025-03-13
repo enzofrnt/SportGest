@@ -40,10 +40,9 @@ security:
     - { path: ^/api, roles: ROLE_USER }
 
     # Routes dashboard avec protection des sous-chemins
-    - { path: ^/dashboard/admin, roles: ROLE_ADMIN }
     - { path: ^/dashboard/responsable, roles: ROLE_RESPONSABLE }
     - { path: ^/dashboard/coach, roles: ROLE_COACH }
-    - { path: ^/dashboard$, roles: ROLE_USER }
+    - { path: ^/dashboard, roles: ROLE_USER }
 
     # Protection par défaut
     - { path: ^/, roles: ROLE_USER }
