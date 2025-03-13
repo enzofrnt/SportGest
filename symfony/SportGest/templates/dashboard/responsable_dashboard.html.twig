@@ -1,0 +1,142 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content %}
+    <div class="container-fluid">
+        <h1 class="h3 mb-4">Bienvenue {{ user.prenom }} {{ user.nom }}</h1>
+
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Nombre de Coachs</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ coachs|length }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-tie fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Nombre de Sportifs</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ sportifs|length }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-running fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Séances ce mois</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ seances_mois|length }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-8 col-lg-7">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Dernières séances</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Titre</th>
+                                        <th>Coach</th>
+                                        <th>Nombre de sportifs</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {# {% for seance in dernieres_seances %}
+                                        <tr>
+                                            <td>{{ seance.dateHeure|date('d/m/Y H:i') }}</td>
+                                            <td>{{ seance.themeSeance }}</td>
+                                            <td>{{ seance.coach.prenom }} {{ seance.coach.nom }}</td>
+                                            <td>{{ seance.sportifs|length }}</td>
+                                            <td>
+                                                <a href="{{ path('admin', {crudController: 'App\\Controller\\Dashboard\\SeanceCrudController', crudAction: 'detail', entityId: seance.id}) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %} #}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4 col-lg-5">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Fiches de paie récentes</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Coach</th>
+                                        <th>Montant</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {# {% for fiche in dernieres_fiches_paie %}
+                                        <tr>
+                                            <td>{{ fiche.date|date('d/m/Y') }}</td>
+                                            <td>{{ fiche.coach.prenom }} {{ fiche.coach.nom }}</td>
+                                            <td>{{ fiche.montantTotal }}€</td>
+                                            <td>
+                                                <a href="{{ path('admin', {crudController: 'App\\Controller\\Dashboard\\FicheDePaieCrudController', crudAction: 'detail', entityId: fiche.id}) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %} #}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

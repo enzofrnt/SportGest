@@ -16,7 +16,7 @@ class SecurityController extends AbstractController
     {
         // Si l'utilisateur est déjà connecté, le rediriger vers son dashboard
         if ($security->isGranted('ROLE_USER')) {
-            return $this->redirectToRoute('app_dashboard');
+            return $this->redirectToRoute('admin');
         }
 
         // Récupérer l'erreur de login s'il y en a une
@@ -40,7 +40,7 @@ class SecurityController extends AbstractController
     #[Route('/login/success', name: 'app_login_success')]
     public function loginSuccess(): Response
     {
-        return $this->redirectToRoute('app_dashboard');
+        return $this->redirectToRoute('admin');
     }
 
     #[Route('/access-denied', name: 'app_access_denied')]

@@ -1,0 +1,114 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Tableau de bord Coach{% endblock %}
+
+{% block main %}
+    <div class="row">
+        <!-- Statistiques -->
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Mes statistiques</h5>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Séances ce mois
+                            <span class="badge bg-primary rounded-pill">{{ stats.seances_mois }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Sportifs encadrés
+                            <span class="badge bg-success rounded-pill">{{ stats.sportifs }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Fiches de paie en attente
+                            <span class="badge bg-warning rounded-pill">{{ stats.fiches_paie_attente }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prochaines séances -->
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Mes prochaines séances</h5>
+                    {% if prochaines_seances is empty %}
+                        <p class="text-muted">Aucune séance programmée</p>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Titre</th>
+                                        <th>Sportifs</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for seance in prochaines_seances %}
+                                        <tr>
+                                            <td>{{ seance.dateHeure|date('d/m/Y H:i') }}</td>
+                                            <td>{{ seance.themeSeance }}</td>
+                                            <td>{{ seance.sportifs|length }}</td>
+                                            <td>
+                                                <a href="{{ path('admin', {
+                                                    crudController: 'App\\Controller\\Dashboard\\SeanceCrudController',
+                                                    crudAction: 'detail',
+                                                    entityId: seance.id
+                                                }) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Dernières fiches de paie -->
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Mes dernières fiches de paie</h5>
+                    {% if fiches_paie is empty %}
+                        <p class="text-muted">Aucune fiche de paie</p>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Période</th>
+                                        <th>Montant</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for fiche in fiches_paie %}
+                                        <tr>
+                                            <td>{{ fiche.periode.value }}</td>
+                                            <td>{{ fiche.montantTotal }}€</td>
+                                            <td>
+                                                <a href="{{ path('admin', {
+                                                    crudController: 'App\\Controller\\Dashboard\\FicheDePaieCrudController',
+                                                    crudAction: 'detail',
+                                                    entityId: fiche.id
+                                                }) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

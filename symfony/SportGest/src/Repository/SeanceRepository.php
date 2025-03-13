@@ -9,6 +9,11 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Seance>
+ *
+ * @method Seance|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Seance|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Seance[]    findAll()
+ * @method Seance[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class SeanceRepository extends ServiceEntityRepository
 {
@@ -126,18 +131,67 @@ class SeanceRepository extends ServiceEntityRepository
         }, array_keys($seancesParMois), array_values($seancesParMois));
     }
 
-    public function findProchainesSeances(Coach $coach): array
+    public function findProchainesSeances(Coach $coach, int $limit = 5): array
     {
+        $maintenant = new \DateTime();
+
         return $this->createQueryBuilder('s')
             ->where('s.coach = :coach')
-            ->andWhere('s.dateHeure >= :now')
-            ->andWhere('s.statut = :statut')
-            ->orderBy('s.dateHeure', 'ASC')
-            ->setMaxResults(5)
+            ->andWhere('s.dateHeure > :maintenant')
             ->setParameter('coach', $coach)
-            ->setParameter('now', new \DateTime())
-            ->setParameter('statut', 'prévue')
+            ->setParameter('maintenant', $maintenant)
+            ->orderBy('s.dateHeure', 'ASC')
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findDernieresSeances(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('s')
+            ->orderBy('s.dateHeure', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findSeancesMois(\DateTime $debut, \DateTime $fin): array
+    {
+        return $this->createQueryBuilder('s')
+            ->where('s.dateHeure BETWEEN :debut AND :fin')
+            ->setParameter('debut', $debut)
+            ->setParameter('fin', $fin)
+            ->orderBy('s.dateHeure', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countSeancesMoisCourant(Coach $coach): int
+    {
+        $debutMois = new \DateTime('first day of this month');
+        $debutMois->setTime(0, 0, 0);
+        $finMois = new \DateTime('last day of this month');
+        $finMois->setTime(23, 59, 59);
+
+        return $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->where('s.coach = :coach')
+            ->andWhere('s.dateHeure BETWEEN :debut AND :fin')
+            ->setParameter('coach', $coach)
+            ->setParameter('debut', $debutMois)
+            ->setParameter('fin', $finMois)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countSportifsUniques(Coach $coach): int
+    {
+        return $this->createQueryBuilder('s')
+            ->select('COUNT(DISTINCT sp.id)')
+            ->join('s.sportifs', 'sp')
+            ->where('s.coach = :coach')
+            ->setParameter('coach', $coach)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }
