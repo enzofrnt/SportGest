@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace App\Controller\Coach;
 
 use App\Entity\Exercice;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -31,4 +31,4 @@ class ExerciceCrudController extends AbstractCrudController
                 ->setChoices(array_combine(DifficulteExercice::values(), DifficulteExercice::values())),
         ];
     }
-}
+} 

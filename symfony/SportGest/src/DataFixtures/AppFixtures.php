@@ -80,6 +80,8 @@ class AppFixtures extends Fixture
         $this->createFichesDePaie($manager, $coachs);
 
         $this->createResponsables($manager, 3);
+
+        $this->createAdmin($manager);
         
         $manager->flush();
     }
@@ -305,16 +307,27 @@ class AppFixtures extends Fixture
             $responsables[] = $responsable;
         }
 
-        // Admin (Responsable) de test
-        $admin = new Responsable();
-        $admin->setNom('Martin');
-        $admin->setPrenom('Sophie');
-        $admin->setEmail('admin@sportgest.fr');
-        $admin->setPassword($this->passwordHasher->hashPassword($admin, 'password'));
-        $manager->persist($admin);
+        // Responsable (Responsable) de test
+        $responsable = new Responsable();
+        $responsable->setNom('Martin');
+        $responsable->setPrenom('Sophie');
+        $responsable->setEmail('responsable@sportgest.fr');
+        $responsable->setPassword($this->passwordHasher->hashPassword($responsable, 'password'));
+        $manager->persist($responsable);
 
-        $responsables[] = $admin;
+        $responsables[] = $responsable;
 
         return $responsables;
+    }
+
+    private function createAdmin(ObjectManager $manager): void
+    {
+        $admins = new Responsable();
+        $admins->setNom('Admin');
+        $admins->setPrenom('Admin');
+        $admins->setEmail('admin@sportgest.fr');
+        $admins->setRoles(['ROLE_ADMIN']);
+        $admins->setPassword($this->passwordHasher->hashPassword($admins, 'password'));
+        $manager->persist($admins);
     }
 }

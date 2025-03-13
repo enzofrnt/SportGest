@@ -18,7 +18,12 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_RESPONSABLE')]
 class CoachCrudController extends AbstractCrudController
 {
     private const SPECIALITES = [
@@ -39,6 +44,12 @@ class CoachCrudController extends AbstractCrudController
     public static function getEntityFqcn(): string
     {
         return Coach::class;
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions
+            ->add(Crud::PAGE_INDEX, Action::DETAIL);
     }
 
     public function configureFields(string $pageName): iterable
@@ -72,6 +83,16 @@ class CoachCrudController extends AbstractCrudController
             NumberField::new('tarifHoraire', 'Tarif horaire (€)')
                 ->setNumDecimals(2)
                 ->setRequired(true),
+            AssociationField::new('sportifs', 'Sportifs')
+                ->setFormTypeOption('by_reference', false)
+                ->formatValue(function ($value, $entity) {
+                    return count($entity->getSportifs()) . ' sportif(s)';
+                }),
+            AssociationField::new('seances', 'Séances')
+                ->setFormTypeOption('by_reference', false)
+                ->formatValue(function ($value, $entity) {
+                    return count($entity->getSeances()) . ' séance(s)';
+                }),
         ];
     }
 

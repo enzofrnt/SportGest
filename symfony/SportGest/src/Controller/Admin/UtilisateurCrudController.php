@@ -15,7 +15,12 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use \EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use App\Enum\NiveauSportif;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_RESPONSABLE')]
 class UtilisateurCrudController extends AbstractCrudController
 {
     private RequestStack $requestStack;
@@ -41,22 +46,17 @@ class UtilisateurCrudController extends AbstractCrudController
     {
         return [
             IdField::new('id')->hideOnForm(),
-            TextField::new('nom'),
-            TextField::new('prenom'),
-            EmailField::new('email'),
-            TextField::new('password')
-                ->setFormType(RepeatedType::class)
-                ->setFormTypeOptions([
-                    'type' => PasswordType::class,
-                    'first_options' => ['label' => 'Mot de passe'],
-                    'second_options' => ['label' => 'Confirmer le mot de passe'],
-                    'invalid_message' => 'Les mots de passe doivent correspondre',
-                ])
-                ->setRequired(true)
-                ->onlyOnForms(),
-            TextField::new('role', 'Role')
-                ->setVirtual(true)
-                ->hideOnForm(),
+            TextField::new('nom', 'Nom'),
+            TextField::new('prenom', 'Prénom'),
+            EmailField::new('email', 'Email'),
+            ChoiceField::new('niveau', 'Niveau')
+                ->setChoices(array_combine(NiveauSportif::values(), NiveauSportif::values())),
+            AssociationField::new('coach', 'Coach'),
+            AssociationField::new('seances', 'Séances')
+                ->setFormTypeOption('by_reference', false)
+                ->formatValue(function ($value, $entity) {
+                    return count($entity->getSeances()) . ' séance(s)';
+                }),
         ];
     }
 

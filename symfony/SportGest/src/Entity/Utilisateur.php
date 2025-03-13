@@ -94,10 +94,21 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this instanceof Coach) {
             $roles[] = 'ROLE_COACH';
         } elseif ($this instanceof Responsable) {
-            $roles[] = 'ROLE_ADMIN';
+            $roles[] = 'ROLE_RESPONSABLE';
         }
 
+        foreach ($this->roles as $role) {
+            $roles[] = $role;
+        }
+        
         return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
     }
 
     public function eraseCredentials(): void

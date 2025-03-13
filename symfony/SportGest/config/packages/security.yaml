@@ -31,11 +31,21 @@ security:
   # Easy way to control access for large sections of your site
   # Note: Only the *first* access control that matches will be used
   access_control:
+    # Routes publiques
     - { path: ^/login, roles: PUBLIC_ACCESS }
-    - { path: ^/dashboard/admin, roles: ROLE_ADMIN }
-    - { path: ^/dashboard/coach, roles: ROLE_COACH }
-    - { path: ^/dashboard/sportif, roles: ROLE_SPORTIF }
     - { path: ^/access-denied, roles: PUBLIC_ACCESS }
+
+    # Routes API
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }
+    - { path: ^/api, roles: ROLE_USER }
+
+    # Routes dashboard avec protection des sous-chemins
+    - { path: ^/dashboard/admin, roles: ROLE_ADMIN }
+    - { path: ^/dashboard/responsable, roles: ROLE_RESPONSABLE }
+    - { path: ^/dashboard/coach, roles: ROLE_COACH }
+    - { path: ^/dashboard$, roles: ROLE_USER }
+
+    # Protection par défaut
     - { path: ^/, roles: ROLE_USER }
 
 when@test:

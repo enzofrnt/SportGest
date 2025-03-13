@@ -18,14 +18,14 @@ use App\Entity\FicheDePaie;
 use App\Enum\PeriodePaie;
 use Doctrine\ORM\EntityManagerInterface;
 
-#[AdminDashboard(routePath: '/dashboard/admin', routeName: 'admin')]
-class AdminController extends AbstractDashboardController
+#[AdminDashboard(routePath: '/dashboard/responsable', routeName: 'responsable')]
+class ResponsableController extends AbstractDashboardController
 {
     public function __construct(private EntityManagerInterface $entityManager)
     {
     }
 
-    #[Route('/dashboard/admin', name: 'admin')]
+    #[Route('/dashboard/responsable', name: 'responsable')]
     public function index(): Response
     {
         // Statistiques générales
