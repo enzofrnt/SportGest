@@ -5,14 +5,22 @@ namespace App\Entity;
 use App\Repository\SportifRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Enum\NiveauSportif;
+use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: SportifRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['sportif:read']],
+    denormalizationContext: ['groups' => ['sportif:write']]
+)]
 class Sportif extends Utilisateur
 {
     #[ORM\Column]
+    #[Groups(['sportif:read', 'sportif:write'])]
     private ?\DateTimeImmutable $dateInscription = null;
 
     #[ORM\Column(type: 'string', enumType: NiveauSportif::class)]
+    #[Groups(['sportif:read', 'sportif:write'])]
     private ?NiveauSportif $niveauSportif = null;
 
     public function getDateInscription(): ?\DateTimeImmutable

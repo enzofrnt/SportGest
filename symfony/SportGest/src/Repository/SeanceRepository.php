@@ -17,30 +17,30 @@ class SeanceRepository extends ServiceEntityRepository
         parent::__construct($registry, Seance::class);
     }
 
-//    /**
-//     * @return Seance[] Returns an array of Seance objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('s.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    //    /**
+    //     * @return Seance[] Returns an array of Seance objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('s')
+    //            ->andWhere('s.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('s.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
 
-//    public function findOneBySomeField($value): ?Seance
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    //    public function findOneBySomeField($value): ?Seance
+    //    {
+    //        return $this->createQueryBuilder('s')
+    //            ->andWhere('s.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 
     public function countSeancesDuJour(Coach $coach): int
     {
@@ -118,7 +118,7 @@ class SeanceRepository extends ServiceEntityRepository
 
         ksort($seancesParMois);
 
-        return array_map(function($mois, $count) {
+        return array_map(function ($mois, $count) {
             return [
                 'mois' => $mois,
                 'count' => $count
@@ -139,5 +139,92 @@ class SeanceRepository extends ServiceEntityRepository
             ->setParameter('statut', 'prévue')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Trouve les séances d'un coach dans une plage de dates
+     */
+    public function findByCoachAndDateRange(Coach $coach, \DateTime $dateDebut, \DateTime $dateFin)
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.coach = :coach')
+            ->andWhere('s.dateHeure >= :dateDebut')
+            ->andWhere('s.dateHeure <= :dateFin')
+            ->setParameter('coach', $coach)
+            ->setParameter('dateDebut', $dateDebut)
+            ->setParameter('dateFin', $dateFin)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Compte le nombre de séances dans une plage de dates
+     */
+    public function countSeancesByDateRange(\DateTime $dateDebut, \DateTime $dateFin)
+    {
+        return $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->andWhere('s.dateHeure >= :dateDebut')
+            ->andWhere('s.dateHeure <= :dateFin')
+            ->setParameter('dateDebut', $dateDebut)
+            ->setParameter('dateFin', $dateFin)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Compte le nombre total de participants dans une plage de dates
+     */
+    public function countTotalParticipantsByDateRange(\DateTime $dateDebut, \DateTime $dateFin)
+    {
+        return $this->createQueryBuilder('s')
+            ->select('SUM(SIZE(s.sportifs))')
+            ->andWhere('s.dateHeure >= :dateDebut')
+            ->andWhere('s.dateHeure <= :dateFin')
+            ->setParameter('dateDebut', $dateDebut)
+            ->setParameter('dateFin', $dateFin)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Obtient des statistiques par type de séance
+     */
+    public function getStatsByTypeSeance(\DateTime $dateDebut, \DateTime $dateFin)
+    {
+        $em = $this->getEntityManager();
+        $query = $em->createQuery(
+            'SELECT 
+                s.typeSeance as type,
+                COUNT(s.id) as nb_seances,
+                SUM(SIZE(s.sportifs)) as nb_participants
+             FROM App\Entity\Seance s
+             WHERE s.dateHeure >= :dateDebut AND s.dateHeure <= :dateFin
+             GROUP BY s.typeSeance'
+        )->setParameter('dateDebut', $dateDebut)
+            ->setParameter('dateFin', $dateFin);
+
+        return $query->getResult();
+    }
+
+    /**
+     * Obtient des statistiques par coach
+     */
+    public function getStatsByCoach(\DateTime $dateDebut, \DateTime $dateFin)
+    {
+        $em = $this->getEntityManager();
+        $query = $em->createQuery(
+            'SELECT 
+                CONCAT(c.nom, \' \', c.prenom) as coach_name,
+                COUNT(s.id) as nb_seances,
+                SUM(SIZE(s.sportifs)) as nb_participants
+             FROM App\Entity\Seance s
+             JOIN s.coach c
+             WHERE s.dateHeure >= :dateDebut AND s.dateHeure <= :dateFin
+             GROUP BY c.id'
+        )->setParameter('dateDebut', $dateDebut)
+            ->setParameter('dateFin', $dateFin);
+
+        return $query->getResult();
     }
 }
