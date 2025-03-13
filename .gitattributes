@@ -1,0 +1,30 @@
+# Force tous les fichiers à utiliser LF
+* text=auto eol=lf
+
+# Fichiers spécifiques qui doivent toujours utiliser LF
+*.php text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.xml text eol=lf
+*.sql text eol=lf
+
+# Fichiers binaires (ne pas modifier)
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.svg text eol=lf 
