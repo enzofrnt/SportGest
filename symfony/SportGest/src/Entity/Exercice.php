@@ -5,25 +5,36 @@ namespace App\Entity;
 use App\Repository\ExerciceRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Enum\DifficulteExercice;
+use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ExerciceRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['exercice:read']],
+    denormalizationContext: ['groups' => ['exercice:write']]
+)]
 class Exercice
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['exercice:read', 'seance:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['exercice:read', 'exercice:write', 'seance:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['exercice:read', 'exercice:write'])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['exercice:read', 'exercice:write'])]
     private ?int $dureeEstimee = null;
 
     #[ORM\Column(type: 'string', enumType: DifficulteExercice::class)]
+    #[Groups(['exercice:read', 'exercice:write'])]
     private ?DifficulteExercice $difficulte = null;
 
     public function getId(): ?int

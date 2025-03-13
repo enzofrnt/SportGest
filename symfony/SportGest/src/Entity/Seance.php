@@ -10,44 +10,61 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Enum\TypeSeance;
 use App\Enum\StatutSeance;
 use App\Enum\NiveauSportif;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: SeanceRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['seance:read']],
+    denormalizationContext: ['groups' => ['seance:write']]
+)]
 class Seance
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['seance:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['seance:read', 'seance:write'])]
     private ?\DateTimeInterface $dateHeure = null;
 
     #[ORM\Column(type: 'string', enumType: TypeSeance::class)]
+    #[Groups(['seance:read', 'seance:write'])]
     private ?TypeSeance $typeSeance = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['seance:read', 'seance:write'])]
     private ?string $themeSeance = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['seance:read', 'seance:write'])]
     private ?Coach $coach = null;
 
     /**
      * @var Collection<int, Sportif>
      */
     #[ORM\ManyToMany(targetEntity: Sportif::class)]
+    #[Groups(['seance:read', 'seance:write'])]
     private Collection $sportifs;
 
     #[ORM\Column(type: 'string', enumType: StatutSeance::class)]
+    #[Groups(['seance:read', 'seance:write'])]
     private ?StatutSeance $statut = null;
 
     #[ORM\Column(type: 'string', enumType: NiveauSportif::class)]
+    #[Groups(['seance:read', 'seance:write'])]
     private ?NiveauSportif $niveauSeance = null;
 
     /**
      * @var Collection<int, Exercice>
      */
     #[ORM\ManyToMany(targetEntity: Exercice::class)]
+    #[Groups(['seance:read', 'seance:write'])]
     private Collection $exercices;
 
     public function __construct()

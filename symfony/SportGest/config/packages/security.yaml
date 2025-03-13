@@ -12,6 +12,11 @@ security:
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
+    api:
+      pattern: ^/api
+      stateless: true
+      security: true
+      provider: app_user_provider
     main:
       lazy: true
       provider: app_user_provider
@@ -43,8 +48,8 @@ security:
     # - { path: ^/access-denied, roles: PUBLIC_ACCESS }
 
     # Routes API
-    # - { path: ^/api/login, roles: PUBLIC_ACCESS }
-    # - { path: ^/api, roles: ROLE_USER }
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }
+    - { path: ^/api, roles: PUBLIC_ACCESS }
 
     # Routes dashboard avec protection des sous-chemins
     # - { path: ^/admin/responsable, roles: ROLE_RESPONSABLE }
