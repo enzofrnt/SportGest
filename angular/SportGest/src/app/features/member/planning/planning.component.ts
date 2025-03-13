@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-planning',
+  selector: 'app-member-planning',
   standalone: true,
   imports: [],
   templateUrl: './planning.component.html',
