@@ -1,7 +1,8 @@
 import { TypeSeance } from './enum/type-seance.enum';
 import { StatutSeance } from './enum/statut-seance.enum';
 import { NiveauSportif } from './enum/niveau-sportif.enum';
-import { Coach, Sportif } from './utilisateur.model';
+import { Coach } from './coach.model';
+import { Sportif } from './sportif.model';
 
 export interface Seance {
     id?: number;

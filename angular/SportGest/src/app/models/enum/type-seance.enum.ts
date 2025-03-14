@@ -1,4 +1,5 @@
 export enum TypeSeance {
-    COLLECTIF = 'Collectif',
-    INDIVIDUEL = 'Individuel'
+    SOLO = 'Solo',
+    DUO = 'Duo',
+    TRIO = 'Trio'
 }

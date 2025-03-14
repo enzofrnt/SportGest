@@ -4,9 +4,9 @@ namespace App\Enum;
 
 enum TypeSeance: string
 {
-    case SOLO = 'solo';
-    case DUO = 'duo';
-    case TRIO = 'trio';
+    case SOLO = 'Solo';
+    case DUO = 'Duo';
+    case TRIO = 'Trio';
 
     public static function values(): array
     {

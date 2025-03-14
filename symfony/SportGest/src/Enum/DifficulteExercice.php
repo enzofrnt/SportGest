@@ -4,9 +4,9 @@ namespace App\Enum;
 
 enum DifficulteExercice: string
 {
-    case FACILE = 'facile';
-    case MOYEN = 'moyen';
-    case DIFFICILE = 'difficile';
+    case FACILE = 'Facile';
+    case MOYEN = 'Moyen';
+    case DIFFICILE = 'Difficile';
 
     public static function values(): array
     {

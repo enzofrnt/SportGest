@@ -4,9 +4,9 @@ namespace App\Enum;
 
 enum StatutSeance: string
 {
-    case PREVUE = 'prévue';
-    case VALIDEE = 'validée';
-    case ANNULEE = 'annulée';
+    case PREVUE = 'Prévue';
+    case VALIDEE = 'Validée';
+    case ANNULEE = 'Annulée';
 
     public static function values(): array
     {

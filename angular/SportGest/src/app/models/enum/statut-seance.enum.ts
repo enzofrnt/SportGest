@@ -1,6 +1,5 @@
 export enum StatutSeance {
-    PLANIFIEE = 'Planifiée',
-    EN_COURS = 'En cours',
-    TERMINEE = 'Terminée',
+    PREVUE = 'Prévue',
+    VALIDEE = 'Validée',
     ANNULEE = 'Annulée'
 }

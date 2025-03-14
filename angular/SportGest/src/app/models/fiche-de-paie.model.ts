@@ -1,5 +1,5 @@
 import { PeriodePaie } from './enum/periode-paie.enum';
-import { Coach } from './utilisateur.model';
+import { Coach } from './coach.model';
 
 export interface FicheDePaie {
     id?: number;

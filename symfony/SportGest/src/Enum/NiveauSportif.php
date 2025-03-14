@@ -4,9 +4,9 @@ namespace App\Enum;
 
 enum NiveauSportif: string
 {
-    case DEBUTANT = 'débutant';
-    case INTERMEDIAIRE = 'intermédiaire';
-    case AVANCE = 'avancé';
+    case DEBUTANT = 'Débutant';
+    case INTERMEDIAIRE = 'Intermédiaire';
+    case AVANCE = 'Avancé';
 
     public static function values(): array
     {
