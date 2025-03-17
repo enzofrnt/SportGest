@@ -13,7 +13,7 @@
                                 <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                     Nombre de Coachs</div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ coachs|length }}
+                                    {{ stats.total_coachs }}
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -32,7 +32,7 @@
                                 <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                     Nombre de Sportifs</div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ sportifs|length }}
+                                    {{ stats.total_sportifs }}
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -51,7 +51,7 @@
                                 <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                     Séances ce mois</div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ seances_mois|length }}
+                                    {{ stats.total_seances_mois }}
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -61,6 +61,27 @@
                     </div>
                 </div>
             </div>
+
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Fiches de paie en attente</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ stats.fiches_paie_attente }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-file-invoice-dollar fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <div class="row">
@@ -82,7 +103,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {# {% for seance in dernieres_seances %}
+                                    {% for seance in dernieres_seances %}
                                         <tr>
                                             <td>{{ seance.dateHeure|date('d/m/Y H:i') }}</td>
                                             <td>{{ seance.themeSeance }}</td>
@@ -94,10 +115,19 @@
                                                 </a>
                                             </td>
                                         </tr>
-                                    {% endfor %} #}
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Séances par coach ce mois</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="seancesParCoachChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -112,16 +142,16 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>Date</th>
+                                        <th>Période</th>
                                         <th>Coach</th>
                                         <th>Montant</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {# {% for fiche in dernieres_fiches_paie %}
+                                    {% for fiche in dernieres_fiches_paie %}
                                         <tr>
-                                            <td>{{ fiche.date|date('d/m/Y') }}</td>
+                                            <td>{{ fiche.periode.value }}</td>
                                             <td>{{ fiche.coach.prenom }} {{ fiche.coach.nom }}</td>
                                             <td>{{ fiche.montantTotal }}€</td>
                                             <td>
@@ -130,13 +160,140 @@
                                                 </a>
                                             </td>
                                         </tr>
-                                    {% endfor %} #}
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Répartition des séances</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="repartitionSeancesChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
+
+        {% if is_granted('ROLE_ADMIN') %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Statistiques avancées</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Top 5 des coachs les plus actifs</h6>
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Coach</th>
+                                                <th>Séances ce mois</th>
+                                                <th>Sportifs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for coach in stats.top_coachs %}
+                                                <tr>
+                                                    <td>{{ coach.prenom }} {{ coach.nom }}</td>
+                                                    <td>{{ coach.seances_mois }}</td>
+                                                    <td>{{ coach.sportifs }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Top 5 des séances les plus fréquentées</h6>
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Séance</th>
+                                                <th>Coach</th>
+                                                <th>Sportifs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for seance in stats.top_seances %}
+                                                <tr>
+                                                    <td>{{ seance.theme }}</td>
+                                                    <td>{{ seance.coach }}</td>
+                                                    <td>{{ seance.sportifs }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
+
+    {% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Graphique des séances par coach
+        const seancesParCoachCtx = document.getElementById('seancesParCoachChart').getContext('2d');
+        new Chart(seancesParCoachCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ stats.coachs_labels|json_encode|raw }},
+                datasets: [{
+                    label: 'Nombre de séances',
+                    data: {{ stats.seances_mois_values|json_encode|raw }},
+                    backgroundColor: 'rgba(78, 115, 223, 0.5)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Graphique de répartition des séances
+        const repartitionSeancesCtx = document.getElementById('repartitionSeancesChart').getContext('2d');
+        new Chart(repartitionSeancesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Séances du mois', 'Autres séances'],
+                datasets: [{
+                    data: [
+                        {{ stats.total_seances_mois }},
+                        {{ stats.total_seances - stats.total_seances_mois }}
+                    ],
+                    backgroundColor: [
+                        'rgba(78, 115, 223, 0.5)',
+                        'rgba(28, 200, 138, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(78, 115, 223, 1)',
+                        'rgba(28, 200, 138, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
+    {% endblock %}
 {% endblock %} 

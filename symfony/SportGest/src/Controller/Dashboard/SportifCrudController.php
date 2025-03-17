@@ -15,6 +15,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TelephoneField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class SportifCrudController extends AbstractCrudController
@@ -46,10 +47,18 @@ class SportifCrudController extends AbstractCrudController
             TextField::new('nom'),
             TextField::new('prenom'),
             EmailField::new('email'),
-            TelephoneField::new('telephone'),
-            DateField::new('dateNaissance'),
-            AssociationField::new('seances')
-                ->setFormTypeOption('by_reference', false),
+            DateField::new('dateInscription', 'Date d\'inscription'),
+            ChoiceField::new('niveauSportif', 'Niveau')
+                ->setFormType(\Symfony\Component\Form\Extension\Core\Type\EnumType::class)
+                ->setFormTypeOptions([
+                    'class' => \App\Enum\NiveauSportif::class,
+                    'choice_label' => function(\App\Enum\NiveauSportif $choice) {
+                        return $choice->value;
+                    }
+                ])
+                ->formatValue(function ($value) {
+                    return $value instanceof \App\Enum\NiveauSportif ? $value->value : '';
+                })
         ];
     }
 

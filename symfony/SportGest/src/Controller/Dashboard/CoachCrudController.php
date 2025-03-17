@@ -27,7 +27,7 @@ class CoachCrudController extends AbstractCrudController
     {
         $user = $this->getUser();
 
-        if (!($user instanceof Responsable && $this->isGranted('ROLE_ADMIN'))) {
+        if (!($user instanceof Responsable && $this->isGranted('ROLE_RESPONSABLE'))) {
             throw new AccessDeniedException('Seuls les responsables admin peuvent gérer les coachs');
         }
 
