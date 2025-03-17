@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { ApiService } from './api.service';
 import { Seance } from '../models/seance.model';
 
@@ -15,23 +15,28 @@ export class SeanceApiService {
     private apiService: ApiService
   ) { }
 
-  getSeances(): Observable<Seance[]> {
-    return this.http.get<Seance[]>(this.apiService.getEndpointUrl(this.endpoint));
+  async getSeances(): Promise<Seance[]> {
+    const url = await this.apiService.getEndpointUrl(this.endpoint);
+    return firstValueFrom(this.http.get<Seance[]>(url));
   }
 
-  getSeance(id: number): Observable<Seance> {
-    return this.http.get<Seance>(`${this.apiService.getEndpointUrl(this.endpoint)}/${id}`);
+  async getSeance(id: number): Promise<Seance> {
+    const url = await this.apiService.getEndpointUrl(this.endpoint);
+    return firstValueFrom(this.http.get<Seance>(`${url}/${id}`));
   }
 
-  createSeance(seance: Seance): Observable<Seance> {
-    return this.http.post<Seance>(this.apiService.getEndpointUrl(this.endpoint), seance);
+  async createSeance(seance: Seance): Promise<Seance> {
+    const url = await this.apiService.getEndpointUrl(this.endpoint);
+    return firstValueFrom(this.http.post<Seance>(url, seance));
   }
 
-  updateSeance(id: number, seance: Seance): Observable<Seance> {
-    return this.http.put<Seance>(`${this.apiService.getEndpointUrl(this.endpoint)}/${id}`, seance);
+  async updateSeance(id: number, seance: Seance): Promise<Seance> {
+    const url = await this.apiService.getEndpointUrl(this.endpoint);
+    return firstValueFrom(this.http.put<Seance>(`${url}/${id}`, seance));
   }
 
-  deleteSeance(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiService.getEndpointUrl(this.endpoint)}/${id}`);
+  async deleteSeance(id: number): Promise<void> {
+    const url = await this.apiService.getEndpointUrl(this.endpoint);
+    return firstValueFrom(this.http.delete<void>(`${url}/${id}`));
   }
 }
