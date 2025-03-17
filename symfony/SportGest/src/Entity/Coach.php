@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CoachRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
@@ -15,25 +17,19 @@ use Symfony\Component\Serializer\Annotation\Groups;
 )]
 class Coach extends Utilisateur
 {
-
-    #[ORM\Column(type: Types::JSON)]
-    #[Groups(['coach:read', 'coach:write'])]
-    private array $specialites = [];
-
     #[ORM\Column]
     #[Groups(['coach:read', 'coach:write'])]
     private ?float $tarifHoraire = null;
 
-    public function getSpecialites(): array
-    {
-        return $this->specialites;
-    }
+    /**
+     * @var Collection<int, Specialite>
+     */
+    #[ORM\ManyToMany(targetEntity: Specialite::class)]
+    private Collection $specialite;
 
-    public function setSpecialites(array $specialites): static
+    public function __construct()
     {
-        $this->specialites = $specialites;
-
-        return $this;
+        $this->specialite = new ArrayCollection();
     }
     public function getTarifHoraire(): ?float
     {
@@ -50,5 +46,29 @@ class Coach extends Utilisateur
     public function __toString(): string
     {
         return $this->getNom() . ' ' . $this->getPrenom();
+    }
+
+    /**
+     * @return Collection<int, Specialite>
+     */
+    public function getSpecialite(): Collection
+    {
+        return $this->specialite;
+    }
+
+    public function addSpecialite(Specialite $specialite): static
+    {
+        if (!$this->specialite->contains($specialite)) {
+            $this->specialite->add($specialite);
+        }
+
+        return $this;
+    }
+
+    public function removeSpecialite(Specialite $specialite): static
+    {
+        $this->specialite->removeElement($specialite);
+
+        return $this;
     }
 }
