@@ -47,6 +47,9 @@ security:
     # - { path: ^/login, roles: PUBLIC_ACCESS }
     # - { path: ^/access-denied, roles: PUBLIC_ACCESS }
 
+    # Route Adminer
+    - { path: ^/adminer, roles: ROLE_ADMIN }
+
     # Routes API
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: PUBLIC_ACCESS }
