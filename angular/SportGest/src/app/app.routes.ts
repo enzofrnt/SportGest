@@ -13,7 +13,6 @@ import { HistoryComponent } from './features/member/history/history.component';
 import { StatsComponent } from './features/member/stats/stats.component';
 import { ProfileComponent } from './features/member/profile/profile.component';
 import { ReservationsComponent } from './features/member/reservations/reservations.component';
-import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   // Route principale - redirige vers la racine
@@ -24,11 +23,10 @@ export const routes: Routes = [
   { path: 'planning', component: PublicPlanningComponent },
   { path: 'inscription', component: RegisterComponent },
   { path: 'connexion', component: LoginComponent },
-  
+
   // Routes protégées (sportifs connectés)
-  { 
-    path: 'membre', 
-    canActivate: [authGuard],
+  {
+    path: 'membre',
     children: [
       { path: '', component: DashboardComponent },
       { path: 'planning', component: MemberPlanningComponent },
@@ -40,7 +38,7 @@ export const routes: Routes = [
       { path: 'reservations', component: ReservationsComponent },
     ]
   },
-  
+
   // Route par défaut
   { path: '**', redirectTo: '' }
 ];
