@@ -15,7 +15,7 @@ class SecurityController extends AbstractController
     public function login(AuthenticationUtils $authenticationUtils, Security $security): Response
     {
         // Si l'utilisateur est déjà connecté, le rediriger vers son dashboard
-        if ($security->isGranted('ROLE_USER')) {
+        if ($security->isGranted('ROLE_RESPONSABLE') || $security->isGranted('ROLE_COACH')) {
             return $this->redirectToRoute('admin');
         }
 
@@ -38,9 +38,13 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/login/success', name: 'app_login_success')]
-    public function loginSuccess(): Response
+    public function loginSuccess(Security $security): Response
     {
-        return $this->redirectToRoute('admin');
+        if ($security->isGranted('ROLE_RESPONSABLE') || $security->isGranted('ROLE_COACH')) {
+            return $this->redirectToRoute('admin');
+        }
+        
+        return $this->redirectToRoute('app_login');
     }
 
     #[Route('/access-denied', name: 'app_access_denied')]

@@ -18,6 +18,13 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use App\Repository\SeanceRepository;
 use App\Repository\FicheDePaieRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TelephoneField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 
 #[AdminDashboard(
     routePath: '/admin',
@@ -86,23 +93,84 @@ class DashboardController extends AbstractDashboardController
         $coachs = $this->entityManager->getRepository(Coach::class)->findAll();
         $sportifs = $this->entityManager->getRepository(Sportif::class)->findAll();
         $seances_mois = [];
+        $total_seances_mois = 0;
+        $total_sportifs = count($sportifs);
+        $total_coachs = count($coachs);
+        $total_seances = $this->seanceRepository->count([]);
+
+        // Préparer les données pour le graphique des séances par coach
+        $coachs_labels = [];
+        $seances_mois_values = [];
+
         foreach ($coachs as $coach) {
-            $seances_mois[] = $this->seanceRepository->countSeancesMoisCourant($coach);
+            $seances_coach = $this->seanceRepository->countSeancesMoisCourant($coach);
+            $seances_mois[$coach->getId()] = $seances_coach;
+            $total_seances_mois += $seances_coach;
+            
+            $coachs_labels[] = $coach->getPrenom() . ' ' . $coach->getNom();
+            $seances_mois_values[] = $seances_coach;
         }
 
         // Récupérer les dernières séances
-        // $dernieres_seances = $this->seanceRepository->findBy([], ['dateHeure' => 'DESC'], 5);
+        $dernieres_seances = $this->seanceRepository->findBy([], ['dateHeure' => 'DESC'], 5);
 
         // Récupérer les dernières fiches de paie
-        // $dernieres_fiches_paie = $this->ficheDePaieRepository->findBy([], ['date' => 'DESC'], 5);
+        $dernieres_fiches_paie = $this->ficheDePaieRepository->findDernieresFichesPaieGlobales(5);
+
+        // Statistiques globales
+        $stats = [
+            'total_seances_mois' => $total_seances_mois,
+            'total_sportifs' => $total_sportifs,
+            'total_coachs' => $total_coachs,
+            'total_seances' => $total_seances,
+            'seances_mois' => $seances_mois,
+            'coachs_labels' => $coachs_labels,
+            'seances_mois_values' => $seances_mois_values,
+        ];
+
+        // Statistiques avancées pour les administrateurs
+        if ($this->isGranted('ROLE_ADMIN')) {
+            // Top 5 des coachs les plus actifs
+            $top_coachs = [];
+            foreach ($coachs as $coach) {
+                $top_coachs[] = [
+                    'prenom' => $coach->getPrenom(),
+                    'nom' => $coach->getNom(),
+                    'seances_mois' => $this->seanceRepository->countSeancesMoisCourant($coach),
+                    'sportifs' => $this->seanceRepository->countSportifsUniques($coach),
+                ];
+            }
+            usort($top_coachs, function($a, $b) {
+                return $b['seances_mois'] <=> $a['seances_mois'];
+            });
+            $stats['top_coachs'] = array_slice($top_coachs, 0, 5);
+
+            // Top 5 des séances les plus fréquentées
+            $seances = $this->seanceRepository->findBy([], ['dateHeure' => 'DESC']);
+            $top_seances = [];
+            foreach ($seances as $seance) {
+                $top_seances[] = [
+                    'theme' => $seance->getThemeSeance(),
+                    'coach' => $seance->getCoach()->getPrenom() . ' ' . $seance->getCoach()->getNom(),
+                    'sportifs' => $seance->getSportifs()->count(),
+                ];
+            }
+            usort($top_seances, function($a, $b) {
+                return $b['sportifs'] <=> $a['sportifs'];
+            });
+            $stats['top_seances'] = array_slice($top_seances, 0, 5);
+
+            // Nombre de fiches de paie en attente
+            $stats['fiches_paie_attente'] = count($this->ficheDePaieRepository->findFichesPaieEnAttente());
+        }
 
         return $this->render('dashboard/responsable_dashboard.html.twig', [
             'user' => $responsable,
             'coachs' => $coachs,
             'sportifs' => $sportifs,
-            'seances_mois' => $seances_mois,
-            // 'dernieres_seances' => $dernieres_seances,
-            // 'dernieres_fiches_paie' => $dernieres_fiches_paie,
+            'stats' => $stats,
+            'dernieres_seances' => $dernieres_seances,
+            'dernieres_fiches_paie' => $dernieres_fiches_paie,
         ]);
     }
 
@@ -130,16 +198,18 @@ class DashboardController extends AbstractDashboardController
         }
 
         if ($user instanceof Responsable) {
+            yield MenuItem::section('Administration');
             if ($this->isGranted('ROLE_ADMIN')) {
-                yield MenuItem::section('Administration');
-                yield MenuItem::linkToCrud('Responsables', 'fas fa-user-tie', Responsable::class);
-                yield MenuItem::linkToCrud('Coachs', 'fas fa-user-friends', Coach::class);
+                yield MenuItem::linkToCrud('Responsables', 'fas fa-user-tie', Responsable::class); 
             }
-            
+            yield MenuItem::linkToCrud('Coachs', 'fas fa-user-friends', Coach::class);
+            yield MenuItem::linkToCrud('Sportifs', 'fas fa-running', Sportif::class)
+                ->setDefaultSort(['nom' => 'ASC', 'prenom' => 'ASC']);
             yield MenuItem::section('Gestion');
             yield MenuItem::linkToCrud('Toutes les séances', 'fas fa-calendar-alt', Seance::class)
                 ->setDefaultSort(['dateHeure' => 'DESC']);
-            yield MenuItem::linkToCrud('Fiches de paie', 'fas fa-file-invoice-dollar', FicheDePaie::class);
+            yield MenuItem::linkToCrud('Tous les exercices', 'fas fa-dumbbell', Exercice::class);
+            yield MenuItem::linkToCrud('Toutes les fiches de paie', 'fas fa-file-invoice-dollar', FicheDePaie::class);
         }
     }
 }
