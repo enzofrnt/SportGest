@@ -10,6 +10,7 @@ use App\Entity\Seance;
 use App\Entity\Exercice;
 use App\Entity\FicheDePaie;
 use App\Entity\Responsable;
+use App\Entity\Specialite;
 use App\Enum\DifficulteExercice;
 use App\Enum\NiveauSportif;
 use App\Enum\TypeSeance;
@@ -64,17 +65,20 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
+        // Création des spécialités
+        $specialites = $this->createSpecialites($manager);
+        
         // Création des exercices
         $exercices = $this->createExercices($manager, 15);
         
         // Création des coachs
-        $coachs = $this->createCoachs($manager, 6);
+        $coachs = $this->createCoachs($manager, 6, $specialites);
         
         // Création des sportifs
         $sportifs = $this->createSportifs($manager, 20);
         
         // Création des séances
-        $this->createSeances($manager, $coachs, $sportifs, $exercices, 30);
+        $this->createSeances($manager, $coachs, $sportifs, $exercices, $specialites, 30);
         
         // Création des fiches de paie
         $this->createFichesDePaie($manager, $coachs);
@@ -84,6 +88,21 @@ class AppFixtures extends Fixture
         $this->createAdmin($manager);
         
         $manager->flush();
+    }
+
+    private function createSpecialites(ObjectManager $manager): array
+    {
+        $specialites = [];
+        $nomsSpecialites = ['Fitness', 'Cardio', 'Musculation', 'Crossfit', 'Yoga', 'Pilates', 'Boxe', 'Natation'];
+        
+        foreach ($nomsSpecialites as $nom) {
+            $specialite = new Specialite();
+            $specialite->setNom($nom);
+            $manager->persist($specialite);
+            $specialites[] = $specialite;
+        }
+        
+        return $specialites;
     }
 
     private function createExercices(ObjectManager $manager, int $count): array
@@ -119,10 +138,8 @@ class AppFixtures extends Fixture
         return $exercices;
     }
 
-    private function createCoachs(ObjectManager $manager, int $count): array
+    private function createCoachs(ObjectManager $manager, int $count, array $specialites): array
     {
-        $specialites = ['Fitness', 'Cardio', 'Musculation', 'Crossfit', 'Yoga', 'Pilates', 'Boxe', 'Natation'];
-        
         $coachs = [];
         for ($i = 0; $i < $count; $i++) {
             $coach = new Coach();
@@ -134,15 +151,13 @@ class AppFixtures extends Fixture
             $coach->setPassword($this->passwordHasher->hashPassword($coach, 'password'));
             
             $specialitesCount = rand(1, 4);
-            $coachSpecialites = [];
             $specialitesShuffled = $specialites;
             shuffle($specialitesShuffled);
             
             for ($j = 0; $j < $specialitesCount; $j++) {
-                $coachSpecialites[] = $specialitesShuffled[$j];
+                $coach->addSpecialite($specialitesShuffled[$j]);
             }
             
-            $coach->setSpecialites($coachSpecialites);
             $coach->setTarifHoraire($this->getRandomFloat(30, 70));
             
             $manager->persist($coach);
@@ -155,7 +170,8 @@ class AppFixtures extends Fixture
         $coach->setPrenom('Jean');
         $coach->setEmail('coach@sportgest.fr');
         $coach->setPassword($this->passwordHasher->hashPassword($coach, 'password'));
-        $coach->setSpecialites(['Fitness', 'Musculation']);
+        $coach->addSpecialite($specialites[0]); // Fitness
+        $coach->addSpecialite($specialites[2]); // Musculation
         $coach->setTarifHoraire(50.0);
         $manager->persist($coach);
 
@@ -199,9 +215,8 @@ class AppFixtures extends Fixture
         return $sportifs;
     }
     
-    private function createSeances(ObjectManager $manager, array $coachs, array $sportifs, array $exercices, int $count): void
+    private function createSeances(ObjectManager $manager, array $coachs, array $sportifs, array $exercices, array $specialites, int $count): void
     {
-        $themesSeance = ['Fitness', 'Cardio', 'Musculation', 'Crossfit', 'Yoga', 'Pilates', 'Boxe'];
         $typesSeance = TypeSeance::cases();
         $niveauxSeance = NiveauSportif::cases();
         $statuts = StatutSeance::cases();
@@ -219,7 +234,6 @@ class AppFixtures extends Fixture
             
             $typeSeance = $typesSeance[array_rand($typesSeance)];
             $seance->setTypeSeance($typeSeance);
-            $seance->setThemeSeance($themesSeance[array_rand($themesSeance)]);
             $seance->setCoach($coachs[array_rand($coachs)]);
             $seance->setNiveauSeance($niveauxSeance[array_rand($niveauxSeance)]);
             
@@ -255,6 +269,13 @@ class AppFixtures extends Fixture
             
             for ($j = 0; $j < $nbExercices; $j++) {
                 $seance->addExercice($exercices[$j]);
+            }
+
+            // Ajout des spécialités
+            $nbSpecialites = rand(1, 3);
+            shuffle($specialites);
+            for ($j = 0; $j < $nbSpecialites; $j++) {
+                $seance->addTheme($specialites[$j]);
             }
             
             $manager->persist($seance);
