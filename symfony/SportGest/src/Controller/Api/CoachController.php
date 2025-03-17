@@ -70,7 +70,7 @@ class CoachController extends AbstractController
         foreach ($seances as $seance) {
             $data[] = [
                 'id' => $seance->getId(),
-                'themeSeance' => $seance->getThemeSeance(),
+                'themes' => $seance->getTheme()->map(fn($theme) => $theme->getNom())->toArray(),
                 'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
                 'typeSeance' => $seance->getTypeSeance()->name,
                 'statut' => $seance->getStatut()->name,

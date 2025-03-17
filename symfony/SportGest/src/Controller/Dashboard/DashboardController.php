@@ -150,7 +150,7 @@ class DashboardController extends AbstractDashboardController
             $top_seances = [];
             foreach ($seances as $seance) {
                 $top_seances[] = [
-                    'theme' => $seance->getThemeSeance(),
+                    'theme' => $seance->getTheme()->map(fn($theme) => $theme->getNom())->toArray(),
                     'coach' => $seance->getCoach()->getPrenom() . ' ' . $seance->getCoach()->getNom(),
                     'sportifs' => $seance->getSportifs()->count(),
                 ];

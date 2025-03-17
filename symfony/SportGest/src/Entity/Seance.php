@@ -204,4 +204,12 @@ class Seance
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Specialite>
+     */
+    public function getTheme(): Collection
+    {
+        return $this->theme;
+    }
 }
