@@ -10,3 +10,7 @@ adminer:
   defaults:
     path: /adminer/index.php
     permanent: true
+
+api_login_check:
+  path: /api/auth/login
+  methods: ["POST"]
