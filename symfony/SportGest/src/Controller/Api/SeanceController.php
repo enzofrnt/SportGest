@@ -4,6 +4,8 @@ namespace App\Controller\Api;
 
 use App\Entity\Seance;
 use App\Entity\Sportif;
+use App\Entity\Coach;
+use App\Enum\StatutSeance;
 use App\Repository\SeanceRepository;
 use App\Repository\CoachRepository;
 use App\Repository\SportifRepository;
@@ -12,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api')]
 class SeanceController extends AbstractController
@@ -181,5 +184,242 @@ class SeanceController extends AbstractController
         }
 
         return true;
+    }
+
+    #[Route('/seances', name: 'api_seances_list', methods: ['GET'])]
+    public function listSeances(SeanceRepository $seanceRepository, Request $request): JsonResponse
+    {
+        // Filtrer les séances selon les paramètres
+        $coachId = $request->query->get('coach_id');
+        $dateDebut = $request->query->get('date_debut') ? new \DateTime($request->query->get('date_debut')) : null;
+        $dateFin = $request->query->get('date_fin') ? new \DateTime($request->query->get('date_fin')) : null;
+        $typeSeance = $request->query->get('type');
+
+        // Construction de la requête selon les critères
+        $criteria = [];
+        if ($coachId) {
+            $criteria['coach'] = $coachId;
+        }
+        // Note: les autres filtres seraient à implémenter dans le repository
+
+        $seances = $seanceRepository->findBy($criteria);
+
+        $data = [];
+        foreach ($seances as $seance) {
+            $data[] = [
+                'id' => $seance->getId(),
+                'themeSeance' => $seance->getThemeSeance(),
+                'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
+                'typeSeance' => $seance->getTypeSeance()->name,
+                'statut' => $seance->getStatut()->name,
+                'coach' => [
+                    'id' => $seance->getCoach()->getId(),
+                    'nom' => $seance->getCoach()->getNom(),
+                    'prenom' => $seance->getCoach()->getPrenom(),
+                ],
+                'nbSportifs' => $seance->getSportifs()->count(),
+            ];
+        }
+
+        return $this->json($data);
+    }
+
+    #[Route('/seances/{id}', name: 'api_seances_show', methods: ['GET'])]
+    public function showSeance(Seance $seance): JsonResponse
+    {
+        $sportifs = [];
+        foreach ($seance->getSportifs() as $sportif) {
+            $sportifs[] = [
+                'id' => $sportif->getId(),
+                'nom' => $sportif->getNom(),
+                'prenom' => $sportif->getPrenom(),
+            ];
+        }
+
+        return $this->json([
+            'id' => $seance->getId(),
+            'themeSeance' => $seance->getThemeSeance(),
+            'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
+            'typeSeance' => $seance->getTypeSeance()->name,
+            'statut' => $seance->getStatut()->name,
+            'niveauSeance' => $seance->getNiveauSeance()->name,
+            'coach' => [
+                'id' => $seance->getCoach()->getId(),
+                'nom' => $seance->getCoach()->getNom(),
+                'prenom' => $seance->getCoach()->getPrenom(),
+            ],
+            'sportifs' => $sportifs,
+        ]);
+    }
+
+    #[Route('/seances', name: 'api_seances_create', methods: ['POST'])]
+    #[IsGranted('ROLE_COACH')]
+    public function createSeance(Request $request, EntityManagerInterface $entityManager, CoachRepository $coachRepository): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        // Validation des données
+        if (!isset($data['themeSeance']) || !isset($data['dateHeure']) || !isset($data['typeSeance']) || !isset($data['niveauSeance'])) {
+            return $this->json(['error' => 'Données incomplètes'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Récupérer le coach (soit celui qui est connecté, soit celui spécifié)
+        /** @var Coach $coach */
+        $coach = $this->getUser();
+        if (isset($data['coach_id']) && $this->isGranted('ROLE_ADMIN')) {
+            $coach = $coachRepository->find($data['coach_id']);
+            if (!$coach) {
+                return $this->json(['error' => 'Coach non trouvé'], JsonResponse::HTTP_NOT_FOUND);
+            }
+        }
+
+        // Création de la séance
+        $seance = new Seance();
+        $seance->setThemeSeance($data['themeSeance']);
+        $seance->setDateHeure(new \DateTime($data['dateHeure']));
+        $seance->setTypeSeance($data['typeSeance']);
+        $seance->setNiveauSeance($data['niveauSeance']);
+        $seance->setCoach($coach);
+        $seance->setStatut(StatutSeance::PREVUE);
+
+        // Enregistrement en base
+        $entityManager->persist($seance);
+        $entityManager->flush();
+
+        return $this->json([
+            'message' => 'Séance créée avec succès',
+            'id' => $seance->getId()
+        ], JsonResponse::HTTP_CREATED);
+    }
+
+    #[Route('/seances/{id}', name: 'api_seances_update', methods: ['PUT'])]
+    public function updateSeance(Request $request, Seance $seance, EntityManagerInterface $entityManager): JsonResponse
+    {
+        // Vérifier les droits d'accès
+        $this->denyAccessUnlessGranted('EDIT', $seance);
+
+        $data = json_decode($request->getContent(), true);
+
+        // Mise à jour des champs modifiables
+        if (isset($data['themeSeance'])) {
+            $seance->setThemeSeance($data['themeSeance']);
+        }
+
+        if (isset($data['dateHeure'])) {
+            $seance->setDateHeure(new \DateTime($data['dateHeure']));
+        }
+
+        if (isset($data['typeSeance'])) {
+            $seance->setTypeSeance($data['typeSeance']);
+        }
+
+        if (isset($data['niveauSeance'])) {
+            $seance->setNiveauSeance($data['niveauSeance']);
+        }
+
+        $entityManager->flush();
+
+        return $this->json([
+            'message' => 'Séance mise à jour avec succès'
+        ]);
+    }
+
+    #[Route('/seances/{id}/statut', name: 'api_seances_update_statut', methods: ['PATCH'])]
+    public function updateStatut(Request $request, Seance $seance, EntityManagerInterface $entityManager): JsonResponse
+    {
+        // Vérifier les droits d'accès
+        $this->denyAccessUnlessGranted('EDIT', $seance);
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['statut'])) {
+            return $this->json(['error' => 'Statut non spécifié'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $seance->setStatut(StatutSeance::from($data['statut']));
+            $entityManager->flush();
+
+            return $this->json([
+                'message' => 'Statut mis à jour avec succès'
+            ]);
+        } catch (\ValueError $e) {
+            return $this->json([
+                'error' => 'Statut invalide'
+            ], JsonResponse::HTTP_BAD_REQUEST);
+        }
+    }
+
+    #[Route('/seances/disponibles', name: 'api_seances_disponibles', methods: ['GET'])]
+    public function getSeancesDisponibles(SeanceRepository $seanceRepository, Request $request): JsonResponse
+    {
+        $dateDebut = $request->query->get('date_debut') ? new \DateTime($request->query->get('date_debut')) : new \DateTime();
+        $dateFin = $request->query->get('date_fin') ? new \DateTime($request->query->get('date_fin')) : (new \DateTime())->modify('+7 days');
+
+        // Implémentation simple: séances à venir avec des places disponibles
+        $qb = $seanceRepository->createQueryBuilder('s')
+            ->where('s.dateHeure BETWEEN :debut AND :fin')
+            ->andWhere('s.statut = :statut')
+            ->setParameter('debut', $dateDebut)
+            ->setParameter('fin', $dateFin)
+            ->setParameter('statut', StatutSeance::PREVUE)
+            ->orderBy('s.dateHeure', 'ASC');
+
+        $seances = $qb->getQuery()->getResult();
+
+        $result = [];
+        foreach ($seances as $seance) {
+            // Vérifier s'il y a des places disponibles
+            if ($seance->getSportifs()->count() < 10) { // Exemple de limite à 10 sportifs
+                $result[] = [
+                    'id' => $seance->getId(),
+                    'themeSeance' => $seance->getThemeSeance(),
+                    'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
+                    'typeSeance' => $seance->getTypeSeance()->name,
+                    'coach' => [
+                        'id' => $seance->getCoach()->getId(),
+                        'nom' => $seance->getCoach()->getNom(),
+                        'prenom' => $seance->getCoach()->getPrenom(),
+                    ],
+                    'placesDisponibles' => 10 - $seance->getSportifs()->count(),
+                ];
+            }
+        }
+
+        return $this->json($result);
+    }
+
+    #[Route('/seances/themes', name: 'api_seances_themes', methods: ['GET'])]
+    public function getThemesSeances(SeanceRepository $seanceRepository): JsonResponse
+    {
+        // Récupérer les thèmes distincts des séances
+        $themes = $seanceRepository->createQueryBuilder('s')
+            ->select('DISTINCT s.themeSeance')
+            ->getQuery()
+            ->getResult();
+
+        // Transformer le résultat
+        $themesList = array_map(function ($item) {
+            return $item['themeSeance'];
+        }, $themes);
+
+        return $this->json($themesList);
+    }
+
+    #[Route('/seances/{id}/exercices', name: 'api_seances_exercices', methods: ['GET'])]
+    public function getSeanceExercices(Seance $seance): JsonResponse
+    {
+        $exercices = [];
+
+        foreach ($seance->getExercices() as $exercice) {
+            $exercices[] = [
+                'id' => $exercice->getId(),
+                'nom' => $exercice->getNom(),
+                'description' => $exercice->getDescription(),
+                // Autres propriétés de l'exercice
+            ];
+        }
+
+        return $this->json($exercices);
     }
 }
