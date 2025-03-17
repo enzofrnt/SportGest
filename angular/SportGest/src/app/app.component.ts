@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
-
+import { ApiService } from './services/api.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -12,4 +12,11 @@ import { FooterComponent } from './shared/components/footer/footer.component';
 })
 export class AppComponent {
   title = 'SportGest';
+
+  constructor(private apiService: ApiService) {}
+
+  async ngOnInit(): Promise<void> {
+    console.log('AppComponent');
+    this.apiService.getApiUrl();
+  }
 }

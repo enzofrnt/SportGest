@@ -4,8 +4,8 @@ namespace App\Enum;
 
 enum PeriodePaie: string
 {
-    case MOIS = 'mois';
-    case SEMAINE = 'semaine';
+    case MOIS = 'Mois';
+    case SEMAINE = 'Semaine';
 
     public static function values(): array
     {
