@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -20,34 +21,66 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api/auth')]
 class AuthController extends AbstractController
 {
-    #[Route('/login', name: 'api_login', methods: ['POST'])]
+    private const TOKEN_COOKIE_NAME = 'BEARER';
+    private const TOKEN_EXPIRATION = 3600; // 1 heure en secondes
+
+    private function addCorsHeaders(JsonResponse $response): void
+    {
+        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:4200');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
+        $response->headers->set('Access-Control-Max-Age', '3600');
+        $response->headers->set('Access-Control-Expose-Headers', 'Set-Cookie');
+        $response->headers->set('Vary', 'Origin');
+    }
+
+    #[Route('/login', name: 'api_login', methods: ['POST', 'OPTIONS'])]
     public function login(
         Request $request,
         UtilisateurRepository $utilisateurRepository,
         UserPasswordHasherInterface $passwordHasher,
         JWTTokenManagerInterface $jwtManager
     ): JsonResponse {
+        if ($request->getMethod() === 'OPTIONS') {
+            $response = new JsonResponse();
+            $this->addCorsHeaders($response);
+            return $response;
+        }
+
         $data = json_decode($request->getContent(), true);
 
         if (!isset($data['email']) || !isset($data['password'])) {
-            return $this->json([
+            $response = $this->json([
                 'message' => 'Email ou mot de passe manquant',
             ], Response::HTTP_BAD_REQUEST);
+            $this->addCorsHeaders($response);
+            return $response;
         }
 
         $user = $utilisateurRepository->findOneBy(['email' => $data['email']]);
 
         if (!$user || !$passwordHasher->isPasswordValid($user, $data['password'])) {
-            return $this->json([
+            $response = $this->json([
                 'message' => 'Identifiants incorrects',
             ], Response::HTTP_UNAUTHORIZED);
+            $this->addCorsHeaders($response);
+            return $response;
         }
 
         // Génération du token JWT
         $token = $jwtManager->create($user);
 
-        return $this->json([
-            'token' => $token,
+        // Création du cookie sécurisé
+        $cookie = Cookie::create(self::TOKEN_COOKIE_NAME)
+            ->withValue($token)
+            ->withExpires(time() + self::TOKEN_EXPIRATION)
+            ->withPath('/')
+            ->withHttpOnly(true)
+            ->withSecure(true)
+            ->withSameSite('none');
+
+        $response = $this->json([
             'user' => [
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
@@ -56,6 +89,103 @@ class AuthController extends AbstractController
                 'roles' => $user->getRoles()
             ]
         ]);
+
+        $response->headers->setCookie($cookie);
+        $this->addCorsHeaders($response);
+        return $response;
+    }
+
+    #[Route('/verify', name: 'api_verify_token', methods: ['GET', 'OPTIONS'])]
+    public function verifyToken(Request $request): JsonResponse
+    {
+        if ($request->getMethod() === 'OPTIONS') {
+            $response = new JsonResponse();
+            $this->addCorsHeaders($response);
+            return $response;
+        }
+
+        // Vérifier si le cookie existe
+        $token = $request->cookies->get(self::TOKEN_COOKIE_NAME);
+        if (!$token) {
+            $response = $this->json([
+                'message' => 'Token non trouvé',
+                'valid' => false
+            ], Response::HTTP_UNAUTHORIZED);
+            $this->addCorsHeaders($response);
+            return $response;
+        }
+
+        /** @var Utilisateur|null $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            $response = $this->json([
+                'message' => 'Non authentifié',
+                'valid' => false
+            ], Response::HTTP_UNAUTHORIZED);
+            $this->addCorsHeaders($response);
+            return $response;
+        }
+
+        $response = $this->json([
+            'valid' => true,
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'nom' => $user->getNom(),
+                'prenom' => $user->getPrenom(),
+                'roles' => $user->getRoles()
+            ]
+        ]);
+        
+        $this->addCorsHeaders($response);
+        return $response;
+    }
+
+    #[Route('/refresh-token', name: 'api_refresh_token', methods: ['POST'])]
+    public function refreshToken(
+        Request $request,
+        JWTTokenManagerInterface $jwtManager
+    ): JsonResponse {
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+        
+        if (!$user) {
+            return $this->json(['message' => 'Non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Génération d'un nouveau token
+        $token = $jwtManager->create($user);
+
+        // Création du nouveau cookie
+        $cookie = Cookie::create(self::TOKEN_COOKIE_NAME)
+            ->withValue($token)
+            ->withExpires(time() + self::TOKEN_EXPIRATION)
+            ->withPath('/')
+            ->withHttpOnly(true)
+            ->withSecure(true)
+            ->withSameSite('none');
+
+        $response = $this->json(['message' => 'Token rafraîchi avec succès']);
+        $response->headers->setCookie($cookie);
+        return $response;
+    }
+
+    #[Route('/logout', name: 'api_logout', methods: ['POST'])]
+    public function logout(): JsonResponse
+    {
+        // Création d'un cookie expiré pour supprimer le token
+        $cookie = Cookie::create(self::TOKEN_COOKIE_NAME)
+            ->withValue('')
+            ->withExpires(time() - 3600) // Expire immédiatement
+            ->withPath('/')
+            ->withHttpOnly(true)
+            ->withSecure(true)
+            ->withSameSite('none');
+
+        $response = $this->json(['message' => 'Déconnecté avec succès']);
+        $response->headers->setCookie($cookie);
+        return $response;
     }
 
     #[Route('/register', name: 'api_register', methods: ['POST'])]
@@ -63,11 +193,11 @@ class AuthController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $entityManager,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        JWTTokenManagerInterface $jwtManager
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        // Vérifications des données
         if (!isset($data['email']) || !isset($data['password']) || !isset($data['nom']) || !isset($data['prenom'])) {
             return $this->json(['message' => 'Données incomplètes'], Response::HTTP_BAD_REQUEST);
         }
@@ -108,7 +238,19 @@ class AuthController extends AbstractController
         $entityManager->persist($sportif);
         $entityManager->flush();
 
-        return $this->json([
+        // Génération du token JWT pour la connexion automatique
+        $token = $jwtManager->create($sportif);
+
+        // Création du cookie sécurisé
+        $cookie = Cookie::create(self::TOKEN_COOKIE_NAME)
+            ->withValue($token)
+            ->withExpires(time() + self::TOKEN_EXPIRATION)
+            ->withPath('/')
+            ->withHttpOnly(true)
+            ->withSecure(true)
+            ->withSameSite('none');
+
+        $response = $this->json([
             'message' => 'Utilisateur créé avec succès',
             'user' => [
                 'id' => $sportif->getId(),
@@ -118,6 +260,9 @@ class AuthController extends AbstractController
                 'role' => 'Sportif'
             ]
         ], Response::HTTP_CREATED);
+
+        $response->headers->setCookie($cookie);
+        return $response;
     }
 
     #[Route('/user', name: 'api_user_info', methods: ['GET'])]

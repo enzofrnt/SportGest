@@ -8,3 +8,8 @@ lexik_jwt_authentication:
       enabled: true
       prefix: Bearer
       name: Authorization
+    cookie:
+      enabled: true
+      name: BEARER
+  remove_token_from_body_when_cookies_used: true
+  set_cookies: true
