@@ -366,4 +366,22 @@ class AuthController extends AbstractController
             ]
         ]);
     }
+
+    #[Route('/check-admin', name: 'api_check_admin', methods: ['GET'])]
+    public function checkAdmin(): JsonResponse
+    {
+        /** @var Utilisateur|null $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->json(['message' => 'Non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Vérifier si l'utilisateur a le rôle ROLE_ADMIN
+        if (!in_array('ROLE_ADMIN', $user->getRoles())) {
+            return $this->json(['message' => 'Accès non autorisée'], Response::HTTP_FORBIDDEN);
+        }
+
+        return $this->json(['message' => 'Authentifié en tant qu\'administrateur']);
+    }
 }

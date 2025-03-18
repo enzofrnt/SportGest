@@ -24,6 +24,17 @@ security:
         success_handler: lexik_jwt_authentication.handler.authentication_success
         failure_handler: lexik_jwt_authentication.handler.authentication_failure
       jwt: ~
+    admin:
+      pattern: ^/admin
+      stateless: true
+      security: true
+      provider: app_user_provider
+      jwt: ~
+      logout:
+        path: app_logout
+        target: app_login
+      access_denied_handler: App\Security\AccessDeniedHandler
+      access_denied_url: /access-denied
     main:
       lazy: true
       provider: app_user_provider
