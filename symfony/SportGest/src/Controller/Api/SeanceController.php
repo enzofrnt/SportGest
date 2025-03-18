@@ -36,21 +36,47 @@ class SeanceController extends AbstractController
 
         // Logique pour trouver les créneaux disponibles
         if ($coachId) {
+            // Cas où un coach spécifique est demandé
             $coach = $coachRepository->find($coachId);
             if ($coach) {
                 // Trouver les séances existantes pour ce coach
                 $seancesExistantes = $seanceRepository->findByCoachAndDateRange($coach, $dateDebut, $dateFin);
 
                 // Calculer les créneaux disponibles
-                // Exemple simplifié - à adapter selon vos règles métier
                 $creneaux = $this->calculerCreneauxDisponibles($dateDebut, $dateFin, $seancesExistantes);
             }
         } else {
-            // Logique pour tous les coachs
-            // ...
+            // Logique pour tous les coachs si aucun coach_id n'est fourni
+            $tousLesCoaches = $coachRepository->findAll();
+            $toutesSeances = [];
+
+            foreach ($tousLesCoaches as $coach) {
+                $seancesCoach = $seanceRepository->findByCoachAndDateRange($coach, $dateDebut, $dateFin);
+                $toutesSeances = array_merge($toutesSeances, $seancesCoach);
+            }
+
+            // Calculer les créneaux disponibles pour tous les coachs
+            $creneaux = $this->calculerCreneauxDisponibles($dateDebut, $dateFin, $toutesSeances);
         }
 
-        return $this->json($creneaux);
+        // Formater la réponse selon la structure attendue: [ { "date": "string", "creneaux": ["string"] }, ... ]
+        $creneauxParJour = [];
+
+        foreach ($creneaux as $creneau) {
+            $date = substr($creneau['debut'], 0, 10); // Extraire la date (YYYY-MM-DD)
+            $heure = substr($creneau['debut'], 11, 5); // Extraire l'heure (HH:MM)
+
+            if (!isset($creneauxParJour[$date])) {
+                $creneauxParJour[$date] = [
+                    'date' => $date,
+                    'creneaux' => []
+                ];
+            }
+
+            $creneauxParJour[$date]['creneaux'][] = $heure;
+        }
+
+        return $this->json(array_values($creneauxParJour));
     }
 
     /**
@@ -253,9 +279,11 @@ class SeanceController extends AbstractController
     }
 
     #[Route('/seances', name: 'api_seances_create', methods: ['POST'])]
-    #[IsGranted('ROLE_COACH')]
     public function createSeance(Request $request, EntityManagerInterface $entityManager, CoachRepository $coachRepository): JsonResponse
     {
+        // Vérification des permissions avec le voter
+        $this->denyAccessUnlessGranted('CREATE', null, 'Accès refusé: seuls les coachs, responsables et admins peuvent créer des séances');
+
         $data = json_decode($request->getContent(), true);
 
         // Validation des données
@@ -328,7 +356,7 @@ class SeanceController extends AbstractController
     public function updateStatut(Request $request, Seance $seance, EntityManagerInterface $entityManager): JsonResponse
     {
         // Vérifier les droits d'accès
-        $this->denyAccessUnlessGranted('EDIT', $seance);
+        $this->denyAccessUnlessGranted('UPDATE_STATUT', $seance, 'Accès refusé: vous n\'êtes pas autorisé à modifier le statut de cette séance');
 
         $data = json_decode($request->getContent(), true);
 
@@ -355,8 +383,9 @@ class SeanceController extends AbstractController
     {
         $dateDebut = $request->query->get('date_debut') ? new \DateTime($request->query->get('date_debut')) : new \DateTime();
         $dateFin = $request->query->get('date_fin') ? new \DateTime($request->query->get('date_fin')) : (new \DateTime())->modify('+7 days');
+        $coachId = $request->query->get('coach_id');
 
-        // Implémentation simple: séances à venir avec des places disponibles
+        // Construction de la requête
         $qb = $seanceRepository->createQueryBuilder('s')
             ->where('s.dateHeure BETWEEN :debut AND :fin')
             ->andWhere('s.statut = :statut')
@@ -365,25 +394,50 @@ class SeanceController extends AbstractController
             ->setParameter('statut', StatutSeance::PREVUE)
             ->orderBy('s.dateHeure', 'ASC');
 
+        // Filtrer par coach si demandé
+        if ($coachId) {
+            $qb->andWhere('s.coach = :coach')
+                ->setParameter('coach', $coachId);
+        }
+
         $seances = $qb->getQuery()->getResult();
+
+        // Capacité maximale des séances (à adapter selon vos besoins)
+        $capaciteMaxSeance = 10;
 
         $result = [];
         foreach ($seances as $seance) {
             // Vérifier s'il y a des places disponibles
-            if ($seance->getSportifs()->count() < 10) { // Exemple de limite à 10 sportifs
+            $placesDisponibles = $capaciteMaxSeance - $seance->getSportifs()->count();
+
+            if ($placesDisponibles > 0) {
                 $result[] = [
                     'id' => $seance->getId(),
                     'themeSeance' => $seance->getThemeSeance(),
                     'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
                     'typeSeance' => $seance->getTypeSeance()->name,
+                    'niveauSeance' => $seance->getNiveauSeance()->name,
                     'coach' => [
                         'id' => $seance->getCoach()->getId(),
                         'nom' => $seance->getCoach()->getNom(),
                         'prenom' => $seance->getCoach()->getPrenom(),
                     ],
-                    'placesDisponibles' => 10 - $seance->getSportifs()->count(),
+                    'placesDisponibles' => $placesDisponibles,
+                    'placesOccupees' => $seance->getSportifs()->count(),
+                    'capaciteMax' => $capaciteMaxSeance
                 ];
             }
+        }
+
+        // Si aucune séance disponible, renvoyer un message explicite
+        if (empty($result)) {
+            return $this->json([
+                'message' => 'Aucune séance disponible pour les critères spécifiés',
+                'periode' => [
+                    'debut' => $dateDebut->format('Y-m-d'),
+                    'fin' => $dateFin->format('Y-m-d')
+                ]
+            ]);
         }
 
         return $this->json($result);
@@ -421,5 +475,108 @@ class SeanceController extends AbstractController
         }
 
         return $this->json($exercices);
+    }
+
+    /**
+     * Endpoint combiné pour les disponibilités (créneaux et séances)
+     */
+    #[Route('/seances/planning-disponibilites', methods: ['GET'])]
+    public function getPlanningDisponibilites(
+        Request $request,
+        SeanceRepository $seanceRepository,
+        CoachRepository $coachRepository
+    ): JsonResponse {
+        $dateDebut = new \DateTime($request->query->get('date_debut', 'now'));
+        $dateFin = new \DateTime($request->query->get('date_fin', '+7 days'));
+        $coachId = $request->query->get('coach_id');
+
+        // 1. Récupérer les créneaux disponibles
+        $creneauxDisponibles = [];
+
+        if ($coachId) {
+            $coach = $coachRepository->find($coachId);
+            if ($coach) {
+                $seancesExistantes = $seanceRepository->findByCoachAndDateRange($coach, $dateDebut, $dateFin);
+                $creneauxDisponibles = $this->calculerCreneauxDisponibles($dateDebut, $dateFin, $seancesExistantes);
+            }
+        } else {
+            $tousLesCoaches = $coachRepository->findAll();
+            $toutesSeances = [];
+
+            foreach ($tousLesCoaches as $coach) {
+                $seancesCoach = $seanceRepository->findByCoachAndDateRange($coach, $dateDebut, $dateFin);
+                $toutesSeances = array_merge($toutesSeances, $seancesCoach);
+            }
+
+            $creneauxDisponibles = $this->calculerCreneauxDisponibles($dateDebut, $dateFin, $toutesSeances);
+        }
+
+        // 2. Récupérer les séances avec places disponibles
+        // Définir la capacité maximale des séances
+        $capaciteMaxSeance = 10;
+
+        $qb = $seanceRepository->createQueryBuilder('s')
+            ->where('s.dateHeure BETWEEN :debut AND :fin')
+            ->andWhere('s.statut = :statut')
+            ->setParameter('debut', $dateDebut)
+            ->setParameter('fin', $dateFin)
+            ->setParameter('statut', StatutSeance::PREVUE)
+            ->orderBy('s.dateHeure', 'ASC');
+
+        if ($coachId) {
+            $qb->andWhere('s.coach = :coach')
+                ->setParameter('coach', $coachId);
+        }
+
+        $seances = $qb->getQuery()->getResult();
+
+        $seancesDisponibles = [];
+        foreach ($seances as $seance) {
+            // Calculer les places disponibles pour chaque séance
+            $placesDisponibles = $capaciteMaxSeance - $seance->getSportifs()->count();
+
+            if ($placesDisponibles > 0) {
+                $seancesDisponibles[] = [
+                    'id' => $seance->getId(),
+                    'themeSeance' => $seance->getThemeSeance(),
+                    'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
+                    'typeSeance' => $seance->getTypeSeance()->name,
+                    'niveauSeance' => $seance->getNiveauSeance()->name,
+                    'coach' => [
+                        'id' => $seance->getCoach()->getId(),
+                        'nom' => $seance->getCoach()->getNom(),
+                        'prenom' => $seance->getCoach()->getPrenom(),
+                    ],
+                    'placesDisponibles' => $placesDisponibles,
+                ];
+            }
+        }
+
+        // 3. Formater la réponse combinée
+        $creneauxParJour = [];
+
+        foreach ($creneauxDisponibles as $creneau) {
+            $date = substr($creneau['debut'], 0, 10); // Extraire la date (YYYY-MM-DD)
+            $heure = substr($creneau['debut'], 11, 5); // Extraire l'heure (HH:MM)
+
+            if (!isset($creneauxParJour[$date])) {
+                $creneauxParJour[$date] = [
+                    'date' => $date,
+                    'creneaux' => []
+                ];
+            }
+
+            $creneauxParJour[$date]['creneaux'][] = $heure;
+        }
+
+        return $this->json([
+            'periode' => [
+                'debut' => $dateDebut->format('Y-m-d'),
+                'fin' => $dateFin->format('Y-m-d')
+            ],
+            'creneaux_disponibles' => array_values($creneauxParJour),
+            'seances_disponibles' => $seancesDisponibles,
+            'filtre_coach' => $coachId ? true : false
+        ]);
     }
 }

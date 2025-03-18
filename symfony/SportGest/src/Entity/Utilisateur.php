@@ -17,19 +17,19 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['coach:read'])]
+    #[Groups(['coach:read', 'sportif:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['coach:read', 'coach:write'])]
+    #[Groups(['coach:read', 'coach:write', 'sportif:read', 'sportif:write'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['coach:read', 'coach:write'])]
+    #[Groups(['coach:read', 'coach:write', 'sportif:read', 'sportif:write'])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['coach:read', 'coach:write'])]
+    #[Groups(['coach:read', 'coach:write', 'sportif:read', 'sportif:write'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]

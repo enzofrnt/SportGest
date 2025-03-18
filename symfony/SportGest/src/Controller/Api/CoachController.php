@@ -49,13 +49,8 @@ class CoachController extends AbstractController
     #[Route('/{id}/specialites', name: 'api_coach_specialites', methods: ['GET'])]
     public function getCoachSpecialites(Coach $coach): JsonResponse
     {
-        // Récupérer les spécialités du coach (à adapter selon votre modèle de données)
-        $specialites = []; // À remplacer par la récupération réelle des spécialités
-
-        // Exemple fictif - à adapter selon votre modèle
-        // if (method_exists($coach, 'getSpecialites')) {
-        //     $specialites = $coach->getSpecialites();
-        // }
+        // Récupérer les spécialités du coach
+        $specialites = $coach->getSpecialites();
 
         return $this->json($specialites);
     }

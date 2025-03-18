@@ -1,7 +1,8 @@
 api_platform:
-    title: Hello API Platform
-    version: 1.0.0
-    defaults:
-        stateless: true
-        cache_headers:
-            vary: ['Content-Type', 'Authorization', 'Origin']
+  title: SportGest API
+  description: API pour la gestion de séances sportives
+  version: 1.0.0
+  defaults:
+    stateless: true
+    cache_headers:
+      vary: ["Content-Type", "Authorization", "Origin"]

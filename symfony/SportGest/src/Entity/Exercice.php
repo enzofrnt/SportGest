@@ -6,6 +6,9 @@ use App\Repository\ExerciceRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Enum\DifficulteExercice;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ExerciceRepository::class)]
@@ -13,6 +16,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['exercice:read']],
     denormalizationContext: ['groups' => ['exercice:write']]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['difficulte' => 'exact'])]
+#[ApiFilter(RangeFilter::class, properties: ['dureeEstimee'])]
 class Exercice
 {
     #[ORM\Id]

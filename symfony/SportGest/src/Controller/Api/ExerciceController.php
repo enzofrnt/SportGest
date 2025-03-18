@@ -21,20 +21,25 @@ class ExerciceController extends AbstractController
         $difficulte = $request->query->get('difficulte');
         $dureeMax = $request->query->get('duree_max');
 
-        $criteria = [];
+        // Construction de la requête
+        $queryBuilder = $exerciceRepository->createQueryBuilder('e');
+
+        // Appliquer le filtre de difficulté
         if ($difficulte) {
-            $criteria['difficulte'] = $difficulte;
+            $queryBuilder
+                ->andWhere('e.difficulte = :difficulte')
+                ->setParameter('difficulte', strtolower($difficulte));
         }
 
-        // Récupération de tous les exercices selon les critères
-        $exercices = $exerciceRepository->findBy($criteria);
-
-        // Filtrage supplémentaire par durée maximum si spécifié
+        // Appliquer le filtre de durée maximale
         if ($dureeMax) {
-            $exercices = array_filter($exercices, function ($exercice) use ($dureeMax) {
-                return $exercice->getDureeEstimee() <= $dureeMax;
-            });
+            $queryBuilder
+                ->andWhere('e.dureeEstimee <= :dureeMax')
+                ->setParameter('dureeMax', (int)$dureeMax);
         }
+
+        // Exécuter la requête
+        $exercices = $queryBuilder->getQuery()->getResult();
 
         $data = [];
         foreach ($exercices as $exercice) {
@@ -42,8 +47,8 @@ class ExerciceController extends AbstractController
                 'id' => $exercice->getId(),
                 'nom' => $exercice->getNom(),
                 'description' => $exercice->getDescription(),
-                'dureeEstimee' => $exercice->getDureeEstimee(),
-                'difficulte' => $exercice->getDifficulte()->name,
+                'difficulte' => $exercice->getDifficulte()->value,
+                'dureeMinutes' => $exercice->getDureeEstimee(),
             ];
         }
 
