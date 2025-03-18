@@ -47,7 +47,7 @@ class CoachCrudController extends AbstractCrudController
             EmailField::new('email'),
             TelephoneField::new('telephone'),
             DateField::new('dateNaissance'),
-            TextField::new('specialite'),
+            AssociationField::new('specialite'),
             AssociationField::new('seances')
                 ->onlyOnDetail(),
             AssociationField::new('ficheDePaies')

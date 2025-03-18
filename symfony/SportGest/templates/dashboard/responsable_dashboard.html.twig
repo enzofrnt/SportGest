@@ -106,7 +106,7 @@
                                     {% for seance in dernieres_seances %}
                                         <tr>
                                             <td>{{ seance.dateHeure|date('d/m/Y H:i') }}</td>
-                                            <td>{{ seance.themeSeance }}</td>
+                                            <td>{{ seance.typeSeance.value }}</td>
                                             <td>{{ seance.coach.prenom }} {{ seance.coach.nom }}</td>
                                             <td>{{ seance.sportifs|length }}</td>
                                             <td>
@@ -224,7 +224,7 @@
                                         <tbody>
                                             {% for seance in stats.top_seances %}
                                                 <tr>
-                                                    <td>{{ seance.theme }}</td>
+                                                    <td>{{ seance.theme|join(', ') }}</td>
                                                     <td>{{ seance.coach }}</td>
                                                     <td>{{ seance.sportifs }}</td>
                                                 </tr>
