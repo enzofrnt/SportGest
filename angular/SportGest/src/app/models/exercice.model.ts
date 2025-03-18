@@ -1,4 +1,4 @@
-import { DifficulteExercice } from './enum/difficulte-excercice.enum';
+import { DifficulteExercice } from './enum/difficulte-exercice.enum';
 
 export interface Exercice {
     id?: number;

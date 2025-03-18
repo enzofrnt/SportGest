@@ -1,42 +1,79 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
+import { Utilisateur } from '../../../models/utilisateur.model';
 import { Subscription } from 'rxjs';
+import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterModule, ClickOutsideDirective],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.scss'
+  styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  isAuthenticated = false;
-  isUserMenuOpen = false;
-  isMobileMenuOpen = false;
+  @ViewChild('userMenuButton') userMenuButton!: ElementRef;
 
+  isAuthenticated: boolean = false;
+  isUserMenuOpen: boolean = false;
+  isMobileMenuOpen: boolean = false;
+  user: Utilisateur | null = null;
+  private userSubscription: Subscription | null = null;
 
-  constructor() {}
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    // S'abonner aux changements d'état d'authentification
+    this.userSubscription = this.authService.currentUser$.subscribe((user: Utilisateur | null) => {
+      this.isAuthenticated = !!user;
+      this.user = user;
+    });
+    console.log(this.user);
   }
 
   ngOnDestroy(): void {
+    // Nettoyer la souscription lors de la destruction du composant
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   toggleUserMenu(): void {
     this.isUserMenuOpen = !this.isUserMenuOpen;
+    if (this.isUserMenuOpen) {
+      this.isMobileMenuOpen = false;
+    }
+  }
+
+  closeUserMenu(): void {
+    this.isUserMenuOpen = false;
   }
 
   toggleMobileMenu(): void {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    if (this.isMobileMenuOpen) {
+      this.isUserMenuOpen = false;
+    }
   }
 
   closeMobileMenu(): void {
     this.isMobileMenuOpen = false;
   }
 
-  logout(): void {
-
+  goToDashboard(): void {
+    this.router.navigate(['/membre']);
     this.isUserMenuOpen = false;
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.isUserMenuOpen = false;
+    this.isMobileMenuOpen = false;
+    this.router.navigate(['/']);
   }
 }

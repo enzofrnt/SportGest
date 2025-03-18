@@ -13,6 +13,7 @@ import { HistoryComponent } from './features/member/history/history.component';
 import { StatsComponent } from './features/member/stats/stats.component';
 import { ProfileComponent } from './features/member/profile/profile.component';
 import { ReservationsComponent } from './features/member/reservations/reservations.component';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   // Route principale - redirige vers la racine
@@ -27,6 +28,7 @@ export const routes: Routes = [
   // Routes protégées (sportifs connectés)
   {
     path: 'membre',
+    canActivate: [authGuard],
     children: [
       { path: '', component: DashboardComponent },
       { path: 'planning', component: MemberPlanningComponent },

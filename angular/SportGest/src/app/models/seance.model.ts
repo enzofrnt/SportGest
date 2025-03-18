@@ -18,12 +18,3 @@ export interface Seance {
     exercices: Exercice[];
     theme: Specialite[];
 }
-
-export interface Exercice {
-    id?: number;
-    nom: string;
-    description: string;
-    duree: number;
-    repetitions: number;
-    series: number;
-}
