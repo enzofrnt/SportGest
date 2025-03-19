@@ -63,17 +63,14 @@ class Seance
     #[Groups(['seance:read', 'seance:write'])]
     private Collection $exercices;
 
-    /**
-     * @var Collection<int, Specialite>
-     */
-    #[ORM\ManyToMany(targetEntity: Specialite::class)]
-    private Collection $theme;
+    #[ORM\ManyToOne(targetEntity: Specialite::class)]
+    #[Groups(['seance:read', 'seance:write'])]
+    private ?Specialite $theme = null;
 
     public function __construct()
     {
         $this->sportifs = new ArrayCollection();
         $this->exercices = new ArrayCollection();
-        $this->theme = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -189,26 +186,13 @@ class Seance
         return $this;
     }
 
-    public function addTheme(Specialite $theme): static
+    public function setTheme(?Specialite $theme): static
     {
-        if (!$this->theme->contains($theme)) {
-            $this->theme->add($theme);
-        }
-
+        $this->theme = $theme;
         return $this;
     }
 
-    public function removeTheme(Specialite $theme): static
-    {
-        $this->theme->removeElement($theme);
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Specialite>
-     */
-    public function getTheme(): Collection
+    public function getTheme(): ?Specialite
     {
         return $this->theme;
     }

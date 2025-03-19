@@ -271,12 +271,8 @@ class AppFixtures extends Fixture
                 $seance->addExercice($exercices[$j]);
             }
 
-            // Ajout des spécialités
-            $nbSpecialites = rand(1, 3);
-            shuffle($specialites);
-            for ($j = 0; $j < $nbSpecialites; $j++) {
-                $seance->addTheme($specialites[$j]);
-            }
+            // Ajout d'une spécialité aléatoire comme thème
+            $seance->setTheme($specialites[array_rand($specialites)]);
             
             $manager->persist($seance);
         }

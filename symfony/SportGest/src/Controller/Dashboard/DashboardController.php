@@ -25,6 +25,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TelephoneField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[AdminDashboard(
     routePath: '/admin',
@@ -150,7 +152,7 @@ class DashboardController extends AbstractDashboardController
             $top_seances = [];
             foreach ($seances as $seance) {
                 $top_seances[] = [
-                    'theme' => $seance->getTheme()->map(fn($theme) => $theme->getNom())->toArray(),
+                    'theme' => $seance->getTheme() ? $seance->getTheme()->getNom() : '',
                     'coach' => $seance->getCoach()->getPrenom() . ' ' . $seance->getCoach()->getNom(),
                     'sportifs' => $seance->getSportifs()->count(),
                 ];
@@ -210,6 +212,28 @@ class DashboardController extends AbstractDashboardController
                 ->setDefaultSort(['dateHeure' => 'DESC']);
             yield MenuItem::linkToCrud('Tous les exercices', 'fas fa-dumbbell', Exercice::class);
             yield MenuItem::linkToCrud('Toutes les fiches de paie', 'fas fa-file-invoice-dollar', FicheDePaie::class);
+        }
+    }
+
+    #[Route('/check-auth', name: 'dashboard_check_auth', methods: ['GET'])]
+    public function checkAuth(): JsonResponse
+    {
+        /** @var Utilisateur|null $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->json(['message' => 'Non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $roles = $user->getRoles();
+        if (in_array('ROLE_RESPONSABLE', $roles)) {
+            return $this->json(['redirect' => '/admin/responsable']);
+        } elseif (in_array('ROLE_COACH', $roles)) {
+            return $this->json(['redirect' => '/admin/coach']);
+        } elseif (in_array('ROLE_SPORTIF', $roles)) {
+            return $this->json(['redirect' => '/admin/sportif']);
+        } else {
+            return $this->json(['message' => 'Accès non autorisé'], Response::HTTP_FORBIDDEN);
         }
     }
 }

@@ -14,9 +14,16 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TelephoneField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class ResponsableCrudController extends AbstractCrudController
 {
+    public function __construct(
+        private UserPasswordHasherInterface $passwordHasher
+    ) {}
+
     public static function getEntityFqcn(): string
     {
         return Responsable::class;
@@ -39,18 +46,22 @@ class ResponsableCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        return [
+        $fields = [
             IdField::new('id')->hideOnForm(),
             TextField::new('nom'),
             TextField::new('prenom'),
             EmailField::new('email'),
-            TelephoneField::new('telephone'),
-            DateField::new('dateNaissance'),
-            TextField::new('poste'),
-            BooleanField::new('isAdmin')
-                ->setLabel('Administrateur')
-                ->renderAsSwitch(true),
         ];
+
+        if ($pageName === Crud::PAGE_NEW || $pageName === Crud::PAGE_EDIT) {
+            $fields[] = TextField::new('password')
+                ->setFormType(PasswordType::class)
+                ->setLabel('Mot de passe')
+                ->setHelp($pageName === Crud::PAGE_EDIT ? 'Laissez vide pour ne pas modifier le mot de passe' : 'Le mot de passe est requis pour la création')
+                ->setRequired($pageName === Crud::PAGE_NEW);
+        }
+
+        return $fields;
     }
 
     public function configureCrud(\EasyCorp\Bundle\EasyAdminBundle\Config\Crud $crud): \EasyCorp\Bundle\EasyAdminBundle\Config\Crud
@@ -60,5 +71,38 @@ class ResponsableCrudController extends AbstractCrudController
             ->setEntityLabelInPlural('Responsables')
             ->setDefaultSort(['nom' => 'ASC', 'prenom' => 'ASC'])
             ->setSearchFields(['nom', 'prenom', 'email', 'poste']);
+    }
+
+    public function createEntity(string $entityFqcn)
+    {
+        $responsable = new Responsable();
+        $responsable->setRoles(['ROLE_RESPONSABLE']);
+        return $responsable;
+    }
+
+    public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        if ($entityInstance->getPassword()) {
+            $hashedPassword = $this->passwordHasher->hashPassword(
+                $entityInstance,
+                $entityInstance->getPassword()
+            );
+            $entityInstance->setPassword($hashedPassword);
+        }
+        $entityManager->persist($entityInstance);
+        $entityManager->flush();
+    }
+
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        if ($entityInstance->getPassword()) {
+            $hashedPassword = $this->passwordHasher->hashPassword(
+                $entityInstance,
+                $entityInstance->getPassword()
+            );
+            $entityInstance->setPassword($hashedPassword);
+        }
+        $entityManager->persist($entityInstance);
+        $entityManager->flush();
     }
 }

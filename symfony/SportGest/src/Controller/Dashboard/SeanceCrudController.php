@@ -4,6 +4,8 @@ namespace App\Controller\Dashboard;
 
 use App\Entity\Coach;
 use App\Entity\Seance;
+use App\Entity\Specialite;
+use App\Entity\Responsable;
 use App\Enum\NiveauSportif;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
@@ -22,6 +24,12 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Form\SpecialiteType;
+use PhpParser\Node\Stmt\ElseIf_;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 
 class SeanceCrudController extends AbstractCrudController
 {
@@ -76,31 +84,32 @@ class SeanceCrudController extends AbstractCrudController
         $user = $this->getUser();
         $fields = [
             IdField::new('id')->hideOnForm(),
-            TextField::new('themeSeance'),
+            AssociationField::new('theme')
+                ->setFormType(Specialite::class)
+                ->autocomplete(),
             DateTimeField::new('dateHeure'),
             ChoiceField::new('niveauSeance', 'Niveau')
                 ->setFormType(\Symfony\Component\Form\Extension\Core\Type\EnumType::class)
                 ->setFormTypeOptions([
                     'class' => \App\Enum\NiveauSportif::class,
                     'choice_label' => function(\App\Enum\NiveauSportif $choice) {
-                        return $choice->value; // Affiche la valeur (ex: "débutant") au lieu de la clé
+                        return $choice->value;
                     }
                 ])
                 ->formatValue(function ($value) {
-                    // Convertir l'enum en chaîne pour l'affichage
                     return $value instanceof \App\Enum\NiveauSportif ? $value->value : '';
                 }),
         ];
 
-        // Si c'est un nouveau formulaire, définir automatiquement le coach actuel
-        if ($pageName === Crud::PAGE_NEW) {
+        // Gestion du champ coach selon le rôle
+        if ($user instanceof Coach) {
             $fields[] = AssociationField::new('coach')
                 ->setFormTypeOption('data', $user)
                 ->setFormTypeOption('disabled', true);
-        } else {
+        } else if ($user instanceof Responsable) {
             $fields[] = AssociationField::new('coach')
-                ->setFormTypeOption('disabled', true);
-        }
+                ->setFormTypeOption('disabled', false);
+        } 
 
         $fields[] = AssociationField::new('exercices');
         $fields[] = AssociationField::new('sportifs');

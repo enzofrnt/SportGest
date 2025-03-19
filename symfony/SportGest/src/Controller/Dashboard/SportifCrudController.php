@@ -17,9 +17,16 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TelephoneField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class SportifCrudController extends AbstractCrudController
 {
+    public function __construct(
+        private UserPasswordHasherInterface $passwordHasher
+    ) {}
+
     public static function getEntityFqcn(): string
     {
         return Sportif::class;
@@ -42,7 +49,7 @@ class SportifCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        return [
+        $fields = [
             IdField::new('id')->hideOnForm(),
             TextField::new('nom'),
             TextField::new('prenom'),
@@ -60,6 +67,16 @@ class SportifCrudController extends AbstractCrudController
                     return $value instanceof \App\Enum\NiveauSportif ? $value->value : '';
                 })
         ];
+
+        if ($pageName === Crud::PAGE_NEW || $pageName === Crud::PAGE_EDIT) {
+            $fields[] = TextField::new('password')
+                ->setFormType(PasswordType::class)
+                ->setLabel('Mot de passe')
+                ->setHelp($pageName === Crud::PAGE_EDIT ? 'Laissez vide pour ne pas modifier le mot de passe' : 'Le mot de passe est requis pour la création')
+                ->setRequired($pageName === Crud::PAGE_NEW);
+        }
+
+        return $fields;
     }
 
     public function configureCrud(Crud $crud): Crud
@@ -68,5 +85,38 @@ class SportifCrudController extends AbstractCrudController
             ->setEntityLabelInSingular('Sportif')
             ->setEntityLabelInPlural('Sportifs')
             ->setDefaultSort(['nom' => 'ASC', 'prenom' => 'ASC']);
+    }
+
+    public function createEntity(string $entityFqcn)
+    {
+        $sportif = new Sportif();
+        $sportif->setRoles(['ROLE_SPORTIF']);
+        return $sportif;
+    }
+
+    public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        if ($entityInstance->getPassword()) {
+            $hashedPassword = $this->passwordHasher->hashPassword(
+                $entityInstance,
+                $entityInstance->getPassword()
+            );
+            $entityInstance->setPassword($hashedPassword);
+        }
+        $entityManager->persist($entityInstance);
+        $entityManager->flush();
+    }
+
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        if ($entityInstance->getPassword()) {
+            $hashedPassword = $this->passwordHasher->hashPassword(
+                $entityInstance,
+                $entityInstance->getPassword()
+            );
+            $entityInstance->setPassword($hashedPassword);
+        }
+        $entityManager->persist($entityInstance);
+        $entityManager->flush();
     }
 }

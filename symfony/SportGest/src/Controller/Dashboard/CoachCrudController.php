@@ -15,9 +15,20 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TelephoneField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Form\SpecialiteType;
 
 class CoachCrudController extends AbstractCrudController
 {
+    public function __construct(
+        private UserPasswordHasherInterface $passwordHasher
+    ) {}
+
     public static function getEntityFqcn(): string
     {
         return Coach::class;
@@ -28,31 +39,46 @@ class CoachCrudController extends AbstractCrudController
         $user = $this->getUser();
 
         if (!($user instanceof Responsable && $this->isGranted('ROLE_RESPONSABLE'))) {
-            throw new AccessDeniedException('Seuls les responsables admin peuvent gérer les coachs');
+            throw new AccessDeniedException('Seuls les responsables peuvent gérer les coachs');
         }
 
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->setPermission(Action::NEW, 'ROLE_ADMIN')
-            ->setPermission(Action::EDIT, 'ROLE_ADMIN')
-            ->setPermission(Action::DELETE, 'ROLE_ADMIN');
+            ->setPermission(Action::NEW, 'ROLE_RESPONSABLE')
+            ->setPermission(Action::EDIT, 'ROLE_RESPONSABLE')
+            ->setPermission(Action::DELETE, 'ROLE_RESPONSABLE');
     }
 
     public function configureFields(string $pageName): iterable
     {
-        return [
+        $fields = [
             IdField::new('id')->hideOnForm(),
             TextField::new('nom'),
             TextField::new('prenom'),
             EmailField::new('email'),
-            TelephoneField::new('telephone'),
-            DateField::new('dateNaissance'),
-            AssociationField::new('specialite'),
+            CollectionField::new('specialite')
+                ->setFormType(CollectionType::class)
+                ->setFormTypeOptions([
+                    'entry_type' => SpecialiteType::class,
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'by_reference' => false,
+                ]),
             AssociationField::new('seances')
                 ->onlyOnDetail(),
             AssociationField::new('ficheDePaies')
                 ->onlyOnDetail(),
         ];
+
+        if ($pageName === Crud::PAGE_NEW || $pageName === Crud::PAGE_EDIT) {
+            $fields[] = TextField::new('password')
+                ->setFormType(PasswordType::class)
+                ->setLabel('Mot de passe')
+                ->setHelp($pageName === Crud::PAGE_EDIT ? 'Laissez vide pour ne pas modifier le mot de passe' : 'Le mot de passe est requis pour la création')
+                ->setRequired($pageName === Crud::PAGE_NEW);
+        }
+
+        return $fields;
     }
 
     public function configureCrud(\EasyCorp\Bundle\EasyAdminBundle\Config\Crud $crud): \EasyCorp\Bundle\EasyAdminBundle\Config\Crud
@@ -62,5 +88,38 @@ class CoachCrudController extends AbstractCrudController
             ->setEntityLabelInPlural('Coachs')
             ->setDefaultSort(['nom' => 'ASC', 'prenom' => 'ASC'])
             ->setSearchFields(['nom', 'prenom', 'email', 'specialite']);
+    }
+
+    public function createEntity(string $entityFqcn)
+    {
+        $coach = new Coach();
+        $coach->setRoles(['ROLE_COACH']);
+        return $coach;
+    }
+
+    public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        if ($entityInstance->getPassword()) {
+            $hashedPassword = $this->passwordHasher->hashPassword(
+                $entityInstance,
+                $entityInstance->getPassword()
+            );
+            $entityInstance->setPassword($hashedPassword);
+        }
+        $entityManager->persist($entityInstance);
+        $entityManager->flush();
+    }
+
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        if ($entityInstance->getPassword()) {
+            $hashedPassword = $this->passwordHasher->hashPassword(
+                $entityInstance,
+                $entityInstance->getPassword()
+            );
+            $entityInstance->setPassword($hashedPassword);
+        }
+        $entityManager->persist($entityInstance);
+        $entityManager->flush();
     }
 }
