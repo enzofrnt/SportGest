@@ -20,6 +20,11 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   // Routes publiques
   { path: 'coachs', component: CoachesComponent },
+  {
+    path: 'coachs/:id',
+    loadComponent: () => import('./features/public/coaches/coach-details/coach-details.component').then(m => m.CoachDetailsComponent),
+    title: 'Détails du coach'
+  },
   { path: 'seances', component: SessionsComponent },
   { path: 'planning', component: PublicPlanningComponent },
   { path: 'inscription', component: RegisterComponent },

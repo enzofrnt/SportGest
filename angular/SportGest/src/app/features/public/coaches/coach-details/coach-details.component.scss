@@ -1,0 +1,135 @@
+.card {
+    box-shadow: var(--shadow-md);
+    border: none;
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.coach-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.coach-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: var(--primary-light);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin-right: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.coach-info {
+    flex: 1;
+}
+
+.coach-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.coach-email {
+    color: var(--medium-gray);
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+}
+
+.info-icon {
+    color: var(--primary-color);
+    margin-right: 0.5rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 1.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-light);
+    display: inline-block;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 1rem;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    &:first-child {
+        border-top: none;
+    }
+    &:last-child {
+        border-bottom: none;
+    }
+    &:hover {
+        background-color: var(--off-white);
+    }
+    &::before {
+        content: '•';
+        color: var(--primary-color);
+        font-weight: bold;
+        margin-right: 0.75rem;
+    }
+}
+
+.badge {
+    padding: 0.5em 0.7em;
+    font-weight: 500;
+}
+
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    th {
+        background-color: var(--primary-light);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+    }
+    td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    tbody tr {
+        transition: background-color 0.3s ease;
+        &:hover {
+            background-color: var(--off-white);
+        }
+    }
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: transform 0.3s ease;
+    &:hover {
+        transform: translateX(-5px);
+    }
+}
