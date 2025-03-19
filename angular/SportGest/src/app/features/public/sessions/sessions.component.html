@@ -1,1 +1,172 @@
-<p>sessions works!</p>
+<div class="container mt-5">
+    <h1 class="mb-4">Nos séances</h1>
+
+    <!-- Message d'information pour utilisateurs non connectés -->
+    <div *ngIf="infoMessage" class="alert alert-info mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+            <div>
+                <p class="mb-2">{{ infoMessage }}</p>
+                <a [routerLink]="['/connexion']" class="btn btn-primary btn-sm">
+                    <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre de recherche et filtres -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="input-group">
+                        <input type="text" class="form-control" [(ngModel)]="searchTerm" placeholder="Rechercher une séance..." name="searchTerm">
+                        <button class="btn btn-outline-primary" type="button" (click)="applyFilters()">
+                            <i class="bi bi-search"></i> Rechercher
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" (click)="toggleFilters()">
+                            <i class="bi bi-funnel"></i> Filtres
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres avancés (collapsible) -->
+            <div *ngIf="showFilters" class="row filters-container">
+                <div class="col-md-3 mb-3">
+                    <label for="typeSeance" class="form-label">Type de séance</label>
+                    <select id="typeSeance" class="form-select" [(ngModel)]="typeSeanceFilter" name="typeSeance">
+                        <option value="">Tous</option>
+                        <option *ngFor="let type of typesSeance" [value]="type">{{ type }}</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="niveauSeance" class="form-label">Niveau</label>
+                    <select id="niveauSeance" class="form-select" [(ngModel)]="niveauSeanceFilter" name="niveauSeance">
+                        <option value="">Tous</option>
+                        <option *ngFor="let niveau of niveauxSportif" [value]="niveau">{{ niveau }}</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="statut" class="form-label">Statut</label>
+                    <select id="statut" class="form-select" [(ngModel)]="statutFilter" name="statut">
+                        <option value="">Tous</option>
+                        <option *ngFor="let statut of statutsSeance" [value]="statut">{{ statut }}</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="dateMin" class="form-label">Date minimum</label>
+                    <input type="date" id="dateMin" class="form-control" [(ngModel)]="dateMinFilter" name="dateMin">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="dateMax" class="form-label">Date maximum</label>
+                    <input type="date" id="dateMax" class="form-control" [(ngModel)]="dateMaxFilter" name="dateMax">
+                </div>
+                <div class="col-md-12 d-flex justify-content-end">
+                    <button type="button" class="btn btn-outline-secondary me-2" (click)="resetFilters()">
+                        <i class="bi bi-x-circle"></i> Réinitialiser
+                    </button>
+                    <button type="button" class="btn btn-primary" (click)="applyFilters()">
+                        <i class="bi bi-check-circle"></i> Appliquer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message de chargement -->
+    <div *ngIf="loading" class="d-flex justify-content-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+        </div>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="error" class="alert alert-warning">
+        {{ error }}
+    </div>
+
+    <!-- Liste des séances -->
+    <div *ngIf="!loading && !selectedSeance">
+        <div *ngIf="filteredSeances.length === 0" class="alert alert-info">
+            Aucune séance ne correspond à vos critères de recherche.
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="col" *ngFor="let seance of filteredSeances">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ seance.themeSeance }}</h5>
+                        <span class="badge" [ngClass]="{
+                          'bg-warning': seance.statut === StatutSeance.PREVUE,
+                          'bg-success': seance.statut === StatutSeance.VALIDEE,
+                          'bg-secondary': seance.statut === StatutSeance.ANNULEE
+                        }">{{ seance.statut }}</span>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="bi bi-calendar3"></i> {{ seance.dateHeure | date:'dd/MM/yyyy HH:mm' }}</p>
+                        <p><i class="bi bi-person-badge"></i> {{ seance.coach.prenom }} {{ seance.coach.nom }}</p>
+                        <p><i class="bi bi-activity"></i> {{ seance.typeSeance }}</p>
+                        <p><i class="bi bi-bar-chart-steps"></i> {{ seance.niveauSeance }}</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-end">
+                        <button class="btn btn-primary" (click)="viewSeanceDetails(seance.id!)">Voir détails</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Détails d'une séance -->
+    <div *ngIf="selectedSeance && !loading" class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">{{ selectedSeance.themeSeance }}</h3>
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeDetails()"></button>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Informations</h4>
+                    <p><strong>Date et heure:</strong> {{ selectedSeance.dateHeure | date:'dd/MM/yyyy HH:mm' }}</p>
+                    <p><strong>Type:</strong> {{ selectedSeance.typeSeance }}</p>
+                    <p><strong>Niveau:</strong> {{ selectedSeance.niveauSeance }}</p>
+                    <p><strong>Statut:</strong> {{ selectedSeance.statut }}</p>
+                    <p><strong>Coach:</strong> {{ selectedSeance.coach.prenom }} {{ selectedSeance.coach.nom }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h4>Exercices</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item" *ngFor="let exercice of selectedSeance.exercices">
+                            {{ exercice.nom }}
+                        </li>
+                    </ul>
+
+                    <h4 class="mt-4">Participants</h4>
+                    <div *ngIf="selectedSeance.sportifs.length === 0" class="alert alert-info">
+                        Aucun participant inscrit.
+                    </div>
+                    <ul class="list-group" *ngIf="selectedSeance.sportifs.length > 0">
+                        <li class="list-group-item" *ngFor="let sportif of selectedSeance.sportifs">
+                            {{ sportif.prenom }} {{ sportif.nom }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Réservation uniquement pour les utilisateurs authentifiés -->
+            <div class="d-flex justify-content-end mt-4">
+                <button class="btn btn-secondary me-2" (click)="closeDetails()">Retour</button>
+                <ng-container *ngIf="isAuthenticated; else notAuthenticatedBtn">
+                    <a *ngIf="selectedSeance.statut !== StatutSeance.ANNULEE" class="btn btn-primary" [routerLink]="['/membre/reservation']" [queryParams]="{seance: selectedSeance.id}">
+                        <i class="bi bi-calendar-check"></i> Réserver
+                    </a>
+                </ng-container>
+                <ng-template #notAuthenticatedBtn>
+                    <a class="btn btn-outline-primary" [routerLink]="['/connexion']">
+                        <i class="bi bi-box-arrow-in-right"></i> Se connecter pour réserver
+                    </a>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
