@@ -23,7 +23,7 @@ class SportifController extends AbstractController
             'nom' => $sportif->getNom(),
             'prenom' => $sportif->getPrenom(),
             'email' => $sportif->getEmail(),
-            'niveauSportif' => $sportif->getNiveauSportif()->name,
+            'niveauSportif' => $sportif->getNiveauSportif()->value,
             'dateInscription' => $sportif->getDateInscription()->format('Y-m-d'),
         ]);
     }
@@ -43,8 +43,8 @@ class SportifController extends AbstractController
                 'id' => $seance->getId(),
                 'themeSeance' => $seance->getThemeSeance(),
                 'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
-                'typeSeance' => $seance->getTypeSeance()->name,
-                'statut' => $seance->getStatut()->name,
+                'typeSeance' => $seance->getTypeSeance()->value,
+                'statut' => $seance->getStatut()->value,
                 'coach' => [
                     'id' => $seance->getCoach()->getId(),
                     'nom' => $seance->getCoach()->getNom(),
@@ -71,7 +71,7 @@ class SportifController extends AbstractController
                 'id' => $seance->getId(),
                 'themeSeance' => $seance->getThemeSeance(),
                 'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
-                'typeSeance' => $seance->getTypeSeance()->name,
+                'typeSeance' => $seance->getTypeSeance()->value,
                 'coach' => [
                     'id' => $seance->getCoach()->getId(),
                     'nom' => $seance->getCoach()->getNom(),

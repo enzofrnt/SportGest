@@ -45,7 +45,7 @@ export class CoachDetailsComponent implements OnInit {
       coach$.subscribe({
         next: (coach) => {
           this.coach = coach;
-          this.loadSessions();
+          this.loadSeances();
         },
         error: (err) => {
           this.error = 'Erreur lors du chargement des détails du coach.';
@@ -60,7 +60,7 @@ export class CoachDetailsComponent implements OnInit {
     }
   }
 
-  async loadSessions(): Promise<void> {
+  async loadSeances(): Promise<void> {
     try {
       const seances$ = await this.coachService.getCoachSeances(this.coachId);
       seances$.subscribe({

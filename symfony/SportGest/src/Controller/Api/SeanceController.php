@@ -221,9 +221,9 @@ class SeanceController extends AbstractController
                 'nom' => $seance->getTheme()->getNom()
             ],
             'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
-            'typeSeance' => $seance->getTypeSeance()->name,
-            'statut' => $seance->getStatut()->name,
-            'niveauSeance' => $seance->getNiveauSeance()->name,
+            'typeSeance' => $seance->getTypeSeance()->value,
+            'statut' => $seance->getStatut()->value,
+            'niveauSeance' => $seance->getNiveauSeance()->value,
             'coach' => [
                 'id' => $seance->getCoach()->getId(),
                 'nom' => $seance->getCoach()->getNom(),
@@ -444,8 +444,8 @@ class SeanceController extends AbstractController
                     'id' => $seance->getId(),
                     'themeSeance' => $seance->getThemeSeance(),
                     'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
-                    'typeSeance' => $seance->getTypeSeance()->name,
-                    'niveauSeance' => $seance->getNiveauSeance()->name,
+                    'typeSeance' => $seance->getTypeSeance()->value,
+                    'niveauSeance' => $seance->getNiveauSeance()->value,
                     'coach' => [
                         'id' => $seance->getCoach()->getId(),
                         'nom' => $seance->getCoach()->getNom(),
@@ -569,8 +569,8 @@ class SeanceController extends AbstractController
                     'id' => $seance->getId(),
                     'themeSeance' => $seance->getThemeSeance(),
                     'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
-                    'typeSeance' => $seance->getTypeSeance()->name,
-                    'niveauSeance' => $seance->getNiveauSeance()->name,
+                    'typeSeance' => $seance->getTypeSeance()->value,
+                    'niveauSeance' => $seance->getNiveauSeance()->value,
                     'coach' => [
                         'id' => $seance->getCoach()->getId(),
                         'nom' => $seance->getCoach()->getNom(),

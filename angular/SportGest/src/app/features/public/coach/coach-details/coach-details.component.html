@@ -69,10 +69,10 @@
               <td>{{ seance.niveauSeance }}</td>
               <td>
                 <span [ngClass]="{
-                                    'badge rounded-pill bg-success': seance.statut === statutSeance.PREVUE,
-                                    'badge rounded-pill bg-primary': seance.statut === statutSeance.VALIDEE,
-                                    'badge rounded-pill bg-danger': seance.statut === statutSeance.ANNULEE
-                                }">
+                  'badge rounded-pill bg-success': seance.statut === StatutSeance.PREVUE,
+                  'badge rounded-pill bg-primary': seance.statut === StatutSeance.VALIDEE,
+                  'badge rounded-pill bg-danger': seance.statut === StatutSeance.ANNULEE
+                }">
                   {{ seance.statut }}
                 </span>
               </td>

@@ -63,7 +63,7 @@ class ExerciceController extends AbstractController
             'nom' => $exercice->getNom(),
             'description' => $exercice->getDescription(),
             'dureeEstimee' => $exercice->getDureeEstimee(),
-            'difficulte' => $exercice->getDifficulte()->name,
+            'difficulte' => $exercice->getDifficulte()->value,
         ]);
     }
 

@@ -75,7 +75,7 @@ class BilanController extends AbstractController
                     'nom' => $exercice->getNom(),
                     'description' => $exercice->getDescription(),
                     'duree' => $dureeExercice,
-                    'difficulte' => $exercice->getDifficulte()->name
+                    'difficulte' => $exercice->getDifficulte()->value
                 ];
 
                 // Collecter uniquement pour le top 3
@@ -83,7 +83,7 @@ class BilanController extends AbstractController
                     $topExercicesData[$exerciceId] = [
                         'id' => $exerciceId,
                         'nom' => $exercice->getNom(),
-                        'difficulte' => $exercice->getDifficulte()->name,
+                        'difficulte' => $exercice->getDifficulte()->value,
                         'nbFois' => 0,
                         'dureeTotal' => 0
                     ];
@@ -101,7 +101,7 @@ class BilanController extends AbstractController
             $dateHeureFin->modify("+{$dureeSeance} minutes");
 
             // Collecter les types de séances
-            $typeSeance = $seance->getTypeSeance()->name;
+            $typeSeance = $seance->getTypeSeance()->value;
             if (!isset($typesSeances[$typeSeance])) {
                 $typesSeances[$typeSeance] = 0;
             }
@@ -130,7 +130,7 @@ class BilanController extends AbstractController
                 'duree' => $dureeSeance,
                 'typeSeance' => $typeSeance,
                 'theme' => $seance->getTheme() ? $seance->getTheme()->getNom() : null,
-                'niveauSeance' => $seance->getNiveauSeance()->name,
+                'niveauSeance' => $seance->getNiveauSeance()->value,
                 'coach' => [
                     'id' => $coach->getId(),
                     'nom' => $coach->getNom(),
@@ -159,7 +159,7 @@ class BilanController extends AbstractController
                 'id' => $sportif->getId(),
                 'nom' => $sportif->getNom(),
                 'prenom' => $sportif->getPrenom(),
-                'niveauSportif' => $sportif->getNiveauSportif()->name,
+                'niveauSportif' => $sportif->getNiveauSportif()->value,
                 'dateInscription' => $sportif->getDateInscription()->format('Y-m-d H:i:s')
             ],
             'periode' => [

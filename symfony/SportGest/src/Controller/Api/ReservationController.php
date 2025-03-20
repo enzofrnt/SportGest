@@ -152,8 +152,8 @@ class ReservationController extends AbstractController
                 'id' => $seance->getId(),
                 'themeSeance' => $seance->getThemeSeance(),
                 'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
-                'typeSeance' => $seance->getTypeSeance()->name,
-                'statut' => $seance->getStatut()->name,
+                'typeSeance' => $seance->getTypeSeance()->value,
+                'statut' => $seance->getStatut()->value,
                 'coach' => [
                     'id' => $seance->getCoach()->getId(),
                     'nom' => $seance->getCoach()->getNom(),
