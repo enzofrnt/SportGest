@@ -16,10 +16,6 @@ use ApiPlatform\Metadata\Post;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: SeanceRepository::class)]
-#[ApiResource(
-    normalizationContext: ['groups' => ['seance:read']],
-    denormalizationContext: ['groups' => ['seance:write']]
-)]
 class Seance
 {
     #[ORM\Id]

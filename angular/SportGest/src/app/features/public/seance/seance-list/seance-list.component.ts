@@ -53,11 +53,16 @@ export class SeanceListComponent implements OnInit {
 
   constructor(
     private seanceApiService: SeanceApiService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    // Charger les séances
+    this.checkAuth();
     this.loadSeances();
+  }
+
+  private checkAuth(): void {
+    this.isAuthenticated = this.authService.isAuthenticated();
   }
 
   toggleFilters(): void {
@@ -65,74 +70,57 @@ export class SeanceListComponent implements OnInit {
   }
 
   async loadSeances(): Promise<void> {
-    const seances$ = await this.seanceApiService.getAllSeance();
-    seances$.subscribe({
-      next: (seances) => {
-        this.seances = seances;
-        this.loading = false;
-      },
-      error: (error) => {
-        this.error = error.message;
-        this.loading = false;
-      }
-    });
+    this.loading = true;
+    this.error = '';
+
+    try {
+      const seances$ = await this.seanceApiService.getAllSeance({
+        type_seance: this.typeSeanceFilter || undefined,
+        niveau_seance: this.niveauSeanceFilter || undefined,
+        date_min: this.dateMinFilter || undefined,
+        date_max: this.dateMaxFilter || undefined,
+        statut: this.statutFilter || undefined
+      });
+
+      seances$.subscribe({
+        next: (seances) => {
+          console.log('Séances reçues de l\'API:', seances); // Debug
+          this.seances = seances;
+          this.filteredSeances = seances;
+          // this.filterSeances();
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Erreur API:', error); // Debug
+          this.error = 'Erreur lors du chargement des séances';
+          this.loading = false;
+        }
+      });
+    } catch (error) {
+      console.error('Erreur:', error); // Debug
+      this.error = 'Erreur lors du chargement des séances';
+      this.loading = false;
+    }
+
+    console.log('Séances chargées:', this.seances); // Debug
   }
 
   applyFilters(): void {
-    this.applyClientSideFilters();
-  }
-
-  applyClientSideFilters(): void {
-    this.filteredSeances = this.seances.filter(seance => {
-      // Filtre par terme de recherche (thème, coach, type)
-      const searchMatch = !this.searchTerm ||
-        seance.themeSeance.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        seance.coach.nom.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        seance.coach.prenom.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        seance.typeSeance.toLowerCase().includes(this.searchTerm.toLowerCase());
-
-      // Filtre par type de séance
-      const typeMatch = !this.typeSeanceFilter || seance.typeSeance === this.typeSeanceFilter;
-
-      // Filtre par niveau
-      const niveauMatch = !this.niveauSeanceFilter || seance.niveauSeance === this.niveauSeanceFilter;
-
-      // Filtre par statut
-      const statutMatch = !this.statutFilter || seance.statut === this.statutFilter;
-
-      // Filtre par date minimum
-      const dateMin = this.dateMinFilter ? new Date(this.dateMinFilter) : null;
-      const dateMinMatch = !dateMin || new Date(seance.dateHeure) >= dateMin;
-
-      // Filtre par date maximum
-      const dateMax = this.dateMaxFilter ? new Date(this.dateMaxFilter) : null;
-      const dateMaxMatch = !dateMax || new Date(seance.dateHeure) <= dateMax;
-
-      return searchMatch && typeMatch && niveauMatch && statutMatch && dateMinMatch && dateMaxMatch;
-    });
+    this.loadSeances();
   }
 
   async viewSeanceDetails(id: number): Promise<void> {
     this.loading = true;
     this.error = '';
 
-    // try {
-    //   if (this.isAuthenticated) {
-    //     this.selectedSeance = await this.seanceApiService.getSeance(id);
-    //   } else {
-    //     this.infoMessage = 'Connectez-vous pour voir les détails de cette séance';
-    //   }
-    // } catch (error) {
-    //   console.error(error);
-    //   if (error instanceof HttpErrorResponse && error.status === 401) {
-    //     this.error = '';
-    //     this.infoMessage = 'Vous devez être connecté pour voir les détails complets de cette séance';
-    //   } else {
-    //     this.error = 'Erreur lors du chargement des détails de la séance';
-    //   }
-    // } finally {
-    //   this.loading = false;
-    // }
+    try {
+      const seance = await this.seanceApiService.getSeanceById(id);
+      this.selectedSeance = seance;
+    } catch (error) {
+      this.error = 'Erreur lors du chargement des détails de la séance';
+    } finally {
+      this.loading = false;
+    }
   }
 
   closeDetails(): void {
@@ -146,6 +134,6 @@ export class SeanceListComponent implements OnInit {
     this.dateMinFilter = '';
     this.dateMaxFilter = '';
     this.statutFilter = '';
-    this.applyClientSideFilters();
+    this.loadSeances();
   }
 }

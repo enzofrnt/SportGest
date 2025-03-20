@@ -1,161 +1,335 @@
-.card {
-    transition: transform 0.3s, box-shadow 0.3s;
-    &:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    }
-}
+// Variables
+$primary-color: #3498db;
+$secondary-color: #2ecc71;
+$danger-color: #e74c3c;
+$warning-color: #f1c40f;
+$text-color: #2c3e50;
+$light-bg: #f8f9fa;
+$border-radius: 12px;
+$card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
-.card-header {
-    background-color: #f8f9fa;
-}
-
-.badge {
-    padding: 6px 10px;
-    border-radius: 20px;
-}
-
-i {
-    margin-right: 8px;
-    width: 16px;
-    text-align: center;
-}
-
-.list-group-item {
-    transition: background-color 0.2s;
-    &:hover {
-        background-color: #f8f9fa;
-    }
-}
-
-h1 {
-    color: #2c3e50;
-    margin-bottom: 1.5rem;
-    font-weight: 700;
-}
-
-h4 {
-    color: #3498db;
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    font-weight: 600;
-}
-
-.btn-primary {
-    background-color: #3498db;
-    border-color: #3498db;
-    &:hover {
-        background-color: #2980b9;
-        border-color: #2980b9;
-    }
-}
-
+// Layout général
 .container {
-    padding-bottom: 3rem;
+  max-width: 1200px;
+  padding: 1rem 1rem;
 }
 
-// Nouveaux styles pour la barre de recherche et les filtres
-.input-group {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    border-radius: 4px;
+// Barre d'outils
+.toolbar {
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $card-shadow;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+
+  .input-group {
+    background: $light-bg;
+    border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
     input {
-        border-right: none;
-        &:focus {
-            box-shadow: none;
-        }
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      &:focus {
+        box-shadow: none;
+        background: white;
+      }
     }
+
     .btn {
-        border-left: none;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      font-weight: 500;
+    }
+  }
+}
+
+// Filtres avancés
+.filters-card {
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $card-shadow;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  animation: slideDown 0.3s ease-out;
+
+  .form-label {
+    font-weight: 500;
+    color: $text-color;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-select, .form-control {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    &:focus {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+  }
+}
+
+// Liste des séances
+.seances-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  justify-content: flex-start;
+}
+
+// Carte de séance
+.seance-card {
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $card-shadow;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex: 1 1 300px;
+  max-width: calc(33.333% - 1rem);
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.5s ease-out;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    background: $light-bg;
+    padding: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h5 {
+      margin: 0;
+      font-weight: 600;
+      color: $text-color;
+    }
+
+    .badge {
+      padding: 0.5rem 0.75rem;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 0.85rem;
+
+      &.bg-warning {
+        background-color: $warning-color !important;
+        color: #fff;
+      }
+
+      &.bg-success {
+        background-color: $secondary-color !important;
+        color: #fff;
+      }
+
+      &.bg-secondary {
+        background-color: #95a5a6 !important;
+        color: #fff;
+      }
+    }
+  }
+
+  .card-body {
+    padding: 1.25rem;
+    flex-grow: 1;
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      color: $text-color;
+
+      i {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: $light-bg;
+        border-radius: 50%;
+        margin-right: 0.75rem;
+        color: $primary-color;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .card-footer {
+    padding: 1rem;
+    background: white;
+    border-top: 1px solid #e0e0e0;
+
+    .btn {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+// Détails de la séance
+.seance-details {
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $card-shadow;
+  margin-top: 2rem;
+  animation: fadeIn 0.3s ease-out;
+
+  .card-header {
+    background: $light-bg;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      margin: 0;
+      color: $text-color;
+      font-weight: 600;
+    }
+  }
+
+  .card-body {
+    padding: 2rem;
+
+    h4 {
+      color: $primary-color;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .info-group {
+      margin-bottom: 2rem;
+
+      p {
+        margin-bottom: 0.5rem;
+        color: $text-color;
+      }
+    }
+
+    .list-group {
+      border-radius: 8px;
+      overflow: hidden;
+
+      .list-group-item {
+        padding: 1rem;
+        border: 1px solid #e0e0e0;
+        background: white;
+
         &:hover {
-            background-color: #f8f9fa;
+          background: $light-bg;
         }
+      }
     }
+  }
 }
 
-// Animation pour les filtres
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive
+@media (max-width: 1200px) {
+  .seance-card {
+    max-width: calc(50% - 1rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .seance-card {
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  .toolbar {
+    .input-group {
+      margin-bottom: 1rem;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+  }
+
+  .seance-details {
+    .card-body {
+      padding: 1rem;
     }
+  }
 }
 
-[hidden] {
-    display: none !important;
-}
+// Messages d'alerte
+.alert {
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
 
-*[hidden]+* {
-    margin-top: 0 !important;
-}
-
-*:not([hidden])+*:not([hidden]) {
-    margin-top: 0.5rem;
-}
-
-.row>*[hidden] {
-    margin-bottom: 0;
-}
-
-// Animation pour les filtres affichés
-.filters-container {
-    animation: slideDown 0.3s ease-out;
-}
-
-// Style pour le message d'avertissement d'authentification
-.alert-warning {
+  &.alert-warning {
     background-color: #fff3cd;
     border-color: #ffecb5;
     color: #856404;
-    border-radius: 6px;
-    padding: 16px;
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    a.btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-        &:hover {
-            background-color: #0069d9;
-            border-color: #0062cc;
-        }
-    }
-}
+  }
 
-// Style pour le message d'information
-.alert-info {
+  &.alert-info {
     background-color: #d1ecf1;
     border-color: #bee5eb;
     color: #0c5460;
-    border-radius: 6px;
-    i.bi-info-circle-fill {
-        color: #17a2b8;
-        font-size: 1.5rem;
-    }
-    .btn-primary {
-        background-color: #17a2b8;
-        border-color: #17a2b8;
-        &:hover {
-            background-color: #138496;
-            border-color: #117a8b;
-        }
-    }
+  }
 }
 
-// Style pour le bouton "Se connecter pour réserver"
-.btn-outline-primary {
-    color: #3498db;
-    border-color: #3498db;
+// Boutons
+.btn {
+  &-primary {
+    background-color: $primary-color;
+    border-color: $primary-color;
     &:hover {
-        background-color: #3498db;
-        color: white;
+      background-color: darken($primary-color, 10%);
+      border-color: darken($primary-color, 10%);
     }
-    i {
-        margin-right: 5px;
+  }
+
+  &-outline-primary {
+    color: $primary-color;
+    border-color: $primary-color;
+    &:hover {
+      background-color: $primary-color;
+      color: white;
     }
+  }
 }

@@ -1,0 +1,207 @@
+// Variables
+$primary-color: #3498db;
+$secondary-color: #2ecc71;
+$danger-color: #e74c3c;
+$warning-color: #f1c40f;
+$text-color: #2c3e50;
+$light-bg: #f8f9fa;
+$border-radius: 12px;
+$card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+// Layout général
+.container {
+  max-width: 1200px;
+  padding: 1rem 1rem;
+}
+
+// Conteneur du calendrier
+.calendar-container {
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $card-shadow;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+
+  ::ng-deep {
+    .fc {
+      background: white;
+      border-radius: $border-radius;
+      padding: 1rem;
+
+      .fc-toolbar {
+        margin-bottom: 1.5rem !important;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        .fc-toolbar-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: $text-color;
+        }
+
+        .fc-button {
+          background-color: $primary-color;
+          border-color: $primary-color;
+          color: white;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          font-weight: 500;
+          text-transform: capitalize;
+
+          &:hover {
+            background-color: darken($primary-color, 10%);
+            border-color: darken($primary-color, 10%);
+          }
+
+          &.fc-button-active {
+            background-color: darken($primary-color, 20%);
+            border-color: darken($primary-color, 20%);
+          }
+        }
+      }
+
+      .fc-timegrid-slot {
+        height: 3em;
+      }
+
+      .fc-event {
+        border-radius: 6px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+
+        &:hover {
+          transform: scale(1.02);
+        }
+      }
+    }
+  }
+}
+
+// Détails de la séance
+.seance-details {
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $card-shadow;
+  margin-top: 2rem;
+  animation: fadeIn 0.3s ease-out;
+
+  .card-header {
+    background: $light-bg;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      margin: 0;
+      color: $text-color;
+      font-weight: 600;
+    }
+  }
+
+  .card-body {
+    padding: 2rem;
+
+    h4 {
+      color: $primary-color;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .info-group {
+      margin-bottom: 2rem;
+
+      p {
+        margin-bottom: 0.5rem;
+        color: $text-color;
+      }
+    }
+
+    .list-group {
+      border-radius: 8px;
+      overflow: hidden;
+
+      .list-group-item {
+        padding: 1rem;
+        border: 1px solid #e0e0e0;
+        background: white;
+
+        &:hover {
+          background: $light-bg;
+        }
+      }
+    }
+  }
+}
+
+// Messages d'alerte
+.alert {
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  &.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffecb5;
+    color: #856404;
+  }
+
+  &.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+  }
+}
+
+// Boutons
+.btn {
+  &-primary {
+    background-color: $primary-color;
+    border-color: $primary-color;
+    &:hover {
+      background-color: darken($primary-color, 10%);
+      border-color: darken($primary-color, 10%);
+    }
+  }
+
+  &-outline-primary {
+    color: $primary-color;
+    border-color: $primary-color;
+    &:hover {
+      background-color: $primary-color;
+      color: white;
+    }
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .calendar-container {
+    padding: 1rem;
+  }
+
+  .seance-details {
+    .card-body {
+      padding: 1rem;
+    }
+  }
+}

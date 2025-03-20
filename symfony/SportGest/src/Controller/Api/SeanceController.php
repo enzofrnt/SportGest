@@ -242,8 +242,61 @@ class SeanceController extends AbstractController
     #[Route('/seances', name: 'api_seances_list', methods: ['GET'])]
     public function listSeances(SeanceRepository $seanceRepository, Request $request): JsonResponse
     {
-        $seances = $seanceRepository->findAll();
+        // Récupération des paramètres de filtrage
+        $typeSeance = $request->query->get('type_seance');
+        $niveauSeance = $request->query->get('niveau_seance');
+        $dateMin = $request->query->get('date_min') ? new \DateTime($request->query->get('date_min')) : null;
+        $dateMax = $request->query->get('date_max') ? new \DateTime($request->query->get('date_max')) : null;
+        $statut = $request->query->get('statut');
+        $coachId = $request->query->get('coach_id');
+
+        // Construction de la requête avec QueryBuilder
+        $qb = $seanceRepository->createQueryBuilder('s')
+            ->leftJoin('s.theme', 't')
+            ->leftJoin('s.coach', 'c')
+            ->leftJoin('s.sportifs', 'sp')
+            ->leftJoin('s.exercices', 'e');
+
+        // Application des filtres
+        if ($typeSeance) {
+            $qb->andWhere('s.typeSeance = :typeSeance')
+               ->setParameter('typeSeance', $typeSeance);
+        }
+
+        if ($niveauSeance) {
+            $qb->andWhere('s.niveauSeance = :niveauSeance')
+               ->setParameter('niveauSeance', $niveauSeance);
+        }
+
+        if ($dateMin) {
+            $qb->andWhere('s.dateHeure >= :dateMin')
+               ->setParameter('dateMin', $dateMin);
+        }
+
+        if ($dateMax) {
+            $qb->andWhere('s.dateHeure <= :dateMax')
+               ->setParameter('dateMax', $dateMax);
+        }
+
+        if ($statut) {
+            $qb->andWhere('s.statut = :statut')
+               ->setParameter('statut', $statut);
+        }
+
+        if ($coachId) {
+            $qb->andWhere('c.id = :coachId')
+               ->setParameter('coachId', $coachId);
+        }
+
+        // Tri par date par défaut
+        $qb->orderBy('s.dateHeure', 'ASC');
+
+        // Exécution de la requête
+        $seances = $qb->getQuery()->getResult();
+
+        // Transformation des données avec la méthode utilitaire
         $data = array_map([$this, 'getSeanceData'], $seances);
+
         return $this->json($data);
     }
 

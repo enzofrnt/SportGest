@@ -4,6 +4,7 @@ import { RegisterComponent } from './auth/register/register.component';
 import { HomeComponent } from './features/public/home/home.component';
 import { CoachListComponent } from './features/public/coach/coache-list/coach-list.component';
 import { SeanceListComponent } from './features/public/seance/seance-list/seance-list.component';
+import { SeancePlanningComponent } from './features/public/seance/seance-planning/seance-planning.component';
 import { PlanningComponent as PublicPlanningComponent } from './features/public/planning/planning.component';
 import { DashboardComponent } from './features/member/dashboard/dashboard.component';
 import { PlanningComponent as MemberPlanningComponent } from './features/member/planning/planning.component';
@@ -26,6 +27,7 @@ export const routes: Routes = [
     title: 'Détails du coach'
   },
   { path: 'seances', component: SeanceListComponent },
+  { path: 'seances/planning', component: SeancePlanningComponent },
   { path: 'planning', component: PublicPlanningComponent },
   { path: 'inscription', component: RegisterComponent },
   { path: 'connexion', component: LoginComponent },
