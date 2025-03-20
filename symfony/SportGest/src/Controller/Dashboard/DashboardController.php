@@ -154,7 +154,7 @@ class DashboardController extends AbstractDashboardController
                 $top_seances[] = [
                     'theme' => $seance->getTheme() ? $seance->getTheme()->getNom() : '',
                     'coach' => $seance->getCoach()->getPrenom() . ' ' . $seance->getCoach()->getNom(),
-                    'sportifs' => $seance->getSportifs()->count(),
+                    'sportifs' => $seance->getReservations()->count(),
                 ];
             }
             usort($top_seances, function ($a, $b) {

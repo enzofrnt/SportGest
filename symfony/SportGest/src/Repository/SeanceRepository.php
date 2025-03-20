@@ -66,8 +66,8 @@ class SeanceRepository extends ServiceEntityRepository
     public function countSportifs(Coach $coach): int
     {
         return $this->createQueryBuilder('s')
-            ->select('COUNT(DISTINCT sp.id)')
-            ->join('s.sportifs', 'sp')
+            ->select('COUNT(DISTINCT r.sportif)')
+            ->join('s.reservations', 'r')
             ->where('s.coach = :coach')
             ->setParameter('coach', $coach)
             ->getQuery()
@@ -189,8 +189,8 @@ class SeanceRepository extends ServiceEntityRepository
     public function countSportifsUniques(Coach $coach): int
     {
         return $this->createQueryBuilder('s')
-            ->select('COUNT(DISTINCT sp.id)')
-            ->join('s.sportifs', 'sp')
+            ->select('COUNT(DISTINCT r.sportif)')
+            ->join('s.reservations', 'r')
             ->where('s.coach = :coach')
             ->setParameter('coach', $coach)
             ->getQuery()
@@ -200,8 +200,8 @@ class SeanceRepository extends ServiceEntityRepository
     public function findSeancesBySportif(Sportif $sportif): array
     {
         return $this->createQueryBuilder('s')
-            ->join('s.sportifs', 'sp')
-            ->where('sp.id = :sportifId')
+            ->join('s.reservations', 'r')
+            ->where('r.sportif = :sportifId')
             ->setParameter('sportifId', $sportif->getId())
             ->orderBy('s.dateHeure', 'DESC')
             ->getQuery()
@@ -211,8 +211,8 @@ class SeanceRepository extends ServiceEntityRepository
     public function findSeancesTermineesBySportif(Sportif $sportif): array
     {
         return $this->createQueryBuilder('s')
-            ->join('s.sportifs', 'sp')
-            ->where('sp.id = :sportifId')
+            ->join('s.reservations', 'r')
+            ->where('r.sportif = :sportifId')
             ->andWhere('s.statut = :statut')
             ->setParameter('sportifId', $sportif->getId())
             ->setParameter('statut', StatutSeance::VALIDEE)
@@ -224,8 +224,8 @@ class SeanceRepository extends ServiceEntityRepository
     public function findSeancesValideesBySportifAndDates(Sportif $sportif, \DateTime $dateMin, \DateTime $dateMax): array
     {
         return $this->createQueryBuilder('s')
-            ->join('s.sportifs', 'sp')
-            ->where('sp.id = :sportifId')
+            ->join('s.reservations', 'r')
+            ->where('r.sportif = :sportifId')
             ->andWhere('s.statut = :statut')
             ->andWhere('s.dateHeure BETWEEN :dateMin AND :dateMax')
             ->setParameter('sportifId', $sportif->getId())
@@ -251,8 +251,8 @@ class SeanceRepository extends ServiceEntityRepository
     public function countParticipationsByDateRange(\DateTime $dateDebut, \DateTime $dateFin): int
     {
         return $this->createQueryBuilder('s')
-            ->select('COUNT(sp.id)')
-            ->join('s.sportifs', 'sp')
+            ->select('COUNT(r.id)')
+            ->join('s.reservations', 'r')
             ->where('s.dateHeure BETWEEN :debut AND :fin')
             ->setParameter('debut', $dateDebut)
             ->setParameter('fin', $dateFin)
@@ -390,10 +390,9 @@ class SeanceRepository extends ServiceEntityRepository
                    YEAR(s.date_heure) as annee,
                    MIN(s.date_heure) as debut_semaine,
                    COUNT(s.id) as nb_seances,
-                   COUNT(DISTINCT sp.id) as nb_participants
+                   COUNT(DISTINCT r.sportif_id) as nb_participants
             FROM seance s
-            LEFT JOIN seance_sportif ss ON s.id = ss.seance_id
-            LEFT JOIN sportif sp ON sp.id = ss.sportif_id
+            LEFT JOIN reservation r ON s.id = r.seance_id
             WHERE s.date_heure BETWEEN :debut AND :fin
             GROUP BY YEAR(s.date_heure), WEEK(s.date_heure)
             ORDER BY annee ASC, semaine ASC

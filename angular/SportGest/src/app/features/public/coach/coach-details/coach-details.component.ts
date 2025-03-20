@@ -79,8 +79,8 @@ export class CoachDetailsComponent implements OnInit {
     }
   }
 
-  getNombreSportifs(seance: Seance): string {
-    return seance.sportifs ? `${seance.sportifs.length}/10` : '0/10';
+  getParticipantCount(seance: Seance): string {
+    return seance.reservations ? `${seance.reservations.length}/10` : '0/10';
   }
 
   /**

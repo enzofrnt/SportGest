@@ -38,11 +38,11 @@ class Seance
     private ?Coach $coach = null;
 
     /**
-     * @var Collection<int, Sportif>
+     * @var Collection<int, Reservation>
      */
-    #[ORM\ManyToMany(targetEntity: Sportif::class)]
+    #[ORM\OneToMany(mappedBy: 'seance', targetEntity: Reservation::class, orphanRemoval: true)]
     #[Groups(['seance:read', 'seance:write'])]
-    private Collection $sportifs;
+    private Collection $reservations;
 
     #[ORM\Column(type: 'string', enumType: StatutSeance::class)]
     #[Groups(['seance:read', 'seance:write'])]
@@ -65,7 +65,7 @@ class Seance
 
     public function __construct()
     {
-        $this->sportifs = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
         $this->exercices = new ArrayCollection();
     }
 
@@ -111,25 +111,30 @@ class Seance
     }
 
     /**
-     * @return Collection<int, Sportif>
+     * @return Collection<int, Reservation>
      */
-    public function getSportifs(): Collection
+    public function getReservations(): Collection
     {
-        return $this->sportifs;
+        return $this->reservations;
     }
 
-    public function addSportif(Sportif $sportif): static
+    public function addReservation(Reservation $reservation): static
     {
-        if (!$this->sportifs->contains($sportif)) {
-            $this->sportifs->add($sportif);
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setSeance($this);
         }
 
         return $this;
     }
 
-    public function removeSportif(Sportif $sportif): static
+    public function removeReservation(Reservation $reservation): static
     {
-        $this->sportifs->removeElement($sportif);
+        if ($this->reservations->removeElement($reservation)) {
+            if ($reservation->getSeance() === $this) {
+                $reservation->setSeance(null);
+            }
+        }
 
         return $this;
     }

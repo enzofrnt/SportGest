@@ -11,6 +11,7 @@ use App\Entity\Exercice;
 use App\Entity\FicheDePaie;
 use App\Entity\Responsable;
 use App\Entity\Specialite;
+use App\Entity\Reservation;
 use App\Enum\DifficulteExercice;
 use App\Enum\NiveauSportif;
 use App\Enum\TypeSeance;
@@ -261,7 +262,16 @@ class AppFixtures extends Fixture
             $nbSportifs = min(count($sportifsFiltres), $maxSportifs, rand(1, $maxSportifs));
             
             for ($j = 0; $j < $nbSportifs; $j++) {
-                $seance->addSportif($sportifsFiltres[$j]);
+                $reservation = new Reservation();
+                $reservation->setSportif($sportifsFiltres[$j]);
+                $reservation->setSeance($seance);
+                
+                // Si la séance est passée, on définit aléatoirement la présence
+                if ($jours < 0) {
+                    $reservation->setPresence(rand(0, 1) === 1);
+                }
+                
+                $manager->persist($reservation);
             }
             
             $nbExercices = rand(2, 7);

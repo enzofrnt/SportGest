@@ -12,6 +12,8 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: SportifRepository::class)]
 #[ApiResource(
@@ -45,6 +47,18 @@ class Sportif extends Utilisateur
     #[Groups(['sportif:read', 'sportif:write'])]
     private ?NiveauSportif $niveauSportif = null;
 
+    /**
+     * @var Collection<int, Reservation>
+     */
+    #[ORM\OneToMany(mappedBy: 'sportif', targetEntity: Reservation::class, orphanRemoval: true)]
+    #[Groups(['sportif:read', 'sportif:write'])]
+    private Collection $reservations;
+
+    public function __construct()
+    {
+        $this->reservations = new ArrayCollection();
+    }
+
     public function getDateInscription(): ?\DateTimeImmutable
     {
         return $this->dateInscription;
@@ -65,6 +79,35 @@ class Sportif extends Utilisateur
     public function setNiveauSportif(NiveauSportif $niveauSportif): static
     {
         $this->niveauSportif = $niveauSportif;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): static
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setSportif($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            if ($reservation->getSportif() === $this) {
+                $reservation->setSportif(null);
+            }
+        }
 
         return $this;
     }

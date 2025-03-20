@@ -14,8 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-
+use App\Entity\Reservation;
 #[Route('/api')]
 class SeanceController extends AbstractController
 {
@@ -103,7 +102,12 @@ class SeanceController extends AbstractController
 
         // Vérifier les règles métier
         if ($this->peutInscrireSportif($seance, $sportif)) {
-            $seance->addSportif($sportif);
+            $reservation = new Reservation();
+            $reservation->setSeance($seance);
+            $reservation->setSportif($sportif);
+
+            $seance->addReservation($reservation);
+            $entityManager->persist($reservation);
             $entityManager->flush();
 
             return $this->json(['message' => 'Sportif inscrit avec succès'], JsonResponse::HTTP_OK);
@@ -205,7 +209,7 @@ class SeanceController extends AbstractController
         }
 
         // Vérifier si la séance n'est pas complète (exemple : max 10 participants)
-        if (count($seance->getSportifs()) >= 10) {
+        if ($seance->getReservations()->count() >= 10) {
             return false;
         }
 
@@ -229,7 +233,7 @@ class SeanceController extends AbstractController
                 'nom' => $seance->getCoach()->getNom(),
                 'prenom' => $seance->getCoach()->getPrenom(),
             ],
-            'nbSportifs' => $seance->getSportifs()->count(),
+            'nbSportifs' => $seance->getReservations()->count(),
             'exercices' => array_map(function($exercice) {
                 return [
                     'id' => $exercice->getId(),
@@ -254,7 +258,7 @@ class SeanceController extends AbstractController
         $qb = $seanceRepository->createQueryBuilder('s')
             ->leftJoin('s.theme', 't')
             ->leftJoin('s.coach', 'c')
-            ->leftJoin('s.sportifs', 'sp')
+            ->leftJoin('s.reservations', 'r')
             ->leftJoin('s.exercices', 'e');
 
         // Application des filtres
@@ -437,7 +441,7 @@ class SeanceController extends AbstractController
         $result = [];
         foreach ($seances as $seance) {
             // Vérifier s'il y a des places disponibles
-            $placesDisponibles = $capaciteMaxSeance - $seance->getSportifs()->count();
+            $placesDisponibles = $capaciteMaxSeance - $seance->getReservations()->count();
 
             if ($placesDisponibles > 0) {
                 $result[] = [
@@ -452,7 +456,7 @@ class SeanceController extends AbstractController
                         'prenom' => $seance->getCoach()->getPrenom(),
                     ],
                     'placesDisponibles' => $placesDisponibles,
-                    'placesOccupees' => $seance->getSportifs()->count(),
+                    'placesOccupees' => $seance->getReservations()->count(),
                     'capaciteMax' => $capaciteMaxSeance
                 ];
             }
@@ -562,7 +566,7 @@ class SeanceController extends AbstractController
         $seancesDisponibles = [];
         foreach ($seances as $seance) {
             // Calculer les places disponibles pour chaque séance
-            $placesDisponibles = $capaciteMaxSeance - $seance->getSportifs()->count();
+            $placesDisponibles = $capaciteMaxSeance - $seance->getReservations()->count();
 
             if ($placesDisponibles > 0) {
                 $seancesDisponibles[] = [

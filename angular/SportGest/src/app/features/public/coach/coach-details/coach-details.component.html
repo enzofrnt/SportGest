@@ -69,14 +69,14 @@
               <td>{{ seance.niveauSeance }}</td>
               <td>
                 <span [ngClass]="{
-                  'badge rounded-pill bg-success': seance.statut === StatutSeance.PREVUE,
-                  'badge rounded-pill bg-primary': seance.statut === StatutSeance.VALIDEE,
-                  'badge rounded-pill bg-danger': seance.statut === StatutSeance.ANNULEE
+                  'badge rounded-pill bg-success': seance.statut === statutSeance.PREVUE,
+                  'badge rounded-pill bg-primary': seance.statut === statutSeance.VALIDEE,
+                  'badge rounded-pill bg-danger': seance.statut === statutSeance.ANNULEE
                 }">
                   {{ seance.statut }}
                 </span>
               </td>
-              <td>{{ getNombreSportifs(seance) }}</td>
+              <td>{{ getParticipantCount(seance) }}</td>
               <td>
                 <a [routerLink]="['/seances', seance.id]"
                   class="btn btn-sm btn-outline-primary">

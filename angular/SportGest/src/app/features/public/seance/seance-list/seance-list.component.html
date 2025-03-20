@@ -118,7 +118,7 @@
             </div>
             <div class="info-item">
               <i class="bi bi-people"></i>
-              <span>{{ seance.sportifs?.length || 0 }} participant(s)</span>
+              <span>{{ seance.reservations?.length || 0 }} participants</span>
             </div>
           </div>
           <div class="card-footer">
@@ -169,14 +169,21 @@
 
             <div class="info-group">
               <h4>Participants</h4>
-              <div *ngIf="!selectedSeance.sportifs?.length"
-                class="alert alert-info">
-                Aucun participant inscrit.
+              <div *ngIf="!selectedSeance.reservations?.length"
+                class="text-center p-3">
+                <p>Aucun participant inscrit</p>
               </div>
-              <ul class="list-group" *ngIf="selectedSeance.sportifs?.length">
-                <li class="list-group-item"
-                  *ngFor="let sportif of selectedSeance.sportifs">
-                  {{ sportif.prenom }} {{ sportif.nom }}
+              <ul class="list-group"
+                *ngIf="selectedSeance.reservations?.length">
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center"
+                  *ngFor="let reservation of selectedSeance.reservations">
+                  {{ reservation.sportif.nom }} {{ reservation.sportif.prenom }}
+                  <span class="badge"
+                    [ngClass]="{'bg-success': reservation.presence, 'bg-danger': reservation.presence === false, 'bg-secondary': reservation.presence === null}">
+                    {{ reservation.presence ? 'Présent' : (reservation.presence
+                    === false ? 'Absent' : 'Non défini') }}
+                  </span>
                 </li>
               </ul>
             </div>

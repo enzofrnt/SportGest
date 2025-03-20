@@ -1,10 +1,10 @@
 import { Coach } from './coach.model';
-import { Sportif } from './sportif.model';
 import { Exercice } from './exercice.model';
 import { Specialite } from './specialite.model';
 import { TypeSeance } from './enum/type-seance.enum';
 import { StatutSeance } from './enum/statut-seance.enum';
 import { NiveauSportif } from './enum/niveau-sportif.enum';
+import { Reservation } from './reservation.model';
 
 export interface Seance {
     id?: number;
@@ -12,7 +12,7 @@ export interface Seance {
     typeSeance: TypeSeance;
     themeSeance: string;
     coach: Coach;
-    sportifs: Sportif[];
+    reservations: Reservation[];
     statut: StatutSeance;
     niveauSeance: NiveauSportif;
     exercices: Exercice[];

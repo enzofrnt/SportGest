@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Coach;
+use App\Entity\Seance;
 use App\Repository\CoachRepository;
 use App\Repository\SeanceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -78,7 +79,7 @@ class CoachController extends AbstractController
                 'typeSeance' => $seance->getTypeSeance()->value,
                 'statut' => $seance->getStatut()->value,
                 'niveauSeance' => $seance->getNiveauSeance()->value,
-                'nbSportifs' => $seance->getSportifs()->count(),
+                'nbSportifs' => $seance->getReservations()->count(),
             ];
         }
 
