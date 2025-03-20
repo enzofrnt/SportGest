@@ -12,6 +12,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use App\Enum\DifficulteExercice;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
@@ -46,12 +48,14 @@ class ExerciceCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             TextField::new('nom'),
-            TextEditorField::new('description'),
+            TextareaField::new('description'),
+            IntegerField::new('dureeEstimee')
+                ->setLabel('Durée estimée (minutes)'),
             ChoiceField::new('difficulte')
                 ->setFormType(\Symfony\Component\Form\Extension\Core\Type\EnumType::class)
                 ->setFormTypeOptions([
                     'class' => \App\Enum\DifficulteExercice::class,
-                    'choice_label' => function(\App\Enum\DifficulteExercice $choice) {
+                    'choice_label' => function (\App\Enum\DifficulteExercice $choice) {
                         return $choice->value;
                     }
                 ])

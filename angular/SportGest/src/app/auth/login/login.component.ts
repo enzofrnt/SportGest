@@ -32,7 +32,11 @@ export class LoginComponent {
       const login$ = await this.authService.login(this.email, this.password);
       login$.subscribe({
         next: () => {
-          this.router.navigate(['/membre']);
+          if (this.authService.isSportif()) {
+            this.router.navigate(['/membre']);
+          } else {
+            this.router.navigate(['/membre/profil']);
+          }
         },
         error: (err) => {
           this.error = err.error.message || 'Une erreur est survenue';

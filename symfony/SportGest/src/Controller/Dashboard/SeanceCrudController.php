@@ -92,7 +92,7 @@ class SeanceCrudController extends AbstractCrudController
                 ->setFormType(\Symfony\Component\Form\Extension\Core\Type\EnumType::class)
                 ->setFormTypeOptions([
                     'class' => \App\Enum\NiveauSportif::class,
-                    'choice_label' => function(\App\Enum\NiveauSportif $choice) {
+                    'choice_label' => function (\App\Enum\NiveauSportif $choice) {
                         return $choice->value;
                     }
                 ])
@@ -109,10 +109,12 @@ class SeanceCrudController extends AbstractCrudController
         } else if ($user instanceof Responsable) {
             $fields[] = AssociationField::new('coach')
                 ->setFormTypeOption('disabled', false);
-        } 
+        }
 
         $fields[] = AssociationField::new('exercices');
-        $fields[] = AssociationField::new('sportifs');
+        $fields[] = AssociationField::new('reservations')
+            ->setLabel('Réservations')
+            ->onlyOnDetail();
 
         return $fields;
     }
@@ -125,8 +127,8 @@ class SeanceCrudController extends AbstractCrudController
         if ($user instanceof Coach) {
             // Les coachs ne voient que leurs propres séances
             $qb->andWhere('entity.coach = :coach')
-               ->setParameter('coach', $user)
-               ->orderBy('entity.dateHeure', 'DESC');
+                ->setParameter('coach', $user)
+                ->orderBy('entity.dateHeure', 'DESC');
         }
 
         return $qb;
