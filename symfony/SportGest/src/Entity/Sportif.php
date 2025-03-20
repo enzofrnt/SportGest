@@ -114,6 +114,6 @@ class Sportif extends Utilisateur
 
     public function __toString(): string
     {
-        return $this->getNom();
+        return $this->getNom() . ' ' . $this->getPrenom();
     }
 }

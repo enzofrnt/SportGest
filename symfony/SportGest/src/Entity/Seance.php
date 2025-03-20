@@ -207,4 +207,9 @@ class Seance
         
         return $dureeTotal;
     }
+
+    public function __toString(): string
+    {
+        return $this->dateHeure->format('Y-m-d H:i');
+    }
 }

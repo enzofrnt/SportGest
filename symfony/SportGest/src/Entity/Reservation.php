@@ -11,11 +11,20 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Patch;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
+#[ORM\UniqueConstraint(
+    name: "unique_reservation",
+    columns: ["sportif_id", "seance_id"]
+)]
 #[ApiResource(
     normalizationContext: ['groups' => ['reservation:read']],
     denormalizationContext: ['groups' => ['reservation:write']]
+)]
+#[UniqueEntity(
+    fields: ['sportif', 'seance'],
+    message: 'Ce sportif est déjà inscrit à cette séance'
 )]
 class Reservation
 {

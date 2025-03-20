@@ -27,7 +27,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-
+use App\Entity\Reservation;
 #[AdminDashboard(
     routePath: '/admin',
     routeName: 'admin'
@@ -207,6 +207,7 @@ class DashboardController extends AbstractDashboardController
             yield MenuItem::linkToCrud('Coachs', 'fas fa-user-friends', Coach::class);
             yield MenuItem::linkToCrud('Sportifs', 'fas fa-running', Sportif::class)
                 ->setDefaultSort(['nom' => 'ASC', 'prenom' => 'ASC']);
+            yield MenuItem::linkToCrud('Reservations', 'fas fa-calendar-alt', Reservation::class);
             yield MenuItem::section('Gestion');
             yield MenuItem::linkToCrud('Toutes les séances', 'fas fa-calendar-alt', Seance::class)
                 ->setDefaultSort(['dateHeure' => 'DESC']);
