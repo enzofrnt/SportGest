@@ -1,4 +1,5 @@
 <?php
+
 namespace App\DataFixtures;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -23,12 +24,43 @@ class AppFixtures extends Fixture
 {
     private UserPasswordHasherInterface $passwordHasher;
 
-    private array $firstNames = ['Jean', 'Marie', 'Pierre', 'Sophie', 'Thomas', 'Julie', 'Nicolas', 'Emilie', 
-                               'Lucas', 'Léa', 'Maxime', 'Laura', 'Alexandre', 'Camille', 'Antoine', 'Chloé'];
-    
-    private array $lastNames = ['Dupont', 'Martin', 'Durand', 'Lefebvre', 'Moreau', 'Simon', 'Laurent',
-                              'Michel', 'Leroy', 'Garcia', 'Bernard', 'Thomas', 'Robert', 'Richard', 'Petit'];
-    
+    private array $firstNames = [
+        'Jean',
+        'Marie',
+        'Pierre',
+        'Sophie',
+        'Thomas',
+        'Julie',
+        'Nicolas',
+        'Emilie',
+        'Lucas',
+        'Léa',
+        'Maxime',
+        'Laura',
+        'Alexandre',
+        'Camille',
+        'Antoine',
+        'Chloé'
+    ];
+
+    private array $lastNames = [
+        'Dupont',
+        'Martin',
+        'Durand',
+        'Lefebvre',
+        'Moreau',
+        'Simon',
+        'Laurent',
+        'Michel',
+        'Leroy',
+        'Garcia',
+        'Bernard',
+        'Thomas',
+        'Robert',
+        'Richard',
+        'Petit'
+    ];
+
     private array $domains = ['gmail.com', 'yahoo.fr', 'hotmail.com', 'outlook.fr', 'free.fr', 'orange.fr'];
 
     public function __construct(UserPasswordHasherInterface $passwordHasher)
@@ -40,22 +72,22 @@ class AppFixtures extends Fixture
     {
         return $this->firstNames[array_rand($this->firstNames)];
     }
-    
+
     private function getRandomLastName(): string
     {
         return $this->lastNames[array_rand($this->lastNames)];
     }
-    
+
     private function getRandomEmail(string $firstName, string $lastName): string
     {
         return strtolower($firstName . '.' . $lastName . '@' . $this->domains[array_rand($this->domains)]);
     }
-    
+
     private function getRandomFloat(float $min, float $max): float
     {
         return $min + mt_rand() / mt_getrandmax() * ($max - $min);
     }
-    
+
     private function getRandomDateInRange(string $start, string $end): \DateTimeImmutable
     {
         $startDate = new \DateTime($start);
@@ -68,26 +100,29 @@ class AppFixtures extends Fixture
     {
         // Création des spécialités
         $specialites = $this->createSpecialites($manager);
-        
+
         // Création des exercices
         $exercices = $this->createExercices($manager, 15);
-        
+
         // Création des coachs
         $coachs = $this->createCoachs($manager, 6, $specialites);
-        
+
         // Création des sportifs
         $sportifs = $this->createSportifs($manager, 20);
-        
+
         // Création des séances
         $this->createSeances($manager, $coachs, $sportifs, $exercices, $specialites, 30);
-        
+
+        // Création des séances spécifiques pour le sportif de test
+        $this->createSeancesForTestSportif($manager, $coachs, $sportifs, $exercices, $specialites);
+
         // Création des fiches de paie
         $this->createFichesDePaie($manager, $coachs);
 
         $this->createResponsables($manager, 3);
 
         $this->createAdmin($manager);
-        
+
         $manager->flush();
     }
 
@@ -95,14 +130,14 @@ class AppFixtures extends Fixture
     {
         $specialites = [];
         $nomsSpecialites = ['Fitness', 'Cardio', 'Musculation', 'Crossfit', 'Yoga', 'Pilates', 'Boxe', 'Natation'];
-        
+
         foreach ($nomsSpecialites as $nom) {
             $specialite = new Specialite();
             $specialite->setNom($nom);
             $manager->persist($specialite);
             $specialites[] = $specialite;
         }
-        
+
         return $specialites;
     }
 
@@ -112,14 +147,28 @@ class AppFixtures extends Fixture
         $prefixesExercices = ['Renforcement des', 'Extension des', 'Flexion des', 'Développé', 'Soulevé de', 'Musculation des', 'Travail des'];
         $difficultes = DifficulteExercice::cases();
         $actions = ['renforcer', 'développer', 'tonifier', 'muscler', 'améliorer'];
-        $nomsExercices = ['Pompes', 'Squats', 'Burpees', 'Abdominaux', 'Planche', 
-                         'Mountain climbers', 'Fentes avant', 'Dips', 'Jumping jacks', 'Tractions',
-                         'Gainage', 'Crunch', 'Tirage vertical', 'Développé couché', 'Rowing'];
-        
+        $nomsExercices = [
+            'Pompes',
+            'Squats',
+            'Burpees',
+            'Abdominaux',
+            'Planche',
+            'Mountain climbers',
+            'Fentes avant',
+            'Dips',
+            'Jumping jacks',
+            'Tractions',
+            'Gainage',
+            'Crunch',
+            'Tirage vertical',
+            'Développé couché',
+            'Rowing'
+        ];
+
         $exercices = [];
         for ($i = 0; $i < $count; $i++) {
             $exercice = new Exercice();
-            
+
             if (rand(0, 1) == 0) {
                 $exercice->setNom($nomsExercices[array_rand($nomsExercices)]);
             } else {
@@ -127,15 +176,15 @@ class AppFixtures extends Fixture
                 $muscle = $typesMuscles[array_rand($typesMuscles)];
                 $exercice->setNom($prefixe . ' ' . $muscle);
             }
-            
+
             $exercice->setDescription('Exercice pour ' . $actions[array_rand($actions)] . ' ' . $typesMuscles[array_rand($typesMuscles)]);
             $exercice->setDureeEstimee(rand(5, 30));
             $exercice->setDifficulte($difficultes[array_rand($difficultes)]);
-            
+
             $manager->persist($exercice);
             $exercices[] = $exercice;
         }
-        
+
         return $exercices;
     }
 
@@ -150,17 +199,17 @@ class AppFixtures extends Fixture
             $coach->setPrenom($prenom);
             $coach->setEmail($this->getRandomEmail($prenom, $nom));
             $coach->setPassword($this->passwordHasher->hashPassword($coach, 'password'));
-            
+
             $specialitesCount = rand(1, 4);
             $specialitesShuffled = $specialites;
             shuffle($specialitesShuffled);
-            
+
             for ($j = 0; $j < $specialitesCount; $j++) {
                 $coach->addSpecialite($specialitesShuffled[$j]);
             }
-            
+
             $coach->setTarifHoraire($this->getRandomFloat(30, 70));
-            
+
             $manager->persist($coach);
             $coachs[] = $coach;
         }
@@ -177,14 +226,14 @@ class AppFixtures extends Fixture
         $manager->persist($coach);
 
         $coachs[] = $coach;
-        
+
         return $coachs;
     }
 
     private function createSportifs(ObjectManager $manager, int $count): array
     {
         $niveaux = NiveauSportif::cases();
-        
+
         $sportifs = [];
         for ($i = 0; $i < $count; $i++) {
             $sportif = new Sportif();
@@ -196,7 +245,7 @@ class AppFixtures extends Fixture
             $sportif->setPassword($this->passwordHasher->hashPassword($sportif, 'password'));
             $sportif->setDateInscription($this->getRandomDateInRange('-2 years', 'now'));
             $sportif->setNiveauSportif($niveaux[array_rand($niveaux)]);
-            
+
             $manager->persist($sportif);
             $sportifs[] = $sportif;
         }
@@ -215,16 +264,16 @@ class AppFixtures extends Fixture
 
         return $sportifs;
     }
-    
+
     private function createSeances(ObjectManager $manager, array $coachs, array $sportifs, array $exercices, array $specialites, int $count): void
     {
         $typesSeance = TypeSeance::cases();
         $niveauxSeance = NiveauSportif::cases();
         $statuts = StatutSeance::cases();
-        
+
         for ($i = 0; $i < $count; $i++) {
             $seance = new Seance();
-            
+
             $jours = rand(-30, 60);
             $heures = rand(8, 20);
             $minutes = [0, 15, 30, 45][array_rand([0, 15, 30, 45])];
@@ -232,62 +281,62 @@ class AppFixtures extends Fixture
             $dateHeure->modify(($jours < 0 ? '-' : '+') . abs($jours) . ' days');
             $dateHeure->setTime($heures, $minutes);
             $seance->setDateHeure($dateHeure);
-            
+
             $typeSeance = $typesSeance[array_rand($typesSeance)];
             $seance->setTypeSeance($typeSeance);
             $seance->setCoach($coachs[array_rand($coachs)]);
             $seance->setNiveauSeance($niveauxSeance[array_rand($niveauxSeance)]);
-            
+
             if ($jours < 0) {
                 $seance->setStatut($statuts[array_rand([1, 2])]);
             } else {
                 $seance->setStatut(StatutSeance::PREVUE);
             }
-            
-            $maxSportifs = match($typeSeance) {
+
+            $maxSportifs = match ($typeSeance) {
                 TypeSeance::SOLO => 1,
                 TypeSeance::DUO => 2,
                 TypeSeance::TRIO => 3,
             };
-            
-            $sportifsFiltres = array_filter($sportifs, function($sportif) use ($seance) {
+
+            $sportifsFiltres = array_filter($sportifs, function ($sportif) use ($seance) {
                 return $sportif->getNiveauSportif() === $seance->getNiveauSeance();
             });
-            
+
             if (empty($sportifsFiltres)) {
                 $sportifsFiltres = $sportifs;
             }
-            
+
             shuffle($sportifsFiltres);
             $nbSportifs = min(count($sportifsFiltres), $maxSportifs, rand(1, $maxSportifs));
-            
+
             for ($j = 0; $j < $nbSportifs; $j++) {
                 $reservation = new Reservation();
                 $reservation->setSportif($sportifsFiltres[$j]);
                 $reservation->setSeance($seance);
-                
+
                 // Si la séance est passée, on définit aléatoirement la présence
                 if ($jours < 0) {
                     $reservation->setPresence(rand(0, 1) === 1);
                 }
-                
+
                 $manager->persist($reservation);
             }
-            
+
             $nbExercices = rand(2, 7);
             shuffle($exercices);
-            
+
             for ($j = 0; $j < $nbExercices; $j++) {
                 $seance->addExercice($exercices[$j]);
             }
 
             // Ajout d'une spécialité aléatoire comme thème
             $seance->setTheme($specialites[array_rand($specialites)]);
-            
+
             $manager->persist($seance);
         }
     }
-    
+
     private function createFichesDePaie(ObjectManager $manager, array $coachs): void
     {
         foreach ($coachs as $coach) {
@@ -296,24 +345,24 @@ class AppFixtures extends Fixture
                 $fiche = new FicheDePaie();
                 $fiche->setCoach($coach);
                 $fiche->setPeriode(PeriodePaie::MOIS);
-                
+
                 $heures = rand(10, 120);
                 $montant = $heures * $coach->getTarifHoraire();
                 $fiche->setMontantTotal($montant);
-                
+
                 $manager->persist($fiche);
             }
-            
+
             // Fiches hebdomadaires
             for ($i = 0; $i < 3; $i++) {
                 $fiche = new FicheDePaie();
                 $fiche->setCoach($coach);
                 $fiche->setPeriode(PeriodePaie::SEMAINE);
-                
+
                 $heures = rand(5, 30);
                 $montant = $heures * $coach->getTarifHoraire();
                 $fiche->setMontantTotal($montant);
-                
+
                 $manager->persist($fiche);
             }
         }
@@ -356,5 +405,125 @@ class AppFixtures extends Fixture
         $admins->setRoles(['ROLE_ADMIN']);
         $admins->setPassword($this->passwordHasher->hashPassword($admins, 'password'));
         $manager->persist($admins);
+    }
+
+    private function createSeancesForTestSportif(ObjectManager $manager, array $coachs, array $sportifs, array $exercices, array $specialites): void
+    {
+        // Trouver le sportif de test
+        $testSportif = null;
+        foreach ($sportifs as $sportif) {
+            if ($sportif->getEmail() === 'sportif@sportgest.fr') {
+                $testSportif = $sportif;
+                break;
+            }
+        }
+
+        if (!$testSportif) {
+            return;
+        }
+
+        // Trouver le coach de test
+        $testCoach = null;
+        foreach ($coachs as $coach) {
+            if ($coach->getEmail() === 'coach@sportgest.fr') {
+                $testCoach = $coach;
+                break;
+            }
+        }
+
+        if (!$testCoach) {
+            $testCoach = $coachs[array_rand($coachs)];
+        }
+
+        // Configuration des séances à créer
+        $seancesConfig = [
+            [
+                'type' => TypeSeance::SOLO,
+                'jours' => -7,
+                'heure' => 10,
+                'minute' => 0,
+                'statut' => StatutSeance::VALIDEE,
+                'theme' => 0, // Fitness
+                'presence' => true,
+                'exercicesDebut' => 0,
+                'exercicesFin' => 3
+            ],
+            [
+                'type' => TypeSeance::DUO,
+                'jours' => 0,
+                'heure' => 14,
+                'minute' => 30,
+                'statut' => StatutSeance::PREVUE,
+                'theme' => 2, // Musculation
+                'exercicesDebut' => 3,
+                'exercicesFin' => 7
+            ],
+            [
+                'type' => TypeSeance::TRIO,
+                'jours' => 7,
+                'heure' => 18,
+                'minute' => 0,
+                'statut' => StatutSeance::PREVUE,
+                'theme' => 4, // Yoga
+                'exercicesDebut' => 7,
+                'exercicesFin' => 12
+            ],
+            [
+                'type' => TypeSeance::SOLO,
+                'jours' => 14,
+                'heure' => 9,
+                'minute' => 0,
+                'statut' => StatutSeance::PREVUE,
+                'theme' => 1, // Cardio
+                'exercicesDebut' => 12,
+                'exercicesFin' => 15
+            ],
+            [
+                'type' => TypeSeance::DUO,
+                'jours' => 21,
+                'heure' => 16,
+                'minute' => 0,
+                'statut' => StatutSeance::PREVUE,
+                'theme' => 3, // Crossfit
+                'exercicesDebut' => 0,
+                'exercicesFin' => 5
+            ]
+        ];
+
+        // Création des séances via une boucle
+        foreach ($seancesConfig as $config) {
+            $seance = new Seance();
+
+            // Configuration de la date et heure
+            $dateHeure = new \DateTime();
+            if ($config['jours'] != 0) {
+                $dateHeure->modify(($config['jours'] < 0 ? '-' : '+') . abs($config['jours']) . ' days');
+            }
+            $dateHeure->setTime($config['heure'], $config['minute']);
+            $seance->setDateHeure($dateHeure);
+
+            // Configuration des autres propriétés
+            $seance->setTypeSeance($config['type']);
+            $seance->setCoach($testCoach);
+            $seance->setNiveauSeance(NiveauSportif::INTERMEDIAIRE);
+            $seance->setStatut($config['statut']);
+            $seance->setTheme($specialites[$config['theme']]);
+
+            // Ajout des exercices
+            for ($i = $config['exercicesDebut']; $i < $config['exercicesFin']; $i++) {
+                $seance->addExercice($exercices[$i % count($exercices)]);
+            }
+
+            $manager->persist($seance);
+
+            // Création de la réservation
+            $reservation = new Reservation();
+            $reservation->setSportif($testSportif);
+            $reservation->setSeance($seance);
+            if (isset($config['presence'])) {
+                $reservation->setPresence($config['presence']);
+            }
+            $manager->persist($reservation);
+        }
     }
 }
