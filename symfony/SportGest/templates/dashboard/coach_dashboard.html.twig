@@ -50,7 +50,7 @@
                                         <tr>
                                             <td>{{ seance.dateHeure|date('d/m/Y H:i') }}</td>
                                             <td>{{ seance.theme.nom }}</td>
-                                            <td>{{ seance.sportifs|length }}</td>
+                                            <td>{{ seance.reservations|length }}</td>
                                             <td>
                                                 <a href="{{ path('admin', {
                                                     crudController: 'App\\Controller\\Dashboard\\SeanceCrudController',
