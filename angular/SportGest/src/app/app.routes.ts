@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { HomeComponent } from './features/public/home/home.component';
-import { CoachesComponent } from './features/public/coach/coache-list/coach-list.component';
+import { CoachListComponent } from './features/public/coach/coache-list/coach-list.component';
 import { SessionsComponent } from './features/public/sessions/sessions.component';
 import { PlanningComponent as PublicPlanningComponent } from './features/public/planning/planning.component';
 import { DashboardComponent } from './features/member/dashboard/dashboard.component';
@@ -19,7 +19,7 @@ export const routes: Routes = [
   // Route principale - redirige vers la racine
   { path: '', component: HomeComponent },
   // Routes publiques
-  { path: 'coachs', component: CoachesComponent },
+  { path: 'coachs', component: CoachListComponent },
   {
     path: 'coachs/:id',
     loadComponent: () => import('./features/public/coach/coach-details/coach-details.component').then(m => m.CoachDetailsComponent),

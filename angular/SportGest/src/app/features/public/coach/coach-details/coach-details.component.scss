@@ -1,9 +1,7 @@
 .card {
-    box-shadow: var(--shadow-md);
-    border: none;
+    border: 1px solid var(--light-gray);
     border-radius: var(--border-radius-md);
     overflow: hidden;
-    transition: all 0.3s ease;
 }
 
 .card-body {

@@ -13,6 +13,23 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/coachs')]
 class CoachController extends AbstractController
 {
+
+    private function getCoachData(Coach $coach): array
+    {
+        return [
+            'id' => $coach->getId(),
+            'nom' => $coach->getNom(),
+            'prenom' => $coach->getPrenom(),
+            'email' => $coach->getEmail(),
+            'tarifHoraire' => $coach->getTarifHoraire(),
+            'specialites' => $coach->getSpecialite()->map(fn($specialite) => [
+                'id' => $specialite->getId(),
+                'nom' => $specialite->getNom()
+            ])->toArray(),
+        ];
+    }
+
+    
     #[Route('', name: 'api_coachs_list', methods: ['GET'])]
     public function listCoachs(CoachRepository $coachRepository): JsonResponse
     {
@@ -20,14 +37,9 @@ class CoachController extends AbstractController
 
         // Transformer les données pour l'API
         $data = [];
+
         foreach ($coachs as $coach) {
-            $data[] = [
-                'id' => $coach->getId(),
-                'nom' => $coach->getNom(),
-                'prenom' => $coach->getPrenom(),
-                'email' => $coach->getEmail(),
-                // Autres informations publiques du coach
-            ];
+            $data[] = $this->getCoachData($coach);
         }
 
         return $this->json($data);
@@ -36,21 +48,14 @@ class CoachController extends AbstractController
     #[Route('/{id}', name: 'api_coach_show', methods: ['GET'])]
     public function showCoach(Coach $coach): JsonResponse
     {
-        // Retourner les détails d'un coach
-        return $this->json([
-            'id' => $coach->getId(),
-            'nom' => $coach->getNom(),
-            'prenom' => $coach->getPrenom(),
-            'email' => $coach->getEmail(),
-            // Autres détails du coach
-        ]);
+        return $this->json($this->getCoachData($coach));
     }
 
     #[Route('/{id}/specialites', name: 'api_coach_specialites', methods: ['GET'])]
     public function getCoachSpecialites(Coach $coach): JsonResponse
     {
         // Récupérer les spécialités du coach
-        $specialites = $coach->getSpecialites();
+        $specialites = $coach->getSpecialite();
 
         return $this->json($specialites);
     }
@@ -65,7 +70,10 @@ class CoachController extends AbstractController
         foreach ($seances as $seance) {
             $data[] = [
                 'id' => $seance->getId(),
-                'themes' => $seance->getTheme()->map(fn($theme) => $theme->getNom())->toArray(),
+                'theme' => [
+                    'id' => $seance->getTheme()->getId(),
+                    'nom' => $seance->getTheme()->getNom()
+                ],
                 'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
                 'typeSeance' => $seance->getTypeSeance()->name,
                 'statut' => $seance->getStatut()->name,

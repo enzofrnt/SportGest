@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CoachService } from '../../../../services/coach-api.service';
 import { Coach } from '../../../../models/coach.model';
-import { Specialite } from '../../../../models/specialite.model';
 import { Seance } from '../../../../models/seance.model';
 import { StatutSeance } from '../../../../models/enum/statut-seance.enum';
 
@@ -17,7 +16,6 @@ import { StatutSeance } from '../../../../models/enum/statut-seance.enum';
 export class CoachDetailsComponent implements OnInit {
   coachId!: number;
   coach: Coach | null = null;
-  specialites: Specialite[] = [];
   seances: Seance[] = [];
   loading = true;
   error: string | null = null;
@@ -47,7 +45,6 @@ export class CoachDetailsComponent implements OnInit {
       coach$.subscribe({
         next: (coach) => {
           this.coach = coach;
-          this.loadSpecialities();
           this.loadSessions();
         },
         error: (err) => {
@@ -63,57 +60,27 @@ export class CoachDetailsComponent implements OnInit {
     }
   }
 
-  async loadSpecialities(): Promise<void> {
-    try {
-      const specialites$ = await this.coachService.getCoachSpecialities(this.coachId);
-      specialites$.subscribe({
-        next: (specialites) => {
-          this.specialites = specialites;
-          if (this.coach && !this.coach.specialites) {
-            this.coach.specialites = specialites;
-          }
-          this.checkLoading();
-        },
-        error: (err) => {
-          console.error('Erreur de chargement des spécialités:', err);
-          this.checkLoading();
-        }
-      });
-    } catch (error) {
-      console.error('Erreur de chargement des spécialités:', error);
-      this.checkLoading();
-    }
-  }
-
   async loadSessions(): Promise<void> {
     try {
       const seances$ = await this.coachService.getCoachSessions(this.coachId);
       seances$.subscribe({
         next: (seances) => {
           this.seances = seances;
-          this.checkLoading();
+          this.loading = false;
         },
         error: (err) => {
           console.error('Erreur de chargement des séances:', err);
-          this.checkLoading();
+          this.loading = false;
         }
       });
     } catch (error) {
       console.error('Erreur de chargement des séances:', error);
-      this.checkLoading();
+      this.loading = false;
     }
   }
 
   getNombreSportifs(seance: Seance): string {
     return seance.sportifs ? `${seance.sportifs.length}/10` : '0/10';
-  }
-
-  private checkLoading(): void {
-    // On considère que le chargement est terminé une fois que les détails du coach
-    // et soit les spécialités, soit les séances sont chargées
-    if (this.coach && (this.specialites.length > 0 || this.seances.length > 0)) {
-      this.loading = false;
-    }
   }
 
   /**
