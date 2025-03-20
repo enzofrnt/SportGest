@@ -45,6 +45,31 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
+  formatRole(role: string): string {
+    if (role === 'ROLE_USER') return 'Utilisateur';
+    if (role === 'ROLE_ADMIN') return 'Administrateur';
+    if (role === 'ROLE_COACH') return 'Coach';
+    return role.replace('ROLE_', '');
+  }
+
+  getPrimaryRole(): string {
+    if (!this.user || !this.user.roles || this.user.roles.length === 0) {
+      return 'Sportif';
+    }
+
+    // Priorité des rôles
+    if (this.user.roles.includes('ROLE_ADMIN')) {
+      return 'Administrateur';
+    } else if (this.user.roles.includes('ROLE_COACH')) {
+      return 'Coach';
+    } else if (this.user.roles.includes('ROLE_USER')) {
+      return 'Sportif';
+    }
+
+    // Si aucun rôle reconnu, prendre le premier
+    return this.formatRole(this.user.roles[0]);
+  }
+
   toggleUserMenu(): void {
     this.isUserMenuOpen = !this.isUserMenuOpen;
     if (this.isUserMenuOpen) {

@@ -9,6 +9,7 @@ import { authGuard } from './guards/auth.guard';
 import { ReservationListComponent } from './features/reservation/reservation-list/reservation-list.component';
 import { BilanComponent } from './features/bilan/bilan.component';
 import { ProfileComponent } from './features/profile/profile.component';
+import { sportifGuard } from './guards/sportif.guard';
 
 export const routes: Routes = [
   // Route principale - redirige vers la racine
@@ -39,13 +40,13 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'reservations',
+    path: 'membre/reservations',
     canActivate: [authGuard],
     component: ReservationListComponent
   },
   {
     path: 'bilan',
-    canActivate: [authGuard],
+    canActivate: [authGuard, sportifGuard],
     component: BilanComponent
   },
   {
