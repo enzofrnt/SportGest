@@ -4,8 +4,10 @@ namespace App\Controller\Api;
 
 use App\Entity\Seance;
 use App\Entity\Sportif;
+use App\Entity\Reservation;
 use App\Repository\SeanceRepository;
 use App\Repository\SportifRepository;
+use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,7 +23,8 @@ class ReservationController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         SeanceRepository $seanceRepository,
-        SportifRepository $sportifRepository
+        SportifRepository $sportifRepository,
+        ReservationRepository $reservationRepository
     ): JsonResponse {
         // Vérification des permissions
         $this->denyAccessUnlessGranted('CREATE_RESERVATION', null, 'Accès refusé : seuls les sportifs peuvent réserver une séance');
@@ -58,21 +61,31 @@ class ReservationController extends AbstractController
         }
 
         // Vérifier si le sportif est déjà inscrit
-        if ($seance->getSportifs()->contains($sportif)) {
+        $existingReservation = $reservationRepository->findOneBy([
+            'seance' => $seance,
+            'sportif' => $sportif
+        ]);
+
+        if ($existingReservation) {
             return $this->json([
                 'error' => 'Le sportif est déjà inscrit à cette séance'
             ], JsonResponse::HTTP_CONFLICT);
         }
 
         // Vérifier si la séance n'est pas complète (limite à 10 sportifs par exemple)
-        if ($seance->getSportifs()->count() >= 10) {
+        if ($seance->getReservations()->count() >= 10) {
             return $this->json([
                 'error' => 'La séance est complète'
             ], JsonResponse::HTTP_CONFLICT);
         }
 
-        // Ajouter le sportif à la séance
-        $seance->addSportif($sportif);
+        // Créer la nouvelle réservation
+        $reservation = new Reservation();
+        $reservation->setSeance($seance);
+        $reservation->setSportif($sportif);
+        $reservation->setPresence(null); // Par défaut, la présence n'est pas définie
+
+        $entityManager->persist($reservation);
         $entityManager->flush();
 
         return $this->json([
@@ -82,10 +95,11 @@ class ReservationController extends AbstractController
 
     #[Route('/{id}', name: 'api_reservation_cancel', methods: ['DELETE'])]
     public function cancelReservation(
-        int $id, // ID de la séance dans l'URL
+        int $id,
         EntityManagerInterface $entityManager,
         SeanceRepository $seanceRepository,
-        SportifRepository $sportifRepository
+        SportifRepository $sportifRepository,
+        ReservationRepository $reservationRepository
     ): JsonResponse {
         // Récupérer la séance à partir de l'ID dans l'URL
         $seance = $seanceRepository->find($id);
@@ -114,15 +128,20 @@ class ReservationController extends AbstractController
             $sportifToRemove = $currentUser;
         }
 
-        // Vérifier si le sportif est bien inscrit à cette séance
-        if (!$seance->getSportifs()->contains($sportifToRemove)) {
+        // Trouver la réservation correspondante
+        $reservation = $reservationRepository->findOneBy([
+            'seance' => $seance,
+            'sportif' => $sportifToRemove
+        ]);
+
+        if (!$reservation) {
             return $this->json([
                 'error' => 'Le sportif n\'est pas inscrit à cette séance'
             ], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        // Retirer le sportif de la séance
-        $seance->removeSportif($sportifToRemove);
+        // Supprimer la réservation
+        $entityManager->remove($reservation);
         $entityManager->flush();
 
         return $this->json([
@@ -134,7 +153,7 @@ class ReservationController extends AbstractController
     public function getSportifReservations(
         int $id,
         SportifRepository $sportifRepository,
-        SeanceRepository $seanceRepository
+        ReservationRepository $reservationRepository
     ): JsonResponse {
         // Vérification des permissions pour la consultation
         $this->denyAccessUnlessGranted('VIEW_RESERVATIONS', $id, 'Accès refusé : vous ne pouvez pas consulter les réservations de ce sportif');
@@ -144,24 +163,51 @@ class ReservationController extends AbstractController
             return $this->json(['error' => 'Sportif non trouvé'], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        $seances = $seanceRepository->findSeancesBySportif($sportif);
+        $reservations = $reservationRepository->findBy(['sportif' => $sportif]);
 
-        $reservations = [];
-        foreach ($seances as $seance) {
-            $reservations[] = [
-                'id' => $seance->getId(),
-                'themeSeance' => $seance->getThemeSeance(),
-                'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
-                'typeSeance' => $seance->getTypeSeance()->value,
-                'statut' => $seance->getStatut()->value,
-                'coach' => [
-                    'id' => $seance->getCoach()->getId(),
-                    'nom' => $seance->getCoach()->getNom(),
-                    'prenom' => $seance->getCoach()->getPrenom(),
+        $reservationsData = [];
+        foreach ($reservations as $reservation) {
+            $seance = $reservation->getSeance();
+            $coach = $seance->getCoach();
+            $theme = $seance->getTheme();
+            $exercices = $seance->getExercices();
+
+            $reservationsData[] = [
+                'id' => $reservation->getId(),
+                'presence' => $reservation->getPresence(),
+                'seance' => [
+                    'id' => $seance->getId(),
+                    'themeSeance' => $theme ? $theme->getNom() : null,
+                    'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
+                    'typeSeance' => $seance->getTypeSeance()->value,
+                    'statut' => $seance->getStatut()->value,
+                    'coach' => [
+                        'id' => $coach->getId(),
+                        'nom' => $coach->getNom(),
+                        'prenom' => $coach->getPrenom(),
+                        'email' => $coach->getEmail()
+                    ],
+                    'exercices' => array_map(function($exercice) {
+                        return [
+                            'id' => $exercice->getId(),
+                            'nom' => $exercice->getNom(),
+                            'description' => $exercice->getDescription(),
+                            'difficulte' => $exercice->getDifficulte()->value,
+                            'dureeEstimee' => $exercice->getDureeEstimee()
+                        ];
+                    }, $exercices->toArray())
                 ],
+                'sportif' => [
+                    'id' => $sportif->getId(),
+                    'nom' => $sportif->getNom(),
+                    'prenom' => $sportif->getPrenom(),
+                    'email' => $sportif->getEmail(),
+                    'dateInscription' => $sportif->getDateInscription()->format('Y-m-d'),
+                    'niveau' => $sportif->getNiveauSportif()->value
+                ]
             ];
         }
 
-        return $this->json($reservations);
+        return $this->json($reservationsData);
     }
 }

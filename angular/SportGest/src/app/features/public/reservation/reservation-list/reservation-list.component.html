@@ -1,0 +1,73 @@
+<div class="reservation-list-container">
+  <h2>Mes Réservations</h2>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    {{ error }}
+  </div>
+
+  <!-- Spinner de chargement -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+
+  <!-- Liste des réservations -->
+  <div *ngIf="!loading && !error" class="reservations-grid">
+    <div *ngIf="reservations.length === 0" class="no-reservations">
+      <div class="alert alert-info" role="alert">
+        Vous n'avez pas encore de réservations.
+      </div>
+    </div>
+
+    <div *ngFor="let reservation of reservations" class="reservation-card">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{ reservation.seance.themeSeance }}</h5>
+          <div class="card-info">
+            <p class="card-text">
+              <i class="bi bi-calendar-event me-2"></i>
+              {{ reservation.seance.dateHeure | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+            <p class="card-text">
+              <i class="bi bi-person me-2"></i>
+              Coach: {{ reservation.seance.coach.nom }} {{
+              reservation.seance.coach.prenom }}
+            </p>
+            <p class="card-text">
+              <i class="bi bi-check-circle me-2"></i>
+              Type: {{ reservation.seance.typeSeance }}
+            </p>
+            <p class="card-text">
+              <i class="bi bi-flag me-2"></i>
+              Statut: {{ reservation.seance.statut }}
+            </p>
+            <p class="card-text">
+              <i class="bi bi-person-check me-2"></i>
+              Présence:
+              <span [ngClass]="{
+                'text-success': reservation.presence === true,
+                'text-danger': reservation.presence === false,
+                'text-muted': reservation.presence === null
+              }">
+                {{ reservation.presence === true ? 'Présent' :
+                reservation.presence === false ? 'Absent' :
+                'Non défini' }}
+              </span>
+            </p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button
+            class="btn btn-danger w-100"
+            (click)="cancelReservation(reservation.id)"
+            [disabled]="reservation.seance.statut === StatutSeance.ANNULEE">
+            <i class="bi bi-x-circle me-2"></i>
+            Annuler la réservation
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

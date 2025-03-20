@@ -6,7 +6,7 @@ import { CoachListComponent } from './features/public/coach/coache-list/coach-li
 import { SeanceListComponent } from './features/public/seance/seance-list/seance-list.component';
 import { SeancePlanningComponent } from './features/public/seance/seance-planning/seance-planning.component';
 import { authGuard } from './guards/auth.guard';
-
+import { ReservationListComponent } from './features/public/reservation/reservation-list/reservation-list.component';
 export const routes: Routes = [
   // Route principale - redirige vers la racine
   { path: '', component: HomeComponent },
@@ -34,6 +34,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/public/seance/seance-detail/seance-detail.component').then(m => m.SeanceDetailComponent)
       }
     ]
+  },
+  {
+    path: 'reservations',
+    canActivate: [authGuard],
+    component: ReservationListComponent
   },
 
   // Route par défaut
