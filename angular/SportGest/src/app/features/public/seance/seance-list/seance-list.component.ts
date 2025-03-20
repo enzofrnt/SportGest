@@ -1,27 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SeanceApiService } from '../../../services/seance-api.service';
+import { SeanceApiService } from '../../../../services/seance-api.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Seance } from '../../../models/seance.model';
-import { TypeSeance } from '../../../models/enum/type-seance.enum';
-import { NiveauSportif } from '../../../models/enum/niveau-sportif.enum';
-import { StatutSeance } from '../../../models/enum/statut-seance.enum';
-import { AuthService } from '../../../services/auth.service';
+import { Seance } from '../../../../models/seance.model';
+import { TypeSeance } from '../../../../models/enum/type-seance.enum';
+import { NiveauSportif } from '../../../../models/enum/niveau-sportif.enum';
+import { StatutSeance } from '../../../../models/enum/statut-seance.enum';
+import { AuthService } from '../../../../services/auth.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { ApiService } from '../../../services/api.service';
-import { Coach } from '../../../models/coach.model';
-import { Exercice } from '../../../models/exercice.model';
-import { DifficulteExercice } from '../../../models/enum/difficulte-exercice.enum';
+import { ApiService } from '../../../../services/api.service';
+import { Coach } from '../../../../models/coach.model';
+import { Exercice } from '../../../../models/exercice.model';
+import { DifficulteExercice } from '../../../../models/enum/difficulte-exercice.enum';
 
 @Component({
-  selector: 'app-sessions',
+  selector: 'app-seance-list',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './sessions.component.html',
-  styleUrl: './sessions.component.scss'
+  templateUrl: './seance-list.component.html',
+  styleUrl: './seance-list.component.scss'
 })
-export class SessionsComponent implements OnInit {
+export class SeanceListComponent implements OnInit {
   // Rendre l'énumération accessible dans le template
   StatutSeance = StatutSeance;
   TypeSeance = TypeSeance;
@@ -29,14 +29,13 @@ export class SessionsComponent implements OnInit {
   seances: Seance[] = [];
   filteredSeances: Seance[] = [];
   selectedSeance: Seance | null = null;
-  loading = false;
+  loading = true;
   error = '';
   showFilters = false;
   isAuthenticated = false;
   publicCoachs: Coach[] = [];
 
   // Message d'information pour les utilisateurs non authentifiés
-  infoMessage = '';
 
   // Terme de recherche
   searchTerm: string = '';
@@ -54,17 +53,9 @@ export class SessionsComponent implements OnInit {
 
   constructor(
     private seanceApiService: SeanceApiService,
-    private authService: AuthService,
-    private http: HttpClient,
-    private apiService: ApiService
   ) {}
 
   ngOnInit(): void {
-    this.isAuthenticated = this.authService.isAuthenticated();
-
-    // Charger les coachs pour tous les utilisateurs (publics)
-    this.loadPublicCoachs();
-
     // Charger les séances
     this.loadSeances();
   }
@@ -73,45 +64,18 @@ export class SessionsComponent implements OnInit {
     this.showFilters = !this.showFilters;
   }
 
-  async loadPublicCoachs(): Promise<void> {
-    try {
-      const url = await this.apiService.getEndpointUrl('coachs');
-      this.http.get<Coach[]>(url).subscribe({
-        next: (coachs) => {
-          this.publicCoachs = coachs;
-        },
-        error: (err) => {
-          console.error('Erreur lors du chargement des coachs', err);
-        }
-      });
-    } catch (err) {
-      console.error('Erreur lors de la récupération de l\'URL des coachs', err);
-    }
-  }
-
   async loadSeances(): Promise<void> {
-    this.loading = true;
-    this.error = '';
-
-    try {
-      if (this.isAuthenticated) {
-        this.seances = await this.seanceApiService.getSeances();
-        this.infoMessage = '';
-      } else {
-        this.infoMessage = 'Connectez-vous pour voir toutes les séances disponibles et réserver votre place.';
+    const seances$ = await this.seanceApiService.getAllSeance();
+    seances$.subscribe({
+      next: (seances) => {
+        this.seances = seances;
+        this.loading = false;
+      },
+      error: (error) => {
+        this.error = error.message;
+        this.loading = false;
       }
-      this.applyClientSideFilters();
-    } catch (error) {
-      console.error(error);
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        this.error = '';
-        this.infoMessage = 'Connectez-vous pour voir toutes les séances disponibles et réserver votre place.';
-      } else {
-        this.error = 'Erreur lors du chargement des séances';
-      }
-    } finally {
-      this.loading = false;
-    }
+    });
   }
 
   applyFilters(): void {
@@ -152,23 +116,23 @@ export class SessionsComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    try {
-      if (this.isAuthenticated) {
-        this.selectedSeance = await this.seanceApiService.getSeance(id);
-      } else {
-        this.infoMessage = 'Connectez-vous pour voir les détails de cette séance';
-      }
-    } catch (error) {
-      console.error(error);
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        this.error = '';
-        this.infoMessage = 'Vous devez être connecté pour voir les détails complets de cette séance';
-      } else {
-        this.error = 'Erreur lors du chargement des détails de la séance';
-      }
-    } finally {
-      this.loading = false;
-    }
+    // try {
+    //   if (this.isAuthenticated) {
+    //     this.selectedSeance = await this.seanceApiService.getSeance(id);
+    //   } else {
+    //     this.infoMessage = 'Connectez-vous pour voir les détails de cette séance';
+    //   }
+    // } catch (error) {
+    //   console.error(error);
+    //   if (error instanceof HttpErrorResponse && error.status === 401) {
+    //     this.error = '';
+    //     this.infoMessage = 'Vous devez être connecté pour voir les détails complets de cette séance';
+    //   } else {
+    //     this.error = 'Erreur lors du chargement des détails de la séance';
+    //   }
+    // } finally {
+    //   this.loading = false;
+    // }
   }
 
   closeDetails(): void {

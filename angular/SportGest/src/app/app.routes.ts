@@ -3,7 +3,7 @@ import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { HomeComponent } from './features/public/home/home.component';
 import { CoachListComponent } from './features/public/coach/coache-list/coach-list.component';
-import { SessionsComponent } from './features/public/sessions/sessions.component';
+import { SeanceListComponent } from './features/public/seance/seance-list/seance-list.component';
 import { PlanningComponent as PublicPlanningComponent } from './features/public/planning/planning.component';
 import { DashboardComponent } from './features/member/dashboard/dashboard.component';
 import { PlanningComponent as MemberPlanningComponent } from './features/member/planning/planning.component';
@@ -25,7 +25,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/public/coach/coach-details/coach-details.component').then(m => m.CoachDetailsComponent),
     title: 'Détails du coach'
   },
-  { path: 'seances', component: SessionsComponent },
+  { path: 'seances', component: SeanceListComponent },
   { path: 'planning', component: PublicPlanningComponent },
   { path: 'inscription', component: RegisterComponent },
   { path: 'connexion', component: LoginComponent },

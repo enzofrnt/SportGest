@@ -62,7 +62,7 @@ export class CoachDetailsComponent implements OnInit {
 
   async loadSessions(): Promise<void> {
     try {
-      const seances$ = await this.coachService.getCoachSessions(this.coachId);
+      const seances$ = await this.coachService.getCoachSeances(this.coachId);
       seances$.subscribe({
         next: (seances) => {
           this.seances = seances;

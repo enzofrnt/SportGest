@@ -31,4 +31,4 @@ export class ReservationService {
   getSportifReservations(sportifId: number): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(`${this.apiUrl}/sportif/${sportifId}`);
   }
-} 
+}

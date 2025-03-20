@@ -22,8 +22,6 @@ export class CoachService {
    */
   async getAllCoachs(): Promise<Observable<Coach[]>> {
     const url = await this.apiService.getEndpointUrl(this.endpoint);
-    console.log("url");
-    console.log(url);
     return this.http.get<Coach[]>(url);
   }
 
@@ -37,22 +35,11 @@ export class CoachService {
   }
 
   /**
-   * Récupère les spécialités d'un coach
-   * @param id L'identifiant du coach
-   */
-  async getCoachSpecialities(id: number): Promise<Observable<Specialite[]>> {
-    const url = await this.apiService.getEndpointUrl(`${this.endpoint}/${id}/specialites`);
-    return this.http.get<string[]>(url).pipe(
-      map(specialties => specialties.map(name => ({ nom: name }) as Specialite))
-    );
-  }
-
-  /**
    * Récupère les séances proposées par un coach
    * @param id L'identifiant du coach
    */
-  async getCoachSessions(id: number): Promise<Observable<Seance[]>> {
+  async getCoachSeances(id: number): Promise<Observable<Seance[]>> {
     const url = await this.apiService.getEndpointUrl(`${this.endpoint}/${id}/seances`);
     return this.http.get<Seance[]>(url);
   }
-} 
+}

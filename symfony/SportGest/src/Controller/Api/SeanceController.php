@@ -212,59 +212,14 @@ class SeanceController extends AbstractController
         return true;
     }
 
-    #[Route('/seances', name: 'api_seances_list', methods: ['GET'])]
-    public function listSeances(SeanceRepository $seanceRepository, Request $request): JsonResponse
+    private function getSeanceData(Seance $seance): array
     {
-        // Filtrer les séances selon les paramètres
-        $coachId = $request->query->get('coach_id');
-        $dateDebut = $request->query->get('date_debut') ? new \DateTime($request->query->get('date_debut')) : null;
-        $dateFin = $request->query->get('date_fin') ? new \DateTime($request->query->get('date_fin')) : null;
-        $typeSeance = $request->query->get('type');
-
-        // Construction de la requête selon les critères
-        $criteria = [];
-        if ($coachId) {
-            $criteria['coach'] = $coachId;
-        }
-        // Note: les autres filtres seraient à implémenter dans le repository
-
-        $seances = $seanceRepository->findBy($criteria);
-
-        $data = [];
-        foreach ($seances as $seance) {
-            $data[] = [
-                'id' => $seance->getId(),
-                'themeSeance' => $seance->getThemeSeance(),
-                'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
-                'typeSeance' => $seance->getTypeSeance()->name,
-                'statut' => $seance->getStatut()->name,
-                'coach' => [
-                    'id' => $seance->getCoach()->getId(),
-                    'nom' => $seance->getCoach()->getNom(),
-                    'prenom' => $seance->getCoach()->getPrenom(),
-                ],
-                'nbSportifs' => $seance->getSportifs()->count(),
-            ];
-        }
-
-        return $this->json($data);
-    }
-
-    #[Route('/seances/{id}', name: 'api_seances_show', methods: ['GET'])]
-    public function showSeance(Seance $seance): JsonResponse
-    {
-        $sportifs = [];
-        foreach ($seance->getSportifs() as $sportif) {
-            $sportifs[] = [
-                'id' => $sportif->getId(),
-                'nom' => $sportif->getNom(),
-                'prenom' => $sportif->getPrenom(),
-            ];
-        }
-
-        return $this->json([
+        return [
             'id' => $seance->getId(),
-            'themeSeance' => $seance->getThemeSeance(),
+            'theme' => [
+                'id' => $seance->getTheme()->getId(),
+                'nom' => $seance->getTheme()->getNom()
+            ],
             'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
             'typeSeance' => $seance->getTypeSeance()->name,
             'statut' => $seance->getStatut()->name,
@@ -274,8 +229,28 @@ class SeanceController extends AbstractController
                 'nom' => $seance->getCoach()->getNom(),
                 'prenom' => $seance->getCoach()->getPrenom(),
             ],
-            'sportifs' => $sportifs,
-        ]);
+            'nbSportifs' => $seance->getSportifs()->count(),
+            'exercices' => array_map(function($exercice) {
+                return [
+                    'id' => $exercice->getId(),
+                    'nom' => $exercice->getNom()
+                ];
+            }, $seance->getExercices()->toArray())
+        ];
+    }
+
+    #[Route('/seances', name: 'api_seances_list', methods: ['GET'])]
+    public function listSeances(SeanceRepository $seanceRepository, Request $request): JsonResponse
+    {
+        $seances = $seanceRepository->findAll();
+        $data = array_map([$this, 'getSeanceData'], $seances);
+        return $this->json($data);
+    }
+
+    #[Route('/seances/{id}', name: 'api_seances_show', methods: ['GET'])]
+    public function showSeance(Seance $seance): JsonResponse
+    {
+        return $this->json($this->getSeanceData($seance));
     }
 
     #[Route('/seances', name: 'api_seances_create', methods: ['POST'])]
@@ -303,7 +278,8 @@ class SeanceController extends AbstractController
 
         // Création de la séance
         $seance = new Seance();
-        $seance->setThemeSeance($data['themeSeance']);
+        // $seance->setThemeSeance($data['themeSeance']);
+        $seance->setTheme($data['theme']);
         $seance->setDateHeure(new \DateTime($data['dateHeure']));
         $seance->setTypeSeance($data['typeSeance']);
         $seance->setNiveauSeance($data['niveauSeance']);
@@ -329,8 +305,8 @@ class SeanceController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         // Mise à jour des champs modifiables
-        if (isset($data['themeSeance'])) {
-            $seance->setThemeSeance($data['themeSeance']);
+        if (isset($data['theme'])) {
+            $seance->setTheme($data['theme']);
         }
 
         if (isset($data['dateHeure'])) {
