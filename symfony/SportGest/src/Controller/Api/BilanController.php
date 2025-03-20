@@ -54,13 +54,51 @@ class BilanController extends AbstractController
         // Calculer les statistiques
         $totalSeances = count($seances);
         $totalDuree = 0;
-        $exercicesRealises = [];
+        $topExercicesData = []; // Pour calculer le top 3
         $coachs = [];
         $typesSeances = [];
+        $detailsSeances = [];
 
         foreach ($seances as $seance) {
-            // Durée totale (on suppose 1 heure par séance par défaut, à ajuster selon votre modèle)
-            $totalDuree += 60; // en minutes
+            // Calculer la durée de la séance en fonction des exercices
+            $dureeSeance = 0;
+            $exercicesSeance = [];
+
+            foreach ($seance->getExercices() as $exercice) {
+                $exerciceId = $exercice->getId();
+                $dureeExercice = $exercice->getDureeEstimee();
+                $dureeSeance += $dureeExercice;
+
+                // Ajouter aux exercices de cette séance avec tous les détails possibles
+                $exercicesSeance[] = [
+                    'id' => $exerciceId,
+                    'nom' => $exercice->getNom(),
+                    'description' => $exercice->getDescription(),
+                    'duree' => $dureeExercice,
+                    'difficulte' => $exercice->getDifficulte()->name
+                ];
+
+                // Collecter uniquement pour le top 3
+                if (!isset($topExercicesData[$exerciceId])) {
+                    $topExercicesData[$exerciceId] = [
+                        'id' => $exerciceId,
+                        'nom' => $exercice->getNom(),
+                        'difficulte' => $exercice->getDifficulte()->name,
+                        'nbFois' => 0,
+                        'dureeTotal' => 0
+                    ];
+                }
+                $topExercicesData[$exerciceId]['nbFois']++;
+                $topExercicesData[$exerciceId]['dureeTotal'] += $dureeExercice;
+            }
+
+            // Ajouter la durée de cette séance au total
+            $totalDuree += $dureeSeance;
+
+            // Calculer l'heure de fin de la séance
+            $dateHeureDebut = $seance->getDateHeure();
+            $dateHeureFin = clone $dateHeureDebut;
+            $dateHeureFin->modify("+{$dureeSeance} minutes");
 
             // Collecter les types de séances
             $typeSeance = $seance->getTypeSeance()->name;
@@ -77,25 +115,37 @@ class BilanController extends AbstractController
                     'id' => $coachId,
                     'nom' => $coach->getNom(),
                     'prenom' => $coach->getPrenom(),
-                    'nbSeances' => 0
+                    'nbSeances' => 0,
+                    'dureeTotal' => 0
                 ];
             }
             $coachs[$coachId]['nbSeances']++;
+            $coachs[$coachId]['dureeTotal'] += $dureeSeance;
 
-            // Collecter les exercices
-            foreach ($seance->getExercices() as $exercice) {
-                $exerciceId = $exercice->getId();
-                if (!isset($exercicesRealises[$exerciceId])) {
-                    $exercicesRealises[$exerciceId] = [
-                        'id' => $exerciceId,
-                        'nom' => $exercice->getNom(),
-                        'difficulte' => $exercice->getDifficulte()->name,
-                        'nbFois' => 0
-                    ];
-                }
-                $exercicesRealises[$exerciceId]['nbFois']++;
-            }
+            // Ajouter les détails de cette séance
+            $detailsSeances[] = [
+                'id' => $seance->getId(),
+                'dateDebut' => $dateHeureDebut->format('Y-m-d H:i:s'),
+                'dateFin' => $dateHeureFin->format('Y-m-d H:i:s'),
+                'duree' => $dureeSeance,
+                'typeSeance' => $typeSeance,
+                'theme' => $seance->getTheme() ? $seance->getTheme()->getNom() : null,
+                'niveauSeance' => $seance->getNiveauSeance()->name,
+                'coach' => [
+                    'id' => $coach->getId(),
+                    'nom' => $coach->getNom(),
+                    'prenom' => $coach->getPrenom()
+                ],
+                'exercices' => $exercicesSeance,
+                'nbExercices' => count($exercicesSeance)
+            ];
         }
+
+        // Tri des exercices pour obtenir le top 3
+        usort($topExercicesData, function ($a, $b) {
+            return $b['nbFois'] <=> $a['nbFois'];
+        });
+        $topExercices = array_slice(array_values($topExercicesData), 0, 3);
 
         // Formatage des données pour le résultat
         $typesSeancesArray = [];
@@ -109,7 +159,8 @@ class BilanController extends AbstractController
                 'id' => $sportif->getId(),
                 'nom' => $sportif->getNom(),
                 'prenom' => $sportif->getPrenom(),
-                'niveauSportif' => $sportif->getNiveauSportif()->name
+                'niveauSportif' => $sportif->getNiveauSportif()->name,
+                'dateInscription' => $sportif->getDateInscription()->format('Y-m-d H:i:s')
             ],
             'periode' => [
                 'debut' => $dateMin->format('Y-m-d'),
@@ -117,12 +168,13 @@ class BilanController extends AbstractController
             ],
             'statistiques' => [
                 'nbSeances' => $totalSeances,
-                'dureeTotal' => $totalDuree,
+                'dureeTotal' => $totalDuree, // en minutes
                 'moyenneHebdo' => $this->calculerMoyenneHebdo($totalSeances, $dateMin, $dateMax)
             ],
             'typesSeances' => $typesSeancesArray,
             'coachs' => array_values($coachs),
-            'exercices' => array_values($exercicesRealises)
+            'topExercices' => $topExercices,
+            'seances' => $detailsSeances
         ];
 
         return $this->json($bilan);

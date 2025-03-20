@@ -108,7 +108,7 @@ class DashboardController extends AbstractDashboardController
             $seances_coach = $this->seanceRepository->countSeancesMoisCourant($coach);
             $seances_mois[$coach->getId()] = $seances_coach;
             $total_seances_mois += $seances_coach;
-            
+
             $coachs_labels[] = $coach->getPrenom() . ' ' . $coach->getNom();
             $seances_mois_values[] = $seances_coach;
         }
@@ -142,7 +142,7 @@ class DashboardController extends AbstractDashboardController
                     'sportifs' => $this->seanceRepository->countSportifsUniques($coach),
                 ];
             }
-            usort($top_coachs, function($a, $b) {
+            usort($top_coachs, function ($a, $b) {
                 return $b['seances_mois'] <=> $a['seances_mois'];
             });
             $stats['top_coachs'] = array_slice($top_coachs, 0, 5);
@@ -157,7 +157,7 @@ class DashboardController extends AbstractDashboardController
                     'sportifs' => $seance->getSportifs()->count(),
                 ];
             }
-            usort($top_seances, function($a, $b) {
+            usort($top_seances, function ($a, $b) {
                 return $b['sportifs'] <=> $a['sportifs'];
             });
             $stats['top_seances'] = array_slice($top_seances, 0, 5);
@@ -189,7 +189,7 @@ class DashboardController extends AbstractDashboardController
     {
         $user = $this->getUser();
 
-        yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
+        yield MenuItem::linkToDashboard('Mon Bilan', 'fa fa-home');
 
         if ($user instanceof Coach) {
             yield MenuItem::section('Gestion des séances');
@@ -202,7 +202,7 @@ class DashboardController extends AbstractDashboardController
         if ($user instanceof Responsable) {
             yield MenuItem::section('Administration');
             if ($this->isGranted('ROLE_ADMIN')) {
-                yield MenuItem::linkToCrud('Responsables', 'fas fa-user-tie', Responsable::class); 
+                yield MenuItem::linkToCrud('Responsables', 'fas fa-user-tie', Responsable::class);
             }
             yield MenuItem::linkToCrud('Coachs', 'fas fa-user-friends', Coach::class);
             yield MenuItem::linkToCrud('Sportifs', 'fas fa-running', Sportif::class)
