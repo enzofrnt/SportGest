@@ -1,18 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SeanceApiService } from '../../../../services/seance-api.service';
+import { SeanceApiService } from '../../../services/seance-api.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { Seance } from '../../../../models/seance.model';
-import { TypeSeance } from '../../../../models/enum/type-seance.enum';
-import { NiveauSportif } from '../../../../models/enum/niveau-sportif.enum';
-import { StatutSeance } from '../../../../models/enum/statut-seance.enum';
-import { AuthService } from '../../../../services/auth.service';
+import { Seance } from '../../../models/seance.model';
+import { TypeSeance } from '../../../models/enum/type-seance.enum';
+import { NiveauSportif } from '../../../models/enum/niveau-sportif.enum';
+import { StatutSeance } from '../../../models/enum/statut-seance.enum';
+import { AuthService } from '../../../services/auth.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { ApiService } from '../../../../services/api.service';
-import { Coach } from '../../../../models/coach.model';
-import { Exercice } from '../../../../models/exercice.model';
-import { DifficulteExercice } from '../../../../models/enum/difficulte-exercice.enum';
+import { ApiService } from '../../../services/api.service';
+import { Coach } from '../../../models/coach.model';
+import { Exercice } from '../../../models/exercice.model';
+import { DifficulteExercice } from '../../../models/enum/difficulte-exercice.enum';
 
 @Component({
   selector: 'app-seance-list',

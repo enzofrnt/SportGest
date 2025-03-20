@@ -136,4 +136,91 @@ class ReservationController extends AbstractController
 
         return $this->json($reservationsData);
     }
+
+    #[Route('', name: 'api_reservation_create', methods: ['POST'])]
+    public function createReservation(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        SeanceRepository $seanceRepository,
+        SportifRepository $sportifRepository,
+        ReservationRepository $reservationRepository
+    ): JsonResponse {
+        // Vérification des permissions
+        $this->denyAccessUnlessGranted('CREATE_RESERVATION', null, 'Accès refusé : seuls les sportifs peuvent réserver une séance');
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['seance_id'])) {
+            return $this->json(['error' => 'ID de séance non fourni'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $seance = $seanceRepository->find($data['seance_id']);
+        if (!$seance) {
+            return $this->json(['error' => 'Séance non trouvée'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        // Par défaut, on utilise l'utilisateur connecté pour la réservation
+        /** @var Sportif $sportif */
+        $sportif = $this->getUser();
+
+        // Si un administrateur effectue la réservation pour quelqu'un d'autre
+        if (isset($data['sportif_id']) && $this->isGranted('ROLE_ADMIN')) {
+            $sportif = $sportifRepository->find($data['sportif_id']);
+            if (!$sportif) {
+                return $this->json(['error' => 'Sportif non trouvé'], JsonResponse::HTTP_NOT_FOUND);
+            }
+        } else if (isset($data['sportif_id'])) {
+            // Si un non-admin tente de réserver pour quelqu'un d'autre
+            return $this->json(['error' => 'Vous ne pouvez pas créer une réservation pour un autre sportif'], JsonResponse::HTTP_FORBIDDEN);
+        }
+
+        // Assurons-nous que l'utilisateur est bien un sportif
+        if (!($sportif instanceof Sportif)) {
+            return $this->json(['error' => 'Seuls les sportifs peuvent réserver des séances'], JsonResponse::HTTP_FORBIDDEN);
+        }
+
+        // Vérifier si le sportif est déjà inscrit
+        $existingReservation = $reservationRepository->findOneBy([
+            'seance' => $seance,
+            'sportif' => $sportif
+        ]);
+
+        if ($existingReservation) {
+            return $this->json([
+                'error' => 'Le sportif est déjà inscrit à cette séance'
+            ], JsonResponse::HTTP_CONFLICT);
+        }
+
+        // Vérifier si la séance n'est pas complète (limite à 10 sportifs par exemple)
+        if ($seance->getReservations()->count() >= 10) {
+            return $this->json([
+                'error' => 'La séance est complète'
+            ], JsonResponse::HTTP_CONFLICT);
+        }
+
+        // Créer la nouvelle réservation
+        $reservation = new Reservation();
+        $reservation->setSeance($seance);
+        $reservation->setSportif($sportif);
+        $reservation->setPresence(null); // Par défaut, la présence n'est pas définie
+
+        $entityManager->persist($reservation);
+        $entityManager->flush();
+
+        return $this->json([
+            'message' => 'Réservation effectuée avec succès',
+            'reservation' => [
+                'id' => $reservation->getId(),
+                'sportif' => [
+                    'id' => $sportif->getId(),
+                    'nom' => $sportif->getNom(),
+                    'prenom' => $sportif->getPrenom()
+                ],
+                'seance' => [
+                    'id' => $seance->getId(),
+                    'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s')
+                ]
+            ]
+        ], JsonResponse::HTTP_CREATED);
+    }
 }

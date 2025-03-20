@@ -1,0 +1,110 @@
+<div class="container mt-5">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="display-4 fw-bold text-primary">Mon Profil</h2>
+      <p class="lead">Gérez vos informations personnelles et préférences</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-2">Chargement de votre profil...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error && user" class="profile-grid">
+    <!-- Section profil -->
+    <div class="profile-card-container">
+      <div class="card profile-card">
+        <div class="profile-header">
+          <div class="profile-avatar">
+            {{ getUserInitials() }}
+          </div>
+          <h4 class="profile-name">{{ user.prenom }} {{ user.nom }}</h4>
+          <p class="profile-email">{{ user.email }}</p>
+          <div class="profile-role-info"
+            *ngIf="user.roles && user.roles.length > 0">
+            <span class="profile-role-value">{{ getPrimaryRole() }}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="profile-info">
+            <div class="profile-stat">
+              <span class="stat-value">{{ totalReservations }}</span>
+              <span class="stat-label">Réservations</span>
+            </div>
+            <div class="profile-stat">
+              <span class="stat-value">{{ completedSessions }}</span>
+              <span class="stat-label">Séances terminées</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informations personnelles -->
+    <div class="profile-card-container">
+      <div class="card profile-card">
+        <div class="card-header bg-light">
+          <h5 class="mb-0"><i class="fas fa-user me-2"></i> Informations
+            personnelles</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="prenom" class="form-label">Prénom</label>
+                <input type="text" class="form-control" id="prenom"
+                  formControlName="prenom">
+                <div
+                  *ngIf="profileForm.get('prenom')?.invalid && profileForm.get('prenom')?.touched"
+                  class="text-danger mt-1">
+                  <small
+                    *ngIf="profileForm.get('prenom')?.errors?.['required']">Le
+                    prénom est requis</small>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="nom" class="form-label">Nom</label>
+                <input type="text" class="form-control" id="nom"
+                  formControlName="nom">
+                <div
+                  *ngIf="profileForm.get('nom')?.invalid && profileForm.get('nom')?.touched"
+                  class="text-danger mt-1">
+                  <small *ngIf="profileForm.get('nom')?.errors?.['required']">Le
+                    nom est requis</small>
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email"
+                formControlName="email">
+              <div
+                *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched"
+                class="text-danger mt-1">
+                <small
+                  *ngIf="profileForm.get('email')?.errors?.['required']">L'email
+                  est requis</small>
+                <small
+                  *ngIf="profileForm.get('email')?.errors?.['email']">Format
+                  d'email invalide</small>
+              </div>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary"
+                [disabled]="!profileForm.valid || profileForm.pristine">
+                <i class="fas fa-save me-2"></i>Enregistrer les modifications
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

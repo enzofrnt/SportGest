@@ -16,6 +16,17 @@ export class ReservationService {
   ) {}
 
   /**
+   * Crée une nouvelle réservation pour une séance
+   * @param seanceId L'identifiant de la séance à réserver
+   */
+  async createReservation(seanceId: number): Promise<Observable<{ message: string; reservation: Reservation }>> {
+    const url = await this.apiService.getEndpointUrl(this.endpoint);
+    return this.http.post<{ message: string; reservation: Reservation }>(url, { seance_id: seanceId }, {
+      withCredentials: true
+    });
+  }
+
+  /**
    * Annule une réservation existante
    * @param id L'identifiant de la réservation à annuler
    */

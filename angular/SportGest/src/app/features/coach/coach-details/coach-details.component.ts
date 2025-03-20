@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { CoachService } from '../../../../services/coach-api.service';
-import { Coach } from '../../../../models/coach.model';
-import { Seance } from '../../../../models/seance.model';
-import { StatutSeance } from '../../../../models/enum/statut-seance.enum';
-import { AuthService } from '../../../../services/auth.service';
+import { CoachService } from '../../../services/coach-api.service';
+import { Coach } from '../../../models/coach.model';
+import { Seance } from '../../../models/seance.model';
+import { StatutSeance } from '../../../models/enum/statut-seance.enum';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-coach-details',

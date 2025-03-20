@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Seance } from '../../../../models/seance.model';
-import { StatutSeance } from '../../../../models/enum/statut-seance.enum';
-import { SeanceApiService } from '../../../../services/seance-api.service';
-import { AuthService } from '../../../../services/auth.service';
-import { DifficulteExercice } from '../../../../models/enum/difficulte-exercice.enum';
+import { Seance } from '../../../models/seance.model';
+import { StatutSeance } from '../../../models/enum/statut-seance.enum';
+import { SeanceApiService } from '../../../services/seance-api.service';
+import { AuthService } from '../../../services/auth.service';
+import { DifficulteExercice } from '../../../models/enum/difficulte-exercice.enum';
+import { ReservationService } from '../../../services/reservation-api.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-seance-detail',
@@ -28,7 +30,8 @@ export class SeanceDetailComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private seanceApiService: SeanceApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private reservationService: ReservationService
   ) {}
 
   ngOnInit() {
@@ -56,5 +59,22 @@ export class SeanceDetailComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/seances']);
+  }
+
+  async reserver(): Promise<void> {
+    if (!this.seance?.id) {
+      this.error = 'ID de séance invalide';
+      return;
+    }
+
+    try {
+      const response$ = await this.reservationService.createReservation(this.seance.id);
+      const response = await firstValueFrom(response$);
+
+      // Rediriger vers la liste des réservations
+      this.router.navigate(['/reservations']);
+    } catch (error: any) {
+      this.error = error.error?.error || 'Erreur lors de la réservation';
+    }
   }
 }

@@ -1,17 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReservationService } from '../../../../services/reservation-api.service';
-import { Reservation } from '../../../../models/reservation.model';
-import { AuthService } from '../../../../services/auth.service';
+import { RouterModule } from '@angular/router';
+import { ReservationService } from '../../../services/reservation-api.service';
+import { Reservation } from '../../../models/reservation.model';
+import { AuthService } from '../../../services/auth.service';
 import { firstValueFrom } from 'rxjs';
-import { StatutSeance } from '../../../../models/enum/statut-seance.enum';
+import { StatutSeance } from '../../../models/enum/statut-seance.enum';
 
 @Component({
   selector: 'app-reservation-list',
   templateUrl: './reservation-list.component.html',
   styleUrls: ['./reservation-list.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, RouterModule]
 })
 export class ReservationListComponent implements OnInit {
   reservations: Reservation[] = [];

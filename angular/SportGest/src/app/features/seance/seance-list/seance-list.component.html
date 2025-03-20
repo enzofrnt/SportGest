@@ -103,6 +103,10 @@
               <span>{{ seance.dateHeure | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
             <div class="info-item">
+              <i class="bi bi-calendar3"></i>
+              <span>{{ seance.dureeSeance }} minutes</span>
+            </div>
+            <div class="info-item">
               <i class="bi bi-person-badge"></i>
               <span>{{ seance.coach?.prenom || 'Coach' }} {{ seance.coach?.nom
                 || 'Non assigné' }}</span>
