@@ -23,47 +23,17 @@ class ReservationController extends AbstractController
     public function cancelReservation(
         int $id,
         EntityManagerInterface $entityManager,
-        SeanceRepository $seanceRepository,
-        SportifRepository $sportifRepository,
         ReservationRepository $reservationRepository
     ): JsonResponse {
-        // Récupérer la séance à partir de l'ID dans l'URL
-        $seance = $seanceRepository->find($id);
-        if (!$seance) {
-            return $this->json(['error' => 'Séance non trouvée'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
-        // Récupérer l'utilisateur connecté
-        $currentUser = $this->getUser();
-
-        // Déterminer quel sportif doit être retiré
-        /** @var Sportif $sportifToRemove */
-        $sportifToRemove = null;
-
-        // Si l'utilisateur est un sportif, il ne peut annuler que sa propre réservation
-        if ($currentUser instanceof Sportif) {
-            $sportifToRemove = $currentUser;
-        } else {
-            // Pour les admins et responsables, on pourrait permettre d'annuler n'importe quelle réservation
-            // mais on utiliserait un paramètre de requête pour cela, comme ?sportif_id=123
-            if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_RESPONSABLE')) {
-                return $this->json(['error' => 'Vous n\'avez pas les permissions nécessaires'], JsonResponse::HTTP_FORBIDDEN);
-            }
-
-            // Dans ce cas simpliste, on considère que seul le sportif connecté peut annuler
-            $sportifToRemove = $currentUser;
-        }
-
-        // Trouver la réservation correspondante
-        $reservation = $reservationRepository->findOneBy([
-            'seance' => $seance,
-            'sportif' => $sportifToRemove
-        ]);
-
+        $reservation = $reservationRepository->find($id);
         if (!$reservation) {
-            return $this->json([
-                'error' => 'Le sportif n\'est pas inscrit à cette séance'
-            ], JsonResponse::HTTP_NOT_FOUND);
+            return $this->json(['error' => 'Réservation non trouvée'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        // Vérifier que l'utilisateur a le droit d'annuler cette réservation
+        $currentUser = $this->getUser();
+        if (!$this->isGranted('ROLE_ADMIN') && $reservation->getSportif() !== $currentUser) {
+            return $this->json(['error' => 'Vous n\'avez pas les permissions nécessaires'], JsonResponse::HTTP_FORBIDDEN);
         }
 
         // Supprimer la réservation
@@ -222,5 +192,43 @@ class ReservationController extends AbstractController
                 ]
             ]
         ], JsonResponse::HTTP_CREATED);
+    }
+
+    #[Route('/check/{seanceId}', name: 'api_check_reservation', methods: ['GET'])]
+    public function checkReservation(
+        int $seanceId,
+        SeanceRepository $seanceRepository,
+        ReservationRepository $reservationRepository
+    ): JsonResponse {
+        $user = $this->getUser();
+        if (!$user instanceof Sportif) {
+            return $this->json(['isReserved' => false]);
+        }
+
+        $seance = $seanceRepository->find($seanceId);
+        if (!$seance) {
+            return $this->json(['error' => 'Séance non trouvée'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $reservation = $reservationRepository->findOneBy([
+            'seance' => $seance,
+            'sportif' => $user
+        ]);
+
+        if (!$reservation) {
+            return $this->json(['isReserved' => false]);
+        }
+
+        return $this->json([
+            'isReserved' => true,
+            'reservation' => [
+                'id' => $reservation->getId(),
+                'presence' => $reservation->getPresence(),
+                'seance' => [
+                    'id' => $seance->getId(),
+                    'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s')
+                ]
+            ]
+        ]);
     }
 }

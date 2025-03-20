@@ -9,6 +9,7 @@ import { AuthService } from '../../../services/auth.service';
 import { DifficulteExercice } from '../../../models/enum/difficulte-exercice.enum';
 import { ReservationService } from '../../../services/reservation-api.service';
 import { firstValueFrom } from 'rxjs';
+import { Reservation } from '../../../models/reservation.model';
 
 @Component({
   selector: 'app-seance-detail',
@@ -24,6 +25,8 @@ export class SeanceDetailComponent implements OnInit {
   isAuthenticated = false;
   loading = true;
   error = '';
+  isReserved = false;
+  currentReservation: Reservation | null = null;
 
   constructor(
     private location: Location,
@@ -50,6 +53,13 @@ export class SeanceDetailComponent implements OnInit {
     try {
       const seance = await this.seanceApiService.getSeanceById(id);
       this.seance = seance;
+
+      if (this.isAuthenticated) {
+        const checkReservation$ = await this.reservationService.checkReservation(id);
+        const result = await firstValueFrom(checkReservation$);
+        this.isReserved = result.isReserved;
+        this.currentReservation = result.reservation || null;
+      }
     } catch (error) {
       this.error = 'Erreur lors du chargement des détails de la séance';
     } finally {
@@ -71,10 +81,43 @@ export class SeanceDetailComponent implements OnInit {
       const response$ = await this.reservationService.createReservation(this.seance.id);
       const response = await firstValueFrom(response$);
 
+      // Mettre à jour l'état local
+      this.isReserved = true;
+      this.currentReservation = response.reservation;
+
       // Rediriger vers la liste des réservations
       this.router.navigate(['/reservations']);
     } catch (error: any) {
       this.error = error.error?.error || 'Erreur lors de la réservation';
     }
+  }
+
+  async annulerReservation(): Promise<void> {
+    if (!confirm('Voulez-vous vraiment annuler cette réservation ?')) {
+      return;
+    }
+
+    if (!this.currentReservation?.id) {
+      this.error = 'Impossible d\'annuler la réservation';
+      return;
+    }
+
+    try {
+      const response$ = await this.reservationService.cancelReservation(this.currentReservation.id);
+      await firstValueFrom(response$);
+
+      // Mettre à jour l'état local
+      this.isReserved = false;
+      this.currentReservation = null;
+
+      // Recharger la séance pour mettre à jour la liste des participants
+      await this.loadSeance();
+    } catch (error: any) {
+      this.error = error.error?.error || 'Erreur lors de l\'annulation de la réservation';
+    }
+  }
+
+  voirReservations(): void {
+    this.router.navigate(['/reservations']);
   }
 }

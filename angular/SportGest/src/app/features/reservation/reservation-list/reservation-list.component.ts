@@ -53,6 +53,11 @@ export class ReservationListComponent implements OnInit {
       return;
     }
 
+    // Demander confirmation avant d'annuler
+    if (!confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
+      return;
+    }
+
     try {
       const response$ = await this.reservationService.cancelReservation(id);
       await firstValueFrom(response$);

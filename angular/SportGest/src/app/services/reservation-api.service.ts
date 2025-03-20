@@ -47,4 +47,15 @@ export class ReservationService {
       withCredentials: true
     });
   }
+
+  /**
+   * Vérifie si une séance est déjà réservée par le sportif connecté
+   * @param seanceId L'identifiant de la séance à vérifier
+   */
+  async checkReservation(seanceId: number): Promise<Observable<{ isReserved: boolean; reservation?: Reservation }>> {
+    const url = await this.apiService.getEndpointUrl(`${this.endpoint}/check/${seanceId}`);
+    return this.http.get<{ isReserved: boolean; reservation?: Reservation }>(url, {
+      withCredentials: true
+    });
+  }
 }

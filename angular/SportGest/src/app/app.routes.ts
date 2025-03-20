@@ -40,7 +40,7 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'membre/reservations',
+    path: 'reservations',
     canActivate: [authGuard],
     component: ReservationListComponent
   },
