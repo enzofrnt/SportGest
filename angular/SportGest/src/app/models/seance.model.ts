@@ -16,5 +16,5 @@ export interface Seance {
     statut: StatutSeance;
     niveauSeance: NiveauSportif;
     exercices: Exercice[];
-    theme: Specialite[];
+    theme: Specialite;
 }

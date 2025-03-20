@@ -63,7 +63,7 @@
           </thead>
           <tbody>
             <tr *ngFor="let seance of seances">
-              <td>{{ seance.themeSeance }}</td>
+              <td>{{ seance.theme.nom }}</td>
               <td>{{ seance.dateHeure | date: 'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ seance.typeSeance }}</td>
               <td>{{ seance.niveauSeance }}</td>
