@@ -1,0 +1,43 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Génération de la fiche de paie{% endblock %}
+
+{% block content_title %}Génération de la fiche de paie{% endblock %}
+
+{% block main %}
+    <div class="card">
+        <div class="card-body">
+            <p class="text-muted mb-4">
+                Sélectionnez un coach et une période pour générer une fiche de paie. 
+                Le montant sera calculé automatiquement en fonction des séances effectuées sur la période.
+            </p>
+
+            {{ form_start(form) }}
+            
+            <div class="mb-3">
+                {{ form_label(form.coach) }}
+                {{ form_widget(form.coach, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.coach) }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form_label(form.periode) }}
+                {{ form_widget(form.periode, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.periode) }}
+                <small class="form-text text-muted">
+                    <ul>
+                        <li><strong>Mois</strong> : Calcule la fiche de paie pour le mois en cours</li>
+                        <li><strong>Semaine</strong> : Calcule la fiche de paie pour la semaine en cours (du lundi au dimanche)</li>
+                    </ul>
+                </small>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <a href="{{ ea_url().setController('App\\Controller\\Dashboard\\FicheDePaieCrudController').setAction('index') }}" class="btn btn-link mr-2">Annuler</a>
+                <button type="submit" class="btn btn-primary">Générer la fiche de paie</button>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %} 

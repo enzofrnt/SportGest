@@ -420,4 +420,19 @@ class SeanceRepository extends ServiceEntityRepository
 
         return $results;
     }
+
+    /**
+     * Trouve toutes les séances validées pour un coach.
+     */
+    public function findValidatedSeancesByCoach(Coach $coach): array
+    {
+        return $this->createQueryBuilder('s')
+            ->where('s.coach = :coach')
+            ->andWhere('s.statut = :statut')
+            ->setParameter('coach', $coach)
+            ->setParameter('statut', StatutSeance::VALIDEE)
+            ->orderBy('s.dateHeure', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }
