@@ -28,7 +28,7 @@
         @if (isAuthenticated) {
         <li class="nav-item">
           <a routerLink="/membre" routerLinkActive="active"
-            [routerLinkActiveOptions]="{exact: true}">Tableau de bord</a>
+            [routerLinkActiveOptions]="{exact: true}">Mon Bilan</a>
         </li>
         <li class="nav-item">
           <a routerLink="/membre/planning" routerLinkActive="active">Mon
@@ -49,8 +49,8 @@
     <div class="user-actions">
       @if (!isAuthenticated) {
       <a routerLink="/connexion" class="btn btn-login">Connexion</a>
-      <a routerLink="/inscription" class="btn btn-register">Inscription</a>
-      } @else {
+      <a routerLink="/inscription" class="btn btn-register">Inscription</a> }
+      @else {
       <div class="user-menu">
         <button #userMenuButton class="user-menu-btn"
           (click)="toggleUserMenu()">
@@ -62,8 +62,7 @@
             </div>
           </div>
           <i class="fas fa-chevron-down"></i>
-        </button>
-        @if (isUserMenuOpen) {
+        </button> @if (isUserMenuOpen) {
         <div class="user-dropdown" clickOutside [ignoreElement]="userMenuButton"
           (clickOutside)="closeUserMenu()">
           <div class="dropdown-header">
@@ -118,7 +117,7 @@
 
     @if (isAuthenticated) {
     <li class="mobile-nav-item">
-      <a routerLink="/membre" (click)="closeMobileMenu()">Tableau de bord</a>
+      <a routerLink="/membre" (click)="closeMobileMenu()">Mon Bilan</a>
     </li>
     <li class="mobile-nav-item">
       <a routerLink="/membre/planning" (click)="closeMobileMenu()">Mon
