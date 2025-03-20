@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { CoachService } from '../../../../services/coach.service';
+import { CoachService } from '../../../../services/coach-api.service';
 import { Coach } from '../../../../models/coach.model';
 import { Specialite } from '../../../../models/specialite.model';
 import { Seance } from '../../../../models/seance.model';
@@ -29,7 +29,7 @@ export class CoachDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log("ngOnInit");  
+    console.log("ngOnInit");
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.coachId = +params['id'];
@@ -41,7 +41,7 @@ export class CoachDetailsComponent implements OnInit {
   async loadCoachDetails(): Promise<void> {
     try {
       this.loading = true;
-      
+
       // Charger les détails du coach
       const coach$ = await this.coachService.getCoachById(this.coachId);
       coach$.subscribe({
@@ -123,4 +123,4 @@ export class CoachDetailsComponent implements OnInit {
     if (!this.coach || !this.coach.prenom || !this.coach.nom) return '?';
     return `${this.coach.prenom.charAt(0)}${this.coach.nom.charAt(0)}`.toUpperCase();
   }
-} 
+}

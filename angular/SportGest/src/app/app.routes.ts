@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { HomeComponent } from './features/public/home/home.component';
-import { CoachesComponent } from './features/public/coaches/coaches.component';
+import { CoachesComponent } from './features/public/coach/coache-list/coach-list.component';
 import { SessionsComponent } from './features/public/sessions/sessions.component';
 import { PlanningComponent as PublicPlanningComponent } from './features/public/planning/planning.component';
 import { DashboardComponent } from './features/member/dashboard/dashboard.component';
@@ -22,7 +22,7 @@ export const routes: Routes = [
   { path: 'coachs', component: CoachesComponent },
   {
     path: 'coachs/:id',
-    loadComponent: () => import('./features/public/coaches/coach-details/coach-details.component').then(m => m.CoachDetailsComponent),
+    loadComponent: () => import('./features/public/coach/coach-details/coach-details.component').then(m => m.CoachDetailsComponent),
     title: 'Détails du coach'
   },
   { path: 'seances', component: SessionsComponent },

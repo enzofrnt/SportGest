@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { CoachService } from '../../../services/coach.service';
-import { Coach } from '../../../models/coach.model';
+import { CoachService } from '../../../../services/coach-api.service';
+import { Coach } from '../../../../models/coach.model';
 
 @Component({
-  selector: 'app-coaches',
+  selector: 'app-coach-list',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './coaches.component.html',
-  styleUrl: './coaches.component.scss'
+  templateUrl: './coach-list.component.html',
+  styleUrl: './coach-list.component.scss'
 })
-export class CoachesComponent implements OnInit {
+export class CoachListComponent implements OnInit {
   coaches: Coach[] = [];
   loading = true;
   error: string | null = null;

@@ -17,8 +17,8 @@ services:
     env_file: .env
     volumes:
       - ../symfony/SportGest:/var/www/html
-      - /var/www/html/var
-      - /var/www/html/vendor
+      - symfony_var:/var/www/html/var
+      - symfony_vendor:/var/www/html/vendor
     ports:
       - "${PHP_PORT}:8000"
     depends_on:
@@ -33,9 +33,12 @@ services:
     working_dir: /SportGest
     volumes:
       - ../angular/SportGest:/SportGest
-      - /SportGest/node_modules
+      - angular_node_modules:/SportGest/node_modules
     ports:
       - "${ANGULAR_PORT}:4200"
 
 volumes:
   mariadb_data:
+  angular_node_modules:
+  symfony_var:
+  symfony_vendor:
