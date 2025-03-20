@@ -197,4 +197,14 @@ class Seance
     {
         return $this->theme;
     }
+
+    public function getDureeSeance(): int {
+        $dureeTotal = 0;
+        
+        foreach ($this->exercices as $exercice) {
+            $dureeTotal += $exercice->getDureeEstimee();
+        }
+        
+        return $dureeTotal;
+    }
 }

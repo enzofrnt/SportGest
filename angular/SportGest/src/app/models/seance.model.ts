@@ -17,4 +17,5 @@ export interface Seance {
     niveauSeance: NiveauSportif;
     exercices: Exercice[];
     theme: Specialite;
+    dureeSeance: number;
 }

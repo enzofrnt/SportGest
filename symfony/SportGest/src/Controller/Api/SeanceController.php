@@ -15,9 +15,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Reservation;
+use App\Controller\Api\Trait\SeanceDataTrait;
+
 #[Route('/api')]
 class SeanceController extends AbstractController
 {
+    use SeanceDataTrait;
+
     /**
      * Recherche des créneaux disponibles
      */
@@ -214,33 +218,6 @@ class SeanceController extends AbstractController
         }
 
         return true;
-    }
-
-    private function getSeanceData(Seance $seance): array
-    {
-        return [
-            'id' => $seance->getId(),
-            'theme' => [
-                'id' => $seance->getTheme()->getId(),
-                'nom' => $seance->getTheme()->getNom()
-            ],
-            'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
-            'typeSeance' => $seance->getTypeSeance()->value,
-            'statut' => $seance->getStatut()->value,
-            'niveauSeance' => $seance->getNiveauSeance()->value,
-            'coach' => [
-                'id' => $seance->getCoach()->getId(),
-                'nom' => $seance->getCoach()->getNom(),
-                'prenom' => $seance->getCoach()->getPrenom(),
-            ],
-            'nbSportifs' => $seance->getReservations()->count(),
-            'exercices' => array_map(function($exercice) {
-                return [
-                    'id' => $exercice->getId(),
-                    'nom' => $exercice->getNom()
-                ];
-            }, $seance->getExercices()->toArray())
-        ];
     }
 
     #[Route('/seances', name: 'api_seances_list', methods: ['GET'])]

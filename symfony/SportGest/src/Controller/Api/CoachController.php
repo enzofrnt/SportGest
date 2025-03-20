@@ -10,10 +10,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Controller\Api\Trait\SeanceDataTrait;
 
 #[Route('/api/coachs')]
 class CoachController extends AbstractController
 {
+    use SeanceDataTrait;
 
     private function getCoachData(Coach $coach): array
     {
@@ -67,21 +69,7 @@ class CoachController extends AbstractController
         // Récupérer les séances proposées par le coach
         $seances = $seanceRepository->findBy(['coach' => $coach]);
 
-        $data = [];
-        foreach ($seances as $seance) {
-            $data[] = [
-                'id' => $seance->getId(),
-                'theme' => [
-                    'id' => $seance->getTheme()->getId(),
-                    'nom' => $seance->getTheme()->getNom()
-                ],
-                'dateHeure' => $seance->getDateHeure()->format('Y-m-d H:i:s'),
-                'typeSeance' => $seance->getTypeSeance()->value,
-                'statut' => $seance->getStatut()->value,
-                'niveauSeance' => $seance->getNiveauSeance()->value,
-                'nbSportifs' => $seance->getReservations()->count(),
-            ];
-        }
+        $data = array_map([$this, 'getSeanceData'], $seances);
 
         return $this->json($data);
     }

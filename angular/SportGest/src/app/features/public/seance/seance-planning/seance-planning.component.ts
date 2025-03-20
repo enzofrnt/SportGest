@@ -92,8 +92,8 @@ export class SeancePlanningComponent implements OnInit {
     const events = this.seances.map(seance => ({
       id: seance.id?.toString(),
       title: seance.theme?.nom || 'Séance sans thème',
-      start: seance.dateHeure,
-      end: new Date(new Date(seance.dateHeure).getTime() + 60 * 60 * 1000), // Durée d'une heure par défaut
+      start: new Date(seance.dateHeure),
+      end: new Date(new Date(seance.dateHeure).getTime() + seance.dureeSeance * 60 * 1000), // Conversion des minutes en millisecondes
       backgroundColor: this.getEventColor(seance.statut),
       borderColor: this.getEventColor(seance.statut),
       extendedProps: {

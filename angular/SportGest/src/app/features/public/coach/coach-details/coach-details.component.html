@@ -54,6 +54,7 @@
             <tr>
               <th>Thème</th>
               <th>Date et heure</th>
+              <th>Durée</th>
               <th>Type</th>
               <th>Niveau</th>
               <th>Statut</th>
@@ -65,8 +66,10 @@
             <tr *ngFor="let seance of seances">
               <td>{{ seance.theme.nom }}</td>
               <td>{{ seance.dateHeure | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ seance.dureeSeance }} minutes</td>
               <td>{{ seance.typeSeance }}</td>
               <td>{{ seance.niveauSeance }}</td>
+
               <td>
                 <span [ngClass]="{
                   'badge rounded-pill bg-success': seance.statut === statutSeance.PREVUE,
