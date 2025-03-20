@@ -27,10 +27,15 @@ class Coach extends Utilisateur
     #[ORM\ManyToMany(targetEntity: Specialite::class)]
     private Collection $specialite;
 
+    #[ORM\OneToMany(mappedBy: 'coach', targetEntity: Seance::class)]
+    private Collection $seances;
+
     public function __construct()
     {
         $this->specialite = new ArrayCollection();
+        $this->seances = new ArrayCollection();
     }
+
     public function getTarifHoraire(): ?float
     {
         return $this->tarifHoraire;
@@ -70,5 +75,10 @@ class Coach extends Utilisateur
         $this->specialite->removeElement($specialite);
 
         return $this;
+    }
+
+    public function getSeances(): Collection
+    {
+        return $this->seances;
     }
 }

@@ -171,6 +171,19 @@ export class AuthService {
     return !!this.currentUserValue;
   }
 
+  // Vérifie si l'utilisateur actuel est un sportif
+  isSportif(): boolean {
+    const user = this.currentUserValue;
+    if (!user || !user.roles) return false;
+    
+    // Un utilisateur est considéré comme sportif s'il a le rôle ROLE_SPORTIF ou ROLE_USER
+    // et qu'il n'a pas les rôles ROLE_COACH ou ROLE_RESPONSABLE ou ROLE_ADMIN
+    return (user.roles.includes('ROLE_SPORTIF') || user.roles.includes('ROLE_USER')) && 
+           !user.roles.includes('ROLE_COACH') && 
+           !user.roles.includes('ROLE_RESPONSABLE') && 
+           !user.roles.includes('ROLE_ADMIN');
+  }
+
   // Méthode pour mettre à jour le profil utilisateur
   async updateUserProfile(userData: Partial<Utilisateur>): Promise<Utilisateur> {
     try {

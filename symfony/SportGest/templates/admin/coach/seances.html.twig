@@ -1,0 +1,39 @@
+{# Affichage des séances du coach #}
+{% if field.value is not empty %}
+    <div class="seances-list">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date et heure</th>
+                    <th>Type</th>
+                    <th>Niveau</th>
+                    <th>Thème</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for seance in field.value %}
+                    <tr>
+                        <td>{{ seance.dateHeure|date('d/m/Y H:i') }}</td>
+                        <td>{{ seance.typeSeance.value }}</td>
+                        <td>{{ seance.niveauSeance.value }}</td>
+                        <td>{{ seance.theme ? seance.theme.nom : '-' }}</td>
+                        <td>{{ seance.statut.value }}</td>
+                        <td>
+                            <a href="{{ path('admin', {
+                                crudController: 'App\\Controller\\Dashboard\\SeanceCrudController',
+                                crudAction: 'detail',
+                                entityId: seance.id
+                            }) }}" class="btn btn-primary btn-sm">
+                                Voir détails
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p>Aucune séance associée à ce coach.</p>
+{% endif %} 

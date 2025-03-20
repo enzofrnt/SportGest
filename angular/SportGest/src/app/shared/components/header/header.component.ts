@@ -20,6 +20,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isUserMenuOpen: boolean = false;
   isMobileMenuOpen: boolean = false;
   user: Utilisateur | null = null;
+  isSportif: boolean = false;
   private userSubscription: Subscription | null = null;
 
   constructor(
@@ -32,6 +33,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.userSubscription = this.authService.currentUser$.subscribe((user: Utilisateur | null) => {
       this.isAuthenticated = !!user;
       this.user = user;
+      this.isSportif = this.authService.isSportif();
     });
     console.log(this.user);
   }

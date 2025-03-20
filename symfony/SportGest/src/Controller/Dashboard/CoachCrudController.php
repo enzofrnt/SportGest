@@ -22,6 +22,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use App\Form\SpecialiteType;
+use App\Entity\Specialite;
 
 class CoachCrudController extends AbstractCrudController
 {
@@ -56,19 +57,21 @@ class CoachCrudController extends AbstractCrudController
             TextField::new('nom'),
             TextField::new('prenom'),
             EmailField::new('email'),
-            CollectionField::new('specialite')
-                ->setFormType(CollectionType::class)
-                ->setFormTypeOptions([
-                    'entry_type' => SpecialiteType::class,
-                    'allow_add' => true,
-                    'allow_delete' => true,
-                    'by_reference' => false,
-                ]),
-            AssociationField::new('seances')
-                ->onlyOnDetail(),
-            AssociationField::new('ficheDePaies')
-                ->onlyOnDetail(),
+            AssociationField::new('specialite')
+                ->setFormTypeOption('by_reference', false)
+                ->setFormTypeOption('multiple', true)
+                ->autocomplete()
+                ->setLabel('Spécialités'),
+            \EasyCorp\Bundle\EasyAdminBundle\Field\NumberField::new('tarifHoraire')
+                ->setLabel('Tarif horaire (€)')
+                ->setNumDecimals(2),
         ];
+
+        if ($pageName === Crud::PAGE_DETAIL) {
+            $fields[] = \EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField::new('seances', 'Séances')
+                ->setTemplatePath('admin/coach/seances.html.twig')
+                ->onlyOnDetail();
+        }
 
         if ($pageName === Crud::PAGE_NEW || $pageName === Crud::PAGE_EDIT) {
             $fields[] = TextField::new('password')

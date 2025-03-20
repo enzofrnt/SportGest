@@ -24,10 +24,12 @@
           <a routerLink="/seances/planning"
             routerLinkActive="active">Planning</a>
         </li>
+        @if (isSportif) {
         <li class="nav-item">
           <a routerLink="/bilan" routerLinkActive="active"
             [routerLinkActiveOptions]="{exact: true}">Mon Bilan</a>
         </li>
+        }
         <li class="nav-item">
           <a routerLink="/reservations" routerLinkActive="active">Mes
             réservations</a>
@@ -105,10 +107,11 @@
       <a routerLink="/planning" (click)="closeMobileMenu()">Planning</a>
     </li>
 
-    @if (isAuthenticated) {
+    @if (isAuthenticated) { @if (isSportif) {
     <li class="mobile-nav-item">
       <a routerLink="/membre" (click)="closeMobileMenu()">Mon Bilan</a>
     </li>
+    }
     <li class="mobile-nav-item">
       <a routerLink="/membre/planning" (click)="closeMobileMenu()">Mon
         planning</a>
