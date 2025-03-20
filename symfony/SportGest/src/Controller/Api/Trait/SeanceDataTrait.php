@@ -28,7 +28,9 @@ trait SeanceDataTrait
             'exercices' => array_map(function($exercice) {
                 return [
                     'id' => $exercice->getId(),
-                    'nom' => $exercice->getNom()
+                    'nom' => $exercice->getNom(),
+                    'dureeEstimee' => $exercice->getDureeEstimee(),
+                    'difficulte' => $exercice->getDifficulte()->value,
                 ];
             }, $seance->getExercices()->toArray())
         ];

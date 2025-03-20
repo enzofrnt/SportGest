@@ -1,0 +1,126 @@
+<div class="container mt-5">
+  <!-- Message de chargement -->
+  <div *ngIf="loading" class="d-flex justify-content-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="error" class="alert alert-warning">
+    {{ error }}
+  </div>
+
+  <!-- Détails de la séance -->
+  <div *ngIf="!loading && !error && seance" class="seance-details">
+    <div class="card-header">
+      <h3>{{ seance.theme?.nom || 'Séance sans thème' }}</h3>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="info-group">
+            <h4>Informations</h4>
+            <p><strong>Date et heure:</strong> {{ seance.dateHeure |
+              date:'dd/MM/yyyy HH:mm' }}</p>
+            <p><strong>Durée:</strong> {{ seance.dureeSeance }}
+              minutes</p>
+            <p><strong>Type:</strong> {{ seance.typeSeance }}</p>
+            <p><strong>Niveau:</strong> {{ seance.niveauSeance }}</p>
+            <p><strong>Statut:</strong> {{ seance.statut }}</p>
+            <p><strong>Coach:</strong> {{ seance.coach?.prenom ||
+              'Coach' }} {{ seance.coach?.nom || 'Non assigné' }}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="info-group">
+            <h4>Exercices</h4>
+            <div *ngIf="!seance.exercices?.length" class="alert alert-info">
+              Aucun exercice prévu pour cette séance.
+            </div>
+            <div class="exercices-list" *ngIf="seance.exercices?.length">
+              <div class="exercice-card"
+                *ngFor="let exercice of seance.exercices">
+                <div class="exercice-header">
+                  <h5>{{ exercice.nom }}</h5>
+                  <span class="badge" [ngClass]="{
+                    'bg-success': exercice.difficulte === DifficulteExercice.FACILE,
+                    'bg-warning': exercice.difficulte === DifficulteExercice.MOYEN,
+                    'bg-danger': exercice.difficulte === DifficulteExercice.DIFFICILE
+                  }">
+                    <i class="bi" [ngClass]="{
+                      'bi-check-circle': exercice.difficulte === DifficulteExercice.FACILE,
+                      'bi-exclamation-circle': exercice.difficulte === DifficulteExercice.MOYEN,
+                      'bi-x-circle': exercice.difficulte === DifficulteExercice.DIFFICILE
+                    }"></i>
+                    {{ exercice.difficulte }}
+                  </span>
+                </div>
+                <div class="exercice-body">
+                  <div class="exercice-info">
+                    <span class="info-item">
+                      <i class="bi bi-clock"></i>
+                      {{ exercice.dureeEstimee }} minutes
+                    </span>
+                  </div>
+                  <p class="exercice-description" *ngIf="exercice.description">
+                    {{ exercice.description }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-group">
+            <h4>Participants</h4>
+            <div *ngIf="!seance.reservations?.length"
+              class="text-center p-3">
+              <p>Aucun participant inscrit</p>
+            </div>
+
+            <div class="participants-list"
+              *ngIf="seance.reservations?.length">
+              <h5>Participants inscrits :</h5>
+              <ul class="list-group">
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center"
+                  *ngFor="let reservation of seance.reservations">
+                  {{ reservation.sportif.nom }} {{
+                  reservation.sportif.prenom }}
+                  <span class="badge"
+                    [ngClass]="{'bg-success': reservation.presence, 'bg-danger': reservation.presence === false, 'bg-secondary': reservation.presence === null}">
+                    {{ reservation.presence ? 'Présent' :
+                    (reservation.presence === false ? 'Absent' :
+                    'Non défini') }}
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="d-flex justify-content-end mt-4">
+        <button class="btn btn-secondary me-2" (click)="goBack()">
+          <i class="bi bi-arrow-left"></i>Retour à la liste
+        </button>
+        <ng-container *ngIf="isAuthenticated; else notAuthenticatedBtn">
+          <a *ngIf="seance.statut !== StatutSeance.ANNULEE"
+            class="btn btn-primary"
+            [routerLink]="['/membre/reservation']"
+            [queryParams]="{seance: seance.id}">
+            <i class="bi bi-calendar-check"></i>Réserver
+          </a>
+        </ng-container>
+        <ng-template #notAuthenticatedBtn>
+          <a class="btn btn-outline-primary"
+            [routerLink]="['/connexion']">
+            <i class="bi bi-box-arrow-in-right"></i>Se connecter pour
+            réserver
+          </a>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

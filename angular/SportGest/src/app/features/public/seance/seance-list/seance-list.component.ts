@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SeanceApiService } from '../../../../services/seance-api.service';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Seance } from '../../../../models/seance.model';
 import { TypeSeance } from '../../../../models/enum/type-seance.enum';
 import { NiveauSportif } from '../../../../models/enum/niveau-sportif.enum';
@@ -53,7 +53,8 @@ export class SeanceListComponent implements OnInit {
 
   constructor(
     private seanceApiService: SeanceApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -110,21 +111,7 @@ export class SeanceListComponent implements OnInit {
   }
 
   async viewSeanceDetails(id: number): Promise<void> {
-    this.loading = true;
-    this.error = '';
-
-    try {
-      const seance = await this.seanceApiService.getSeanceById(id);
-      this.selectedSeance = seance;
-    } catch (error) {
-      this.error = 'Erreur lors du chargement des détails de la séance';
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  closeDetails(): void {
-    this.selectedSeance = null;
+    await this.router.navigate(['/seances', id]);
   }
 
   resetFilters(): void {

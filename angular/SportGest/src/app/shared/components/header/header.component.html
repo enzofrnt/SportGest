@@ -16,6 +16,7 @@
         <li class="nav-item">
           <a routerLink="/coachs" routerLinkActive="active">Nos coachs</a>
         </li>
+        @if (isAuthenticated) {
         <li class="nav-item">
           <a routerLink="/seances" routerLinkActive="active">Nos séances</a>
         </li>
@@ -23,20 +24,9 @@
           <a routerLink="/seances/planning"
             routerLinkActive="active">Planning</a>
         </li>
-
-        <!-- Menu membre connecté -->
-        @if (isAuthenticated) {
         <li class="nav-item">
           <a routerLink="/membre" routerLinkActive="active"
             [routerLinkActiveOptions]="{exact: true}">Mon Bilan</a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="/membre/planning" routerLinkActive="active">Mon
-            planning</a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="/membre/reservation"
-            routerLinkActive="active">Réserver</a>
         </li>
         <li class="nav-item">
           <a routerLink="/membre/reservations" routerLinkActive="active">Mes

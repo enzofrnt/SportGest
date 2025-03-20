@@ -45,6 +45,7 @@
       </div>
     </div>
 
+    @if (isAuthenticated) {
     <!-- Séances proposées -->
     <div *ngIf="seances && seances.length > 0" class="mt-5">
       <h3 class="mb-4">Séances proposées</h3>
@@ -96,5 +97,7 @@
       <i class="fas fa-info-circle me-2"></i> Ce coach n'a pas encore de séances
       programmées.
     </div>
+
+    }
   </div>
 </div>

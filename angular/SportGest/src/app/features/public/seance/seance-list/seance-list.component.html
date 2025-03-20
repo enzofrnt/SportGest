@@ -82,7 +82,7 @@
     </div>
 
     <!-- Liste des séances -->
-    <div *ngIf="!loading && !selectedSeance">
+    <div *ngIf="!loading">
       <div *ngIf="!seances || seances.length === 0" class="alert alert-info">
         Aucune séance ne correspond à vos critères de recherche.
       </div>
@@ -105,8 +105,7 @@
             <div class="info-item">
               <i class="bi bi-person-badge"></i>
               <span>{{ seance.coach?.prenom || 'Coach' }} {{ seance.coach?.nom
-                ||
-                'Non assigné' }}</span>
+                || 'Non assigné' }}</span>
             </div>
             <div class="info-item">
               <i class="bi bi-activity"></i>
@@ -131,86 +130,6 @@
               <i class="bi bi-eye"></i>Voir détails
             </button>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Détails d'une séance -->
-    <div *ngIf="selectedSeance && !loading" class="seance-details">
-      <div class="card-header">
-        <h3>{{ selectedSeance.theme?.nom || 'Séance sans thème' }}</h3>
-        <button type="button" class="btn-close" aria-label="Close"
-          (click)="closeDetails()"></button>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-6">
-            <div class="info-group">
-              <h4>Informations</h4>
-              <p><strong>Date et heure:</strong> {{ selectedSeance.dateHeure |
-                date:'dd/MM/yyyy HH:mm' }}</p>
-              <p><strong>Type:</strong> {{ selectedSeance.typeSeance }}</p>
-              <p><strong>Niveau:</strong> {{ selectedSeance.niveauSeance }}</p>
-              <p><strong>Statut:</strong> {{ selectedSeance.statut }}</p>
-              <p><strong>Coach:</strong> {{ selectedSeance.coach?.prenom ||
-                'Coach' }} {{ selectedSeance.coach?.nom || 'Non assigné' }}</p>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="info-group">
-              <h4>Exercices</h4>
-              <div *ngIf="!selectedSeance.exercices?.length"
-                class="alert alert-info">
-                Aucun exercice prévu pour cette séance.
-              </div>
-              <ul class="list-group" *ngIf="selectedSeance.exercices?.length">
-                <li class="list-group-item"
-                  *ngFor="let exercice of selectedSeance.exercices">
-                  {{ exercice.nom }}
-                </li>
-              </ul>
-            </div>
-
-            <div class="info-group">
-              <h4>Participants</h4>
-              <div *ngIf="!selectedSeance.reservations?.length"
-                class="text-center p-3">
-                <p>Aucun participant inscrit</p>
-              </div>
-              <ul class="list-group"
-                *ngIf="selectedSeance.reservations?.length">
-                <li
-                  class="list-group-item d-flex justify-content-between align-items-center"
-                  *ngFor="let reservation of selectedSeance.reservations">
-                  {{ reservation.sportif.nom }} {{ reservation.sportif.prenom }}
-                  <span class="badge"
-                    [ngClass]="{'bg-success': reservation.presence, 'bg-danger': reservation.presence === false, 'bg-secondary': reservation.presence === null}">
-                    {{ reservation.presence ? 'Présent' : (reservation.presence
-                    === false ? 'Absent' : 'Non défini') }}
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Réservation -->
-        <div class="d-flex justify-content-end mt-4">
-          <button class="btn btn-secondary me-2" (click)="closeDetails()">
-            <i class="bi bi-arrow-left"></i>Retour
-          </button>
-          <ng-container *ngIf="isAuthenticated; else notAuthenticatedBtn">
-            <a *ngIf="selectedSeance.statut !== StatutSeance.ANNULEE"
-              class="btn btn-primary" [routerLink]="['/membre/reservation']"
-              [queryParams]="{seance: selectedSeance.id}">
-              <i class="bi bi-calendar-check"></i>Réserver
-            </a>
-          </ng-container>
-          <ng-template #notAuthenticatedBtn>
-            <a class="btn btn-outline-primary" [routerLink]="['/connexion']">
-              <i class="bi bi-box-arrow-in-right"></i>Se connecter pour réserver
-            </a>
-          </ng-template>
         </div>
       </div>
     </div>

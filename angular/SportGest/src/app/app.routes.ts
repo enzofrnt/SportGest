@@ -5,20 +5,12 @@ import { HomeComponent } from './features/public/home/home.component';
 import { CoachListComponent } from './features/public/coach/coache-list/coach-list.component';
 import { SeanceListComponent } from './features/public/seance/seance-list/seance-list.component';
 import { SeancePlanningComponent } from './features/public/seance/seance-planning/seance-planning.component';
-import { PlanningComponent as PublicPlanningComponent } from './features/public/planning/planning.component';
-import { DashboardComponent } from './features/member/dashboard/dashboard.component';
-import { PlanningComponent as MemberPlanningComponent } from './features/member/planning/planning.component';
-import { SessionDetailsComponent } from './features/member/session-details/session-details.component';
-import { BookingComponent } from './features/member/booking/booking.component';
-import { HistoryComponent } from './features/member/history/history.component';
-import { StatsComponent } from './features/member/stats/stats.component';
-import { ProfileComponent } from './features/member/profile/profile.component';
-import { ReservationsComponent } from './features/member/reservations/reservations.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   // Route principale - redirige vers la racine
   { path: '', component: HomeComponent },
+
   // Routes publiques
   { path: 'coachs', component: CoachListComponent },
   {
@@ -26,25 +18,21 @@ export const routes: Routes = [
     loadComponent: () => import('./features/public/coach/coach-details/coach-details.component').then(m => m.CoachDetailsComponent),
     title: 'Détails du coach'
   },
-  { path: 'seances', component: SeanceListComponent },
-  { path: 'seances/planning', component: SeancePlanningComponent },
-  { path: 'planning', component: PublicPlanningComponent },
+
   { path: 'inscription', component: RegisterComponent },
   { path: 'connexion', component: LoginComponent },
 
-  // Routes protégées (sportifs connectés)
+  // Routes des séances (protégées)
   {
-    path: 'membre',
+    path: 'seances',
     canActivate: [authGuard],
     children: [
-      { path: '', component: DashboardComponent },
-      { path: 'planning', component: MemberPlanningComponent },
-      { path: 'seance/:id', component: SessionDetailsComponent },
-      { path: 'reservation', component: BookingComponent },
-      { path: 'historique', component: HistoryComponent },
-      { path: 'statistiques', component: StatsComponent },
-      { path: 'profil', component: ProfileComponent },
-      { path: 'reservations', component: ReservationsComponent },
+      { path: '', component: SeanceListComponent },
+      { path: 'planning', component: SeancePlanningComponent },
+      {
+        path: ':id',
+        loadComponent: () => import('./features/public/seance/seance-detail/seance-detail.component').then(m => m.SeanceDetailComponent)
+      }
     ]
   },
 

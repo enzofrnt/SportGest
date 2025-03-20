@@ -5,6 +5,7 @@ import { CoachService } from '../../../../services/coach-api.service';
 import { Coach } from '../../../../models/coach.model';
 import { Seance } from '../../../../models/seance.model';
 import { StatutSeance } from '../../../../models/enum/statut-seance.enum';
+import { AuthService } from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-coach-details',
@@ -20,10 +21,12 @@ export class CoachDetailsComponent implements OnInit {
   loading = true;
   error: string | null = null;
   statutSeance = StatutSeance;
+  isAuthenticated: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
-    private coachService: CoachService
+    private coachService: CoachService,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -33,6 +36,10 @@ export class CoachDetailsComponent implements OnInit {
         this.coachId = +params['id'];
         this.loadCoachDetails();
       }
+    });
+
+    this.authService.currentUser$.subscribe(user => {
+      this.isAuthenticated = !!user;
     });
   }
 

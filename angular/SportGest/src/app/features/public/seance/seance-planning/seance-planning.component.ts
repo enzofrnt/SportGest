@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SeanceApiService } from '../../../../services/seance-api.service';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Seance } from '../../../../models/seance.model';
 import { TypeSeance } from '../../../../models/enum/type-seance.enum';
 import { NiveauSportif } from '../../../../models/enum/niveau-sportif.enum';
@@ -27,7 +27,6 @@ export class SeancePlanningComponent implements OnInit {
   TypeSeance = TypeSeance;
 
   seances: Seance[] = [];
-  selectedSeance: Seance | null = null;
   loading = true;
   error = '';
   isAuthenticated = false;
@@ -53,7 +52,8 @@ export class SeancePlanningComponent implements OnInit {
 
   constructor(
     private seanceApiService: SeanceApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -117,11 +117,10 @@ export class SeancePlanningComponent implements OnInit {
     }
   }
 
-  handleEventClick(arg: any) {
-    this.selectedSeance = arg.event.extendedProps['seance'];
-  }
-
-  closeDetails(): void {
-    this.selectedSeance = null;
+  handleEventClick(arg: EventClickArg) {
+    const seance = arg.event.extendedProps['seance'] as Seance;
+    if (seance.id) {
+      this.router.navigate(['/seances', seance.id], { state: { previousUrl: '/seances/planning' } });
+    }
   }
 }
