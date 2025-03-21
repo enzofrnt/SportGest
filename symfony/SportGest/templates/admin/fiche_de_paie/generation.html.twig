@@ -21,6 +21,14 @@
             </div>
             
             <div class="mb-3">
+                <strong>{{ form_label(form.typePeriode) }}</strong>
+                <div class="period-type-container">
+                    {{ form_widget(form.typePeriode) }}
+                </div>
+                {{ form_errors(form.typePeriode) }}
+            </div>
+            
+            <div class="mb-3 form-group-periode">
                 {{ form_label(form.periode) }}
                 {{ form_widget(form.periode, {'attr': {'class': 'form-control'}}) }}
                 {{ form_errors(form.periode) }}
@@ -28,6 +36,28 @@
                     <ul>
                         <li><strong>Mois</strong> : Calcule la fiche de paie pour le mois en cours</li>
                         <li><strong>Semaine</strong> : Calcule la fiche de paie pour la semaine en cours (du lundi au dimanche)</li>
+                    </ul>
+                </small>
+            </div>
+            
+            <div class="mb-3 form-group-dateDebut">
+                {{ form_label(form.dateDebut) }}
+                {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.dateDebut) }}
+                <small class="form-text text-muted">
+                    <ul>
+                        <li><strong>dateDébut</strong> : Date de début de la période</li>
+                    </ul>
+                </small>
+            </div>
+            
+            <div class="mb-3 form-group-dateFin">
+                {{ form_label(form.dateFin) }}
+                {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.dateFin) }}
+                <small class="form-text text-muted">
+                    <ul>
+                        <li><strong>dateFin</strong> : Date de fin de la période</li>
                     </ul>
                 </small>
             </div>
@@ -40,4 +70,74 @@
             {{ form_end(form) }}
         </div>
     </div>
+
+    <style>
+        .period-type-container {
+            margin-top: 10px;
+            display: flex;
+            gap: 20px;
+        }
+        .period-type-container label {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .period-type-container label:hover {
+            background-color: #e9ecef;
+        }
+        .period-type-container input[type="radio"]:checked + label {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        .period-type-container input[type="radio"] {
+            margin-right: 8px;
+        }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const typePeriodeFields = document.querySelectorAll('input[name="fiche_de_paie_generation[typePeriode]"]');
+        const periodeField = document.querySelector('.form-group-periode');
+        const dateFields = document.querySelectorAll('.form-group-dateDebut, .form-group-dateFin');
+
+        function toggleFields() {
+            const selectedType = document.querySelector('input[name="fiche_de_paie_generation[typePeriode]"]:checked').value;
+            
+            if (selectedType === 'standard' || selectedType === 'mois_precedent') {
+                periodeField.style.display = selectedType === 'standard' ? 'block' : 'none';
+                dateFields.forEach(field => {
+                    field.style.display = 'none';
+                    // Désactiver l'attribut required pour éviter l'erreur de validation
+                    const input = field.querySelector('input');
+                    if (input && input.hasAttribute('required')) {
+                        input.setAttribute('data-was-required', 'true');
+                        input.removeAttribute('required');
+                    }
+                });
+            } else {
+                periodeField.style.display = 'none';
+                dateFields.forEach(field => {
+                    field.style.display = 'block';
+                    const input = field.querySelector('input');
+                    if (input && input.hasAttribute('data-was-required')) {
+                        input.setAttribute('required', 'required');
+                    }
+                });
+            }
+        }
+
+        typePeriodeFields.forEach(field => {
+            field.addEventListener('change', toggleFields);
+        });
+        
+        // Appliquer les styles initiaux
+        toggleFields();
+    });
+    </script>
 {% endblock %} 

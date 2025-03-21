@@ -16,6 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
@@ -80,38 +81,58 @@ class FicheDePaieCrudController extends AbstractCrudController
                 ->formatValue(function ($value) {
                     return $value instanceof \App\Enum\PeriodePaie ? $value->value : '';
                 }),
-            NumberField::new('totalHeure', 'Total heures')
-                ->onlyOnDetail()
+            Field::new('totalHeure', 'Total heures')
                 ->setVirtual(true)
                 ->formatValue(function ($value, $entity) {
                     try {
                         if (!$entity instanceof FicheDePaie || !$entity->getCoach()) {
+                            $this->logger->warning('Entity invalide ou coach absent', [
+                                'entity_type' => get_class($entity),
+                                'entity_id' => $entity instanceof FicheDePaie ? $entity->getId() : 'unknown',
+                                'has_coach' => $entity instanceof FicheDePaie ? ($entity->getCoach() ? 'yes' : 'no') : 'n/a'
+                            ]);
                             return 'N/A';
                         }
+
+                        $this->logger->info('Calcul des heures pour fiche de paie', [
+                            'fiche_id' => $entity->getId(),
+                            'coach' => $entity->getCoach()->getNom() . ' ' . $entity->getCoach()->getPrenom(),
+                            'periode' => $entity->getPeriode()->value
+                        ]);
+
                         $totalHeures = $this->calculerTotalHeures($entity);
-                        return $totalHeures . ' h';
+
+                        // Log explicite avec valeur
+                        $this->logger->debug('Valeur calculée: ' . $totalHeures);
+
+                        // Log explicite des détails des attributs du log
+                        $this->logger->debug('Détails du log', [
+                            'fiche_id_type' => gettype($entity->getId()),
+                            'total_heures_type' => gettype($totalHeures),
+                            'total_heures_value' => $totalHeures
+                        ]);
+
+                        $this->logger->info('Résultat calcul des heures', [
+                            'fiche_id' => $entity->getId(),
+                            'total_heures' => $totalHeures
+                        ]);
+
+                        // Log explicite du résultat formaté
+                        $resultat = sprintf('%.2f h', $totalHeures);
+                        $this->logger->debug('Valeur formatée à retourner: ' . $resultat . ' (type: ' . gettype($totalHeures) . ')');
+
+                        return $resultat;
                     } catch (\Exception $e) {
-                        $this->logger->error('Erreur de calcul des heures: ' . $e->getMessage());
-                        return 'Erreur';
-                    }
-                }),
-            TextField::new('totalHeure', 'Total heures')
-                ->onlyOnIndex()
-                ->setVirtual(true)
-                ->formatValue(function ($value, $entity) {
-                    try {
-                        if (!$entity instanceof FicheDePaie || !$entity->getCoach()) {
-                            return 'N/A';
-                        }
-                        $totalHeures = $this->calculerTotalHeures($entity);
-                        return $totalHeures . ' h';
-                    } catch (\Exception $e) {
-                        $this->logger->error('Erreur de calcul des heures: ' . $e->getMessage());
+                        $this->logger->error('Erreur lors du calcul des heures', [
+                            'message' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
                         return 'Erreur';
                     }
                 }),
             MoneyField::new('montantTotal')
                 ->setCurrency('EUR')
+                ->setStoredAsCents(true)
                 ->setLabel('Montant'),
         ];
 
@@ -132,12 +153,27 @@ class FicheDePaieCrudController extends AbstractCrudController
         $periode = $ficheDePaie->getPeriode();
         $coach = $ficheDePaie->getCoach();
 
+        $this->logger->debug('Début calcul total heures', [
+            'fiche_id' => $ficheDePaie->getId(),
+            'coach_id' => $coach ? $coach->getId() : null,
+            'periode' => $periode ? $periode->value : null
+        ]);
+
         if (!$coach) {
+            $this->logger->warning('Coach non trouvé pour la fiche de paie', [
+                'fiche_id' => $ficheDePaie->getId()
+            ]);
             return 0;
         }
 
         // Récupérer toutes les séances validées de ce coach
         $seancesValidees = $this->seanceRepository->findValidatedSeancesByCoach($coach);
+
+        $this->logger->debug('Séances validées récupérées', [
+            'fiche_id' => $ficheDePaie->getId(),
+            'coach_id' => $coach->getId(),
+            'nombre_seances' => count($seancesValidees)
+        ]);
 
         if (empty($seancesValidees)) {
             $this->logger->debug('Aucune séance validée trouvée pour ce coach', [
@@ -152,12 +188,29 @@ class FicheDePaieCrudController extends AbstractCrudController
         $montantCible = $ficheDePaie->getMontantTotal();
         $tarifHoraire = $coach->getTarifHoraire();
 
+        $this->logger->debug('Données financières', [
+            'fiche_id' => $ficheDePaie->getId(),
+            'montant_cible' => $montantCible,
+            'tarif_horaire' => $tarifHoraire,
+            'montant_cible_type' => gettype($montantCible),
+            'tarif_horaire_type' => gettype($tarifHoraire)
+        ]);
+
         if ($tarifHoraire <= 0) {
             $this->logger->debug('Tarif horaire invalide', [
                 'coach_id' => $coach->getId(),
                 'tarif' => $tarifHoraire
             ]);
             return 0;
+        }
+
+        // Si le montant est stocké en centimes, le convertir en euros
+        if ($montantCible > 1000) { // Heuristique simple pour détecter si c'est en centimes
+            $montantCible = $montantCible / 100;
+            $this->logger->debug('Montant converti de centimes à euros', [
+                'montant_original' => $ficheDePaie->getMontantTotal(),
+                'montant_converti' => $montantCible
+            ]);
         }
 
         // Heures théoriques basées sur le montant
@@ -173,7 +226,9 @@ class FicheDePaieCrudController extends AbstractCrudController
         // Calculer manuellement le nombre d'heures travaillées
         $totalMinutes = 0;
         foreach ($seancesValidees as $seance) {
-            $totalMinutes += $seance->getDureeSeance();
+            $duree = $seance->getDureeSeance();
+            $this->logger->debug('Séance: ID ' . $seance->getId() . ', durée: ' . $duree . ' minutes');
+            $totalMinutes += $duree;
         }
 
         $totalHeures = round($totalMinutes / 60, 2);
@@ -224,39 +279,53 @@ class FicheDePaieCrudController extends AbstractCrudController
 
             if ($form->isSubmitted() && $form->isValid()) {
                 $coach = $ficheDePaie->getCoach();
-                $periode = $ficheDePaie->getPeriode();
+                $typePeriode = $form->get('typePeriode')->getData();
+
+                if ($typePeriode === 'standard') {
+                    $periode = $ficheDePaie->getPeriode();
+                    // Logique existante pour Mois/Semaine en cours
+                    $dateDebut = new \DateTime();
+                    $dateFin = new \DateTime();
+
+                    if ($periode == PeriodePaie::MOIS) {
+                        $dateDebut->modify('first day of this month')->setTime(0, 0, 0);
+                        $dateFin->modify('last day of this month')->setTime(23, 59, 59);
+                    } else {
+                        $jour = $dateDebut->format('N');
+                        $decalage = $jour - 1;
+                        $dateDebut->modify("-{$decalage} days")->setTime(0, 0, 0);
+                        $dateFin = clone $dateDebut;
+                        $dateFin->modify('+6 days')->setTime(23, 59, 59);
+                    }
+                } else if ($typePeriode === 'mois_precedent') {
+                    // Logique pour le mois précédent
+                    $dateDebut = new \DateTime('first day of last month');
+                    $dateDebut->setTime(0, 0, 0);
+                    $dateFin = new \DateTime('last day of last month');
+                    $dateFin->setTime(23, 59, 59);
+
+                    $this->logger->debug('Période mois précédent sélectionnée', [
+                        'date_debut' => $dateDebut->format('Y-m-d H:i:s'),
+                        'date_fin' => $dateFin->format('Y-m-d H:i:s')
+                    ]);
+                } else {
+                    // Période personnalisée
+                    $dateDebut = $form->get('dateDebut')->getData();
+                    $dateFin = $form->get('dateFin')->getData();
+
+                    if (!$dateDebut || !$dateFin) {
+                        $this->addFlash('error', 'Veuillez sélectionner une période valide.');
+                        return $this->redirect($this->container->get(AdminUrlGenerator::class)
+                            ->setController(self::class)
+                            ->setAction('generationFichePaie')
+                            ->generateUrl());
+                    }
+                }
 
                 $this->logger->info('Génération de fiche de paie initiée', [
                     'coach' => $coach->getNom() . ' ' . $coach->getPrenom() . ' (ID: ' . $coach->getId() . ')',
-                    'periode' => $periode->value,
-                    'tarif_horaire' => $coach->getTarifHoraire() . ' EUR'
-                ]);
-
-                // Déterminer les dates de début et de fin selon la période
-                $dateDebut = new \DateTime();
-                $dateFin = new \DateTime();
-
-                if ($periode == PeriodePaie::MOIS) {
-                    // Pour le mois en cours
-                    $dateDebut->modify('first day of this month')->setTime(0, 0, 0);
-                    $dateFin->modify('last day of this month')->setTime(23, 59, 59);
-                    $this->logger->info('Dates avant modification', [
-                        'date_debut_avant' => $dateDebut->format('d/m/Y H:i:s'),
-                        'date_fin_avant' => $dateFin->format('d/m/Y H:i:s'),
-                    ]);
-                } else {
-                    // Pour la semaine en cours (du lundi au dimanche)
-                    $jour = $dateDebut->format('N'); // 1 (lundi) à 7 (dimanche)
-                    $decalage = $jour - 1;
-                    $dateDebut->modify("-{$decalage} days")->setTime(0, 0, 0);
-                    $dateFin = clone $dateDebut;
-                    $dateFin->modify('+6 days')->setTime(23, 59, 59);
-                }
-
-                $this->logger->info('Période sélectionnée', [
-                    'type' => $periode->value,
-                    'date_debut' => $dateDebut->format('d/m/Y H:i:s'),
-                    'date_fin' => $dateFin->format('d/m/Y H:i:s')
+                    'date_debut' => $dateDebut->format('d/m/Y'),
+                    'date_fin' => $dateFin->format('d/m/Y')
                 ]);
 
                 // Récupérer les séances du coach pour la période sélectionnée
