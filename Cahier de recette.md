@@ -7,7 +7,9 @@
 - [ ] Un Caoch peut réliser le CRUD sur tous les élements sauf les Responsables, les Coachs, les Sportifs, les Fiches de paie. Mais il peut consulter ses fiches de paies sans les modifier.
 - [ ] Un sportif ne peut pas se connecter au backoffice et donc effectuer des actions de CRUD sur backoffice.
 - [ ] Un sportif peut se connecter sur le front et réaliser des réservations.
-- [ ]
+- [ ] Un sportif peut se connecter sur le front et consulter son bilan.
+- [ ] Un sportif peut se connecter sur le front et annuler une réservation.
+- [ ] Un sportif peut se connecter sur le front et consulter le planning des séances.
 
 ## Front Angular
 
