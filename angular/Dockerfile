@@ -13,7 +13,7 @@ RUN pnpm install
 
 FROM base AS build
 
-RUN pnpm build
+RUN pnpm build --base-href /app/ --deploy-url /app/
 
 FROM nginx:latest as prod
 
