@@ -18,12 +18,18 @@ adminer:
     path: /adminer/index.php
     permanent: true
 
-app:
-  path: /app
-  controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
-  defaults:
-    path: /app/index.html
-    permanent: true
+# app:
+#   path: /app
+#   controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
+#   defaults:
+#     path: /app/index.html
+#     permanent: true
+
+# angular_controllers:
+#   resource:
+#     path: ../src/Controller/AngularController.php
+#     namespace: App\Controller\AngularController::index
+#   type: attribute
 
 api_login_check:
   path: /api/auth/login
