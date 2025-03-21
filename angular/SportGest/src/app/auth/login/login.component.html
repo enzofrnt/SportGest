@@ -1,6 +1,14 @@
-<div class="login-container">
-  <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+<div>
+  <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="login-form">
     <h2>Connexion</h2>
+
+    <!-- Message d'erreur général -->
+    <div class="alert alert-danger"
+      *ngIf="error && (errorType === 'server_error' || errorType === 'unknown')">
+      {{ error }}
+    </div>
+
+    <!-- Message d'erreur pour les champs manquants -->
     <div class="form-group">
       <label for="email">Email</label>
       <input
@@ -9,8 +17,14 @@
         name="email"
         [(ngModel)]="email"
         required
-        class="form-control" />
+        class="form-control"
+        [class.is-invalid]="error && errorType === 'missing_fields'" />
+      <div class="invalid-feedback"
+        *ngIf="error && errorType === 'missing_fields'">
+        {{ error }}
+      </div>
     </div>
+
     <div class="form-group">
       <label for="password">Mot de passe</label>
       <input
@@ -19,13 +33,29 @@
         name="password"
         [(ngModel)]="password"
         required
-        class="form-control" />
+        class="form-control"
+        [class.is-invalid]="error && (errorType === 'missing_fields' || errorType === 'invalid_password' || errorType === 'invalid_credentials')" />
+      <div class="invalid-feedback"
+        *ngIf="error && (errorType === 'missing_fields' || errorType === 'invalid_password' || errorType === 'invalid_credentials')">
+        {{ error }}
+      </div>
     </div>
-    <button type="submit" [disabled]="!loginForm.valid || isLoading">
-      {{ isLoading ? 'Connexion...' : 'Se connecter' }}
-    </button>
-    <div *ngIf="error" class="error-message">
+
+    <!-- Message d'erreur pour l'utilisateur non trouvé -->
+    <div class="alert alert-warning"
+      *ngIf="error && errorType === 'user_not_found'">
       {{ error }}
     </div>
+
+    <!-- Message d'erreur pour le rôle non autorisé -->
+    <div class="alert alert-warning"
+      *ngIf="error && errorType === 'unauthorized_role'">
+      {{ error }}
+    </div>
+
+    <button type="submit" [disabled]="!loginForm.valid || isLoading"
+      class="btn btn-primary">
+      {{ isLoading ? 'Connexion...' : 'Se connecter' }}
+    </button>
   </form>
 </div>

@@ -49,11 +49,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (role === 'ROLE_USER') return 'Utilisateur';
     if (role === 'ROLE_ADMIN') return 'Administrateur';
     if (role === 'ROLE_COACH') return 'Coach';
+    if (role === 'ROLE_SPORTIF') return 'Sportif';
     return role.replace('ROLE_', '');
   }
 
   getPrimaryRole(): string {
-    if (!this.user || !this.user.roles || this.user.roles.length === 0) {
+    if (!this.user) {
+      return 'Non connecté';
+    }
+
+    // Si l'utilisateur n'a pas de rôles, on considère qu'il est un sportif par défaut
+    if (!this.user.roles || !Array.isArray(this.user.roles) || this.user.roles.length === 0) {
       return 'Sportif';
     }
 
@@ -62,6 +68,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       return 'Administrateur';
     } else if (this.user.roles.includes('ROLE_COACH')) {
       return 'Coach';
+    } else if (this.user.roles.includes('ROLE_SPORTIF')) {
+      return 'Sportif';
     } else if (this.user.roles.includes('ROLE_USER')) {
       return 'Sportif';
     }

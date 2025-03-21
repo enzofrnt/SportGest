@@ -236,7 +236,6 @@ class SeanceRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
     public function countSeancesByDateRange(\DateTime $dateDebut, \DateTime $dateFin): int
     {
         return $this->createQueryBuilder('s')

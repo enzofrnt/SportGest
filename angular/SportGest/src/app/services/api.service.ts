@@ -23,8 +23,6 @@ export class ApiService {
         })
       );
       this.apiUrl = config.API_URL === '$API_URL' ? API_URL : config.API_URL;
-      console.log('API_URL');
-      console.log(this.apiUrl);
     } catch (error) {
       console.error('Failed to load API configuration:', error);
       this.apiUrl = API_URL;

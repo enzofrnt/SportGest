@@ -68,6 +68,7 @@ security:
     - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
     - { path: ^/api/auth/verify, roles: PUBLIC_ACCESS }
+    - { path: ^/api/coach, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
     # Routes admin avec protection des sous-chemins

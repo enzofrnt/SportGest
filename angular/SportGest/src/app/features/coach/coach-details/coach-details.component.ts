@@ -30,7 +30,6 @@ export class CoachDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log("ngOnInit");
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.coachId = +params['id'];
@@ -52,7 +51,11 @@ export class CoachDetailsComponent implements OnInit {
       coach$.subscribe({
         next: (coach) => {
           this.coach = coach;
-          this.loadSeances();
+          if (this.isAuthenticated) {
+            this.loadSeances();
+          } else {
+            this.loading = false;
+          }
         },
         error: (err) => {
           this.error = 'Erreur lors du chargement des détails du coach.';

@@ -49,7 +49,7 @@ class BilanController extends AbstractController
         $dateMax = $request->query->get('date_max') ? new \DateTime($request->query->get('date_max')) : new \DateTime();
 
         // Récupérer les séances validées du sportif dans la période demandée
-        $seances = $seanceRepository->findSeancesValideesBySportifAndDates($sportif, $dateMin, $dateMax);
+        $seances = $seanceRepository->findSeancesBySportif($sportif);
 
         // Calculer les statistiques
         $totalSeances = count($seances);

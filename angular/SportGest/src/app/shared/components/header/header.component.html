@@ -67,8 +67,6 @@
           <ul class="dropdown-menu">
             <li><a routerLink="/profil"><i class="fas fa-user"></i> Mon
                 profil</a></li>
-            <li><a routerLink="/membre/historique"><i
-                  class="fas fa-history"></i> Historique</a></li>
             @if (isSportif) {
             <li><a routerLink="/bilan"><i
                   class="fas fa-chart-bar"></i> Statistiques</a></li>
@@ -102,41 +100,30 @@
     <li class="mobile-nav-item">
       <a routerLink="/coachs" (click)="closeMobileMenu()">Nos coachs</a>
     </li>
+    @if (isAuthenticated) {
     <li class="mobile-nav-item">
       <a routerLink="/seances" (click)="closeMobileMenu()">Nos séances</a>
     </li>
     <li class="mobile-nav-item">
-      <a routerLink="/planning" (click)="closeMobileMenu()">Planning</a>
+      <a routerLink="/seances/planning" (click)="closeMobileMenu()">Planning</a>
     </li>
-
-    @if (isAuthenticated) { @if (isSportif) {
+    @if (isSportif) {
     <li class="mobile-nav-item">
-      <a routerLink="/membre" (click)="closeMobileMenu()">Mon Bilan</a>
+      <a routerLink="/bilan" (click)="closeMobileMenu()">Mon Bilan</a>
     </li>
     }
-    <li class="mobile-nav-item">
-      <a routerLink="/membre/planning" (click)="closeMobileMenu()">Mon
-        planning</a>
-    </li>
-    <li class="mobile-nav-item">
-      <a routerLink="/membre/reservation"
-        (click)="closeMobileMenu()">Réserver</a>
-    </li>
     <li class="mobile-nav-item">
       <a routerLink="/reservations" (click)="closeMobileMenu()">Mes
         réservations</a>
     </li>
     <li class="mobile-nav-item">
-      <a routerLink="/membre/profil" (click)="closeMobileMenu()">Mon profil</a>
+      <a routerLink="/profil" (click)="closeMobileMenu()">Mon profil</a>
     </li>
+    @if (isSportif) {
     <li class="mobile-nav-item">
-      <a routerLink="/membre/historique"
-        (click)="closeMobileMenu()">Historique</a>
+      <a routerLink="/bilan" (click)="closeMobileMenu()">Statistiques</a>
     </li>
-    <li class="mobile-nav-item">
-      <a routerLink="/membre/statistiques"
-        (click)="closeMobileMenu()">Statistiques</a>
-    </li>
+    }
     <li class="mobile-nav-item">
       <a (click)="logout(); closeMobileMenu()">Déconnexion</a>
     </li>

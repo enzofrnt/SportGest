@@ -35,6 +35,17 @@ class AuthController extends AbstractController
         $response->headers->set('Vary', 'Origin');
     }
 
+    private function createSecureCookie(string $token): Cookie
+    {
+        return Cookie::create(self::TOKEN_COOKIE_NAME)
+            ->withValue($token)
+            ->withExpires(time() + self::TOKEN_EXPIRATION)
+            ->withPath('/')
+            ->withHttpOnly(true)
+            ->withSecure(false) // Changé à false pour le développement local
+            ->withSameSite('lax'); // Changé à 'lax' pour permettre les requêtes cross-origin
+    }
+
     #[Route('/login', name: 'api_login', methods: ['POST', 'OPTIONS'])]
     public function login(
         Request $request,
@@ -52,7 +63,8 @@ class AuthController extends AbstractController
 
         if (!isset($data['email']) || !isset($data['password'])) {
             $response = $this->json([
-                'message' => 'Email ou mot de passe manquant',
+                'message' => 'Veuillez remplir tous les champs',
+                'error' => 'missing_fields'
             ], Response::HTTP_BAD_REQUEST);
             $this->addCorsHeaders($response);
             return $response;
@@ -60,9 +72,19 @@ class AuthController extends AbstractController
 
         $user = $utilisateurRepository->findOneBy(['email' => $data['email']]);
 
-        if (!$user || !$passwordHasher->isPasswordValid($user, $data['password'])) {
+        if (!$user) {
             $response = $this->json([
-                'message' => 'Identifiants incorrects',
+                'message' => 'Aucun compte n\'existe avec cet email',
+                'error' => 'user_not_found'
+            ], Response::HTTP_UNAUTHORIZED);
+            $this->addCorsHeaders($response);
+            return $response;
+        }
+
+        if (!$passwordHasher->isPasswordValid($user, $data['password'])) {
+            $response = $this->json([
+                'message' => 'Mot de passe incorrect',
+                'error' => 'invalid_password'
             ], Response::HTTP_UNAUTHORIZED);
             $this->addCorsHeaders($response);
             return $response;
@@ -71,26 +93,17 @@ class AuthController extends AbstractController
         // Génération du token JWT
         $token = $jwtManager->create($user);
 
-        // Création du cookie sécurisé
-        $cookie = Cookie::create(self::TOKEN_COOKIE_NAME)
-            ->withValue($token)
-            ->withExpires(time() + self::TOKEN_EXPIRATION)
-            ->withPath('/')
-            ->withHttpOnly(true)
-            ->withSecure(true)
-            ->withSameSite('none');
-
         $response = $this->json([
+            'token' => $token,
             'user' => [
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'nom' => $user->getNom(),
                 'prenom' => $user->getPrenom(),
-                'roles' => $user->getRoles()
+                'roles' => array_values($user->getRoles())
             ]
         ]);
 
-        $response->headers->setCookie($cookie);
         $this->addCorsHeaders($response);
         return $response;
     }
@@ -100,17 +113,6 @@ class AuthController extends AbstractController
     {
         if ($request->getMethod() === 'OPTIONS') {
             $response = new JsonResponse();
-            $this->addCorsHeaders($response);
-            return $response;
-        }
-
-        // Vérifier si le cookie existe
-        $token = $request->cookies->get(self::TOKEN_COOKIE_NAME);
-        if (!$token) {
-            $response = $this->json([
-                'message' => 'Token non trouvé',
-                'valid' => false
-            ], Response::HTTP_UNAUTHORIZED);
             $this->addCorsHeaders($response);
             return $response;
         }
@@ -174,17 +176,8 @@ class AuthController extends AbstractController
     #[Route('/logout', name: 'api_logout', methods: ['POST'])]
     public function logout(): JsonResponse
     {
-        // Création d'un cookie expiré pour supprimer le token
-        $cookie = Cookie::create(self::TOKEN_COOKIE_NAME)
-            ->withValue('')
-            ->withExpires(time() - 3600) // Expire immédiatement
-            ->withPath('/')
-            ->withHttpOnly(true)
-            ->withSecure(true)
-            ->withSameSite('none');
-
         $response = $this->json(['message' => 'Déconnecté avec succès']);
-        $response->headers->setCookie($cookie);
+        $this->addCorsHeaders($response);
         return $response;
     }
 
@@ -238,30 +231,22 @@ class AuthController extends AbstractController
         $entityManager->persist($sportif);
         $entityManager->flush();
 
-        // Génération du token JWT pour la connexion automatique
+        // Génération du token JWT
         $token = $jwtManager->create($sportif);
-
-        // Création du cookie sécurisé
-        $cookie = Cookie::create(self::TOKEN_COOKIE_NAME)
-            ->withValue($token)
-            ->withExpires(time() + self::TOKEN_EXPIRATION)
-            ->withPath('/')
-            ->withHttpOnly(true)
-            ->withSecure(true)
-            ->withSameSite('none');
 
         $response = $this->json([
             'message' => 'Utilisateur créé avec succès',
+            'token' => $token,
             'user' => [
                 'id' => $sportif->getId(),
                 'email' => $sportif->getEmail(),
                 'nom' => $sportif->getNom(),
                 'prenom' => $sportif->getPrenom(),
-                'role' => 'Sportif'
+                'roles' => array_values($sportif->getRoles())
             ]
         ], Response::HTTP_CREATED);
 
-        $response->headers->setCookie($cookie);
+        $this->addCorsHeaders($response);
         return $response;
     }
 
@@ -281,7 +266,7 @@ class AuthController extends AbstractController
                 'email' => $user->getEmail(),
                 'nom' => $user->getNom(),
                 'prenom' => $user->getPrenom(),
-                'roles' => $user->getRoles(),
+                'roles' => array_values($user->getRoles()),
                 'role' => $user->getRole()
             ]
         ]);

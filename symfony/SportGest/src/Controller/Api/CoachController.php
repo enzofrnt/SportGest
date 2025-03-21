@@ -14,7 +14,6 @@ use App\Controller\Api\Trait\SeanceDataTrait;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/coachs')]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
 class CoachController extends AbstractController
 {
     use SeanceDataTrait;
@@ -56,6 +55,7 @@ class CoachController extends AbstractController
         return $this->json($this->getCoachData($coach));
     }
 
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/specialites', name: 'api_coach_specialites', methods: ['GET'])]
     public function getCoachSpecialites(Coach $coach): JsonResponse
     {
@@ -64,7 +64,8 @@ class CoachController extends AbstractController
 
         return $this->json($specialites);
     }
-
+    
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/{id}/seances', name: 'api_coach_seances', methods: ['GET'])]
     public function getCoachSeances(Coach $coach, SeanceRepository $seanceRepository): JsonResponse
     {

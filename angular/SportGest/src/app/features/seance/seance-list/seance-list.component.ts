@@ -85,7 +85,6 @@ export class SeanceListComponent implements OnInit {
 
       seances$.subscribe({
         next: (seances) => {
-          console.log('Séances reçues de l\'API:', seances); // Debug
           this.seances = seances;
           this.filteredSeances = seances;
           // this.filterSeances();
@@ -102,8 +101,6 @@ export class SeanceListComponent implements OnInit {
       this.error = 'Erreur lors du chargement des séances';
       this.loading = false;
     }
-
-    console.log('Séances chargées:', this.seances); // Debug
   }
 
   applyFilters(): void {
