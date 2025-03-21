@@ -11,8 +11,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Controller\Api\Trait\SeanceDataTrait;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/coachs')]
+#[IsGranted('IS_AUTHENTICATED_FULLY')]
 class CoachController extends AbstractController
 {
     use SeanceDataTrait;

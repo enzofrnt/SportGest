@@ -1,3 +1,10 @@
+root:
+  path: /
+  controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
+  defaults:
+    path: /app
+    permanent: true
+
 controllers:
   resource:
     path: ../src/Controller/
@@ -9,6 +16,13 @@ adminer:
   controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
   defaults:
     path: /adminer/index.php
+    permanent: true
+
+app:
+  path: /app
+  controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
+  defaults:
+    path: /app/index.html
     permanent: true
 
 api_login_check:

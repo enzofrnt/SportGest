@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\SecurityBundle\Security;
+use Psr\Log\LoggerInterface;
 
 class SecurityController extends AbstractController
 {
@@ -29,6 +30,14 @@ class SecurityController extends AbstractController
             'last_username' => $lastUsername,
             'error' => $error,
         ]);
+    }
+
+    #[Route('/login/check', name: 'app_login_check')]
+    public function loginCheck(LoggerInterface $logger): void
+    {
+        $logger->info('Tentative de connexion détectée');
+        // Cette méthode ne sera jamais exécutée,
+        // le composant de sécurité intercepte la requête avant
     }
 
     #[Route('/logout', name: 'app_logout')]

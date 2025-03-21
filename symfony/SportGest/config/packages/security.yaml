@@ -24,25 +24,16 @@ security:
         success_handler: lexik_jwt_authentication.handler.authentication_success
         failure_handler: lexik_jwt_authentication.handler.authentication_failure
       jwt: ~
-    admin:
-      pattern: ^/admin
-      stateless: true
-      security: true
-      provider: app_user_provider
-      jwt: ~
-      logout:
-        path: app_logout
-        target: app_login
-      access_denied_handler: App\Security\AccessDeniedHandler
-      access_denied_url: /access-denied
+
     main:
+      pattern: ^/
       lazy: true
       provider: app_user_provider
       form_login:
         login_path: app_login
-        check_path: app_login
+        check_path: app_login_check
         enable_csrf: true
-        default_target_path: app_login
+        default_target_path: admin
         username_parameter: email
         password_parameter: password
       logout:
@@ -50,6 +41,10 @@ security:
         target: app_login
       access_denied_handler: App\Security\AccessDeniedHandler
       access_denied_url: /access-denied
+
+    app:
+      pattern: ^/app
+      security: false
 
   role_hierarchy:
     ROLE_ADMIN: ROLE_RESPONSABLE
@@ -62,6 +57,7 @@ security:
   # Note: Only the *first* access control that matches will be used
   access_control:
     # Routes publiques
+    - { path: ^/app, roles: PUBLIC_ACCESS }
     - { path: ^/login, roles: PUBLIC_ACCESS }
     - { path: ^/access-denied, roles: PUBLIC_ACCESS }
 
@@ -72,15 +68,16 @@ security:
     - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
     - { path: ^/api/auth/verify, roles: PUBLIC_ACCESS }
-    - { path: ^/api/reservations, roles: PUBLIC_ACCESS }
-    - { path: ^/api/coachs, roles: PUBLIC_ACCESS }
-    - { path: ^/api/seances, roles: PUBLIC_ACCESS }
-    - { path: ^/api/auth, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
-    # Routes dashboard avec protection des sous-chemins
-    - { path: ^/admin/responsable, roles: ROLE_RESPONSABLE }
-    - { path: ^/admin/coach, roles: ROLE_COACH }
+    # Routes admin avec protection des sous-chemins
+    - { path: ^/admin/responsable, roles: ROLE_ADMIN }
+    - { path: ^/admin/coach, roles: ROLE_RESPONSABLE }
+    - { path: ^/admin/sportif, roles: ROLE_COACH }
+    - { path: ^/admin/reservation, roles: ROLE_RESPONSABLE }
+    - { path: ^/admin/seance, roles: ROLE_COACH }
+    - { path: ^/admin/exercice, roles: ROLE_COACH }
+    - { path: ^/admin/fiche-de-paie, roles: ROLE_COACH }
     - { path: ^/admin, roles: ROLE_USER }
 
     # Protection par défaut
