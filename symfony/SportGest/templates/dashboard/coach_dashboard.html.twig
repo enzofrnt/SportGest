@@ -91,7 +91,7 @@
                                     {% for fiche in fiches_paie %}
                                         <tr>
                                             <td>{{ fiche.periode.value }}</td>
-                                            <td>{{ fiche.montantTotal }}€</td>
+                                            <td>{{ (fiche.montantTotal / 100)|number_format(2, ',', ' ') }} €</td>
                                             <td>
                                                 <a href="{{ path('admin', {
                                                     crudController: 'App\\Controller\\Dashboard\\FicheDePaieCrudController',

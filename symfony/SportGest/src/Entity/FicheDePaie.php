@@ -64,4 +64,9 @@ class FicheDePaie
 
         return $this;
     }
+
+    public function getTotalHeure(): ?float
+    {
+        return null;
+    }
 }

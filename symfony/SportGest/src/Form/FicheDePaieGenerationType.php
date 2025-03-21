@@ -8,6 +8,8 @@ use App\Enum\PeriodePaie;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityRepository;
@@ -19,7 +21,7 @@ class FicheDePaieGenerationType extends AbstractType
         $builder
             ->add('coach', EntityType::class, [
                 'class' => Coach::class,
-                'choice_label' => function(Coach $coach) {
+                'choice_label' => function (Coach $coach) {
                     return $coach->getNom() . ' ' . $coach->getPrenom();
                 },
                 'query_builder' => function (EntityRepository $er) {
@@ -40,6 +42,43 @@ class FicheDePaieGenerationType extends AbstractType
                 'required' => true,
                 'placeholder' => false,
             ])
+            ->add('dateDebut', DateType::class, [
+                'widget' => 'single_text',
+                'label' => 'Date de début',
+                'required' => true,
+                'attr' => [
+                    'class' => 'js-datepicker',
+                ],
+                'mapped' => false,
+            ])
+            ->add('dateFin', DateType::class, [
+                'widget' => 'single_text',
+                'label' => 'Date de fin',
+                'required' => false,
+                'attr' => [
+                    'class' => 'js-datepicker',
+                ],
+                'mapped' => false,
+            ])
+            ->add('typePeriode', ChoiceType::class, [
+                'choices' => [
+                    'Mois/Semaine en cours' => 'standard',
+                    'Mois précédent' => 'mois_precedent',
+                    'Période personnalisée' => 'custom',
+                ],
+                'label' => 'Type de période',
+                'required' => true,
+                'expanded' => true,
+                'multiple' => false,
+                'mapped' => false,
+                'data' => 'standard',
+                'attr' => [
+                    'class' => 'period-type-selector',
+                ],
+                'choice_attr' => function ($choice, $key, $value) {
+                    return ['class' => 'period-choice-input'];
+                },
+            ])
         ;
     }
 
@@ -49,4 +88,4 @@ class FicheDePaieGenerationType extends AbstractType
             'data_class' => FicheDePaie::class,
         ]);
     }
-} 
+}

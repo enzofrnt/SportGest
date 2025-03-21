@@ -153,7 +153,7 @@
                                         <tr>
                                             <td>{{ fiche.periode.value }}</td>
                                             <td>{{ fiche.coach.prenom }} {{ fiche.coach.nom }}</td>
-                                            <td>{{ fiche.montantTotal }}€</td>
+                                            <td>{{ (fiche.montantTotal / 100)|number_format(2, ',', ' ') }} €</td>
                                             <td>
                                                 <a href="{{ path('admin', {crudController: 'App\\Controller\\Dashboard\\FicheDePaieCrudController', crudAction: 'detail', entityId: fiche.id}) }}" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-eye"></i>
